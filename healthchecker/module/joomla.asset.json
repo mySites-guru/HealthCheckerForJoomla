@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
   "name": "mod_healthchecker",
-  "version": "3.0.28",
+  "version": "3.0.29",
   "description": "Health Checker for Joomla - Module Assets",
   "license": "GPL-2.0-or-later",
   "assets": [
