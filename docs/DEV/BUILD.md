@@ -419,19 +419,6 @@ vim healthchecker/component/healthchecker.xml
 # - Optionally: individual component/plugin ZIPs
 ```
 
-### Joomla Extensions Directory (JED)
-
-When ready for JED submission:
-
-1. Build release package
-2. Test in clean Joomla 5.x installation
-3. Prepare screenshots
-4. Submit to JED with:
-   - `pkg_healthchecker-{VERSION}.zip`
-   - Description from README
-   - Category: Administration / Site Management
-   - GPL v2+ license
-
 ## Advanced: Custom Build
 
 To add new plugin to build process:
