@@ -139,11 +139,17 @@ final class UnusedModulesCheck extends AbstractHealthCheck
 
         // More than 5 unused modules suggests module management needs attention
         if ($totalUnused > 5) {
+            // Extract module titles from objects for display
+            $moduleNames = array_map(
+                static fn(object $module): string => $module->title,
+                array_merge($unusedModules, $noPageModules),
+            );
+
             return $this->warning(
                 sprintf(
                     '%d published module(s) have no menu assignment. Consider unpublishing or assigning them to pages. %s',
                     $totalUnused,
-                    implode(', ', $unusedModules),
+                    implode(', ', $moduleNames),
                 ),
             );
         }

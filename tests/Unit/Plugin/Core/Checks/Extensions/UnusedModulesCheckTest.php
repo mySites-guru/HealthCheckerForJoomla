@@ -90,7 +90,7 @@ class UnusedModulesCheckTest extends TestCase
         $this->assertStringContainsString('2', $result->description);
     }
 
-    public function testRunWithManyUnusedModulesReturnsWarning(): void
+    public function testRunWithManyUnusedModulesReturnsWarningWithNames(): void
     {
         $unusedModules = [];
 
@@ -106,8 +106,10 @@ class UnusedModulesCheckTest extends TestCase
 
         $result = $this->check->run();
 
-        // The check returns warning status regardless of string conversion issue
         $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        // Verify module names are included in warning message
+        $this->assertStringContainsString('Unused Module 1', $result->description);
+        $this->assertStringContainsString('Unused Module 8', $result->description);
     }
 
     public function testRunWithNoPageModulesReturnsWarning(): void
