@@ -12,6 +12,8 @@ A comprehensive health monitoring extension for Joomla 5+ with over 130 checks a
 
 **Requirements**: Joomla 5.0+, PHP 8.1+
 
+![Health Checker for Joomla Screenshot](docs/assets/screenshot.png)
+
 ## Features
 
 - **Over 130 Health Checks** across 8+ categories (System, Database, Security, Users, Extensions, Performance, SEO, Content)
