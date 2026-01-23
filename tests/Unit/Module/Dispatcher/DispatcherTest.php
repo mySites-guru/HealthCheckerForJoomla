@@ -21,17 +21,17 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(Dispatcher::class)]
 class DispatcherTest extends TestCase
 {
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
+        $this->cmsApplication = new CMSApplication();
     }
 
     public function testDispatcherExtendsAbstractModuleDispatcher(): void
     {
         $module = $this->createModule();
-        $dispatcher = new Dispatcher($module, $this->app);
+        $dispatcher = new Dispatcher($module, $this->cmsApplication);
 
         $this->assertInstanceOf(Dispatcher::class, $dispatcher);
     }
@@ -39,7 +39,7 @@ class DispatcherTest extends TestCase
     public function testDispatcherImplementsHelperFactoryAwareInterface(): void
     {
         $module = $this->createModule();
-        $dispatcher = new Dispatcher($module, $this->app);
+        $dispatcher = new Dispatcher($module, $this->cmsApplication);
 
         $this->assertInstanceOf(\Joomla\CMS\Helper\HelperFactoryAwareInterface::class, $dispatcher);
     }
@@ -47,7 +47,7 @@ class DispatcherTest extends TestCase
     public function testSetHelperFactoryAcceptsHelperFactory(): void
     {
         $module = $this->createModule();
-        $dispatcher = new Dispatcher($module, $this->app);
+        $dispatcher = new Dispatcher($module, $this->cmsApplication);
 
         $helperFactory = $this->createHelperFactory();
         $dispatcher->setHelperFactory($helperFactory);
@@ -59,7 +59,7 @@ class DispatcherTest extends TestCase
     public function testGetHelperFactoryThrowsWhenNotSet(): void
     {
         $module = $this->createModule();
-        $dispatcher = new Dispatcher($module, $this->app);
+        $dispatcher = new Dispatcher($module, $this->cmsApplication);
 
         $this->expectException(\UnexpectedValueException::class);
         $dispatcher->getHelperFactory();
@@ -68,10 +68,10 @@ class DispatcherTest extends TestCase
     public function testGetLayoutDataReturnsArray(): void
     {
         $module = $this->createModule();
-        $dispatcher = new TestableDispatcher($module, $this->app);
-        $dispatcher->setHelperFactory($this->createHelperFactory());
+        $testableDispatcher = new TestableDispatcher($module, $this->cmsApplication);
+        $testableDispatcher->setHelperFactory($this->createHelperFactory());
 
-        $layoutData = $dispatcher->exposeGetLayoutData();
+        $layoutData = $testableDispatcher->exposeGetLayoutData();
 
         $this->assertIsArray($layoutData);
     }
@@ -79,10 +79,10 @@ class DispatcherTest extends TestCase
     public function testGetLayoutDataContainsHealthStats(): void
     {
         $module = $this->createModule();
-        $dispatcher = new TestableDispatcher($module, $this->app);
-        $dispatcher->setHelperFactory($this->createHelperFactory());
+        $testableDispatcher = new TestableDispatcher($module, $this->cmsApplication);
+        $testableDispatcher->setHelperFactory($this->createHelperFactory());
 
-        $layoutData = $dispatcher->exposeGetLayoutData();
+        $layoutData = $testableDispatcher->exposeGetLayoutData();
 
         $this->assertArrayHasKey('healthStats', $layoutData);
     }
@@ -90,10 +90,10 @@ class DispatcherTest extends TestCase
     public function testGetLayoutDataContainsParentData(): void
     {
         $module = $this->createModule();
-        $dispatcher = new TestableDispatcher($module, $this->app);
-        $dispatcher->setHelperFactory($this->createHelperFactory());
+        $testableDispatcher = new TestableDispatcher($module, $this->cmsApplication);
+        $testableDispatcher->setHelperFactory($this->createHelperFactory());
 
-        $layoutData = $dispatcher->exposeGetLayoutData();
+        $layoutData = $testableDispatcher->exposeGetLayoutData();
 
         // Parent data should include params, module, and app
         $this->assertArrayHasKey('params', $layoutData);
@@ -104,10 +104,10 @@ class DispatcherTest extends TestCase
     public function testHealthStatsContainsExpectedKeys(): void
     {
         $module = $this->createModule();
-        $dispatcher = new TestableDispatcher($module, $this->app);
-        $dispatcher->setHelperFactory($this->createHelperFactory());
+        $testableDispatcher = new TestableDispatcher($module, $this->cmsApplication);
+        $testableDispatcher->setHelperFactory($this->createHelperFactory());
 
-        $layoutData = $dispatcher->exposeGetLayoutData();
+        $layoutData = $testableDispatcher->exposeGetLayoutData();
         $healthStats = $layoutData['healthStats'];
 
         $this->assertArrayHasKey('showCritical', $healthStats);
@@ -126,10 +126,10 @@ class DispatcherTest extends TestCase
             'enable_cache' => '0',
             'cache_duration' => '1800',
         ]);
-        $dispatcher = new TestableDispatcher($module, $this->app);
-        $dispatcher->setHelperFactory($this->createHelperFactory());
+        $testableDispatcher = new TestableDispatcher($module, $this->cmsApplication);
+        $testableDispatcher->setHelperFactory($this->createHelperFactory());
 
-        $layoutData = $dispatcher->exposeGetLayoutData();
+        $layoutData = $testableDispatcher->exposeGetLayoutData();
         $healthStats = $layoutData['healthStats'];
 
         $this->assertFalse($healthStats['showCritical']);
@@ -142,10 +142,10 @@ class DispatcherTest extends TestCase
     public function testHealthStatsWithDefaultParams(): void
     {
         $module = $this->createModule();
-        $dispatcher = new TestableDispatcher($module, $this->app);
-        $dispatcher->setHelperFactory($this->createHelperFactory());
+        $testableDispatcher = new TestableDispatcher($module, $this->cmsApplication);
+        $testableDispatcher->setHelperFactory($this->createHelperFactory());
 
-        $layoutData = $dispatcher->exposeGetLayoutData();
+        $layoutData = $testableDispatcher->exposeGetLayoutData();
         $healthStats = $layoutData['healthStats'];
 
         // All defaults should be true/enabled
@@ -159,10 +159,10 @@ class DispatcherTest extends TestCase
     public function testParamsIsRegistryInstance(): void
     {
         $module = $this->createModule();
-        $dispatcher = new TestableDispatcher($module, $this->app);
-        $dispatcher->setHelperFactory($this->createHelperFactory());
+        $testableDispatcher = new TestableDispatcher($module, $this->cmsApplication);
+        $testableDispatcher->setHelperFactory($this->createHelperFactory());
 
-        $layoutData = $dispatcher->exposeGetLayoutData();
+        $layoutData = $testableDispatcher->exposeGetLayoutData();
 
         $this->assertInstanceOf(Registry::class, $layoutData['params']);
     }
@@ -170,10 +170,10 @@ class DispatcherTest extends TestCase
     public function testModuleIsObject(): void
     {
         $module = $this->createModule();
-        $dispatcher = new TestableDispatcher($module, $this->app);
-        $dispatcher->setHelperFactory($this->createHelperFactory());
+        $testableDispatcher = new TestableDispatcher($module, $this->cmsApplication);
+        $testableDispatcher->setHelperFactory($this->createHelperFactory());
 
-        $layoutData = $dispatcher->exposeGetLayoutData();
+        $layoutData = $testableDispatcher->exposeGetLayoutData();
 
         $this->assertIsObject($layoutData['module']);
     }
@@ -181,10 +181,10 @@ class DispatcherTest extends TestCase
     public function testAppIsCMSApplication(): void
     {
         $module = $this->createModule();
-        $dispatcher = new TestableDispatcher($module, $this->app);
-        $dispatcher->setHelperFactory($this->createHelperFactory());
+        $testableDispatcher = new TestableDispatcher($module, $this->cmsApplication);
+        $testableDispatcher->setHelperFactory($this->createHelperFactory());
 
-        $layoutData = $dispatcher->exposeGetLayoutData();
+        $layoutData = $testableDispatcher->exposeGetLayoutData();
 
         $this->assertInstanceOf(CMSApplication::class, $layoutData['app']);
     }
@@ -192,17 +192,17 @@ class DispatcherTest extends TestCase
     public function testHelperFactoryGetHelperIsCalledWithCorrectName(): void
     {
         $module = $this->createModule();
-        $dispatcher = new TestableDispatcher($module, $this->app);
+        $testableDispatcher = new TestableDispatcher($module, $this->cmsApplication);
 
-        $helper = new HealthCheckerHelper();
+        $healthCheckerHelper = new HealthCheckerHelper();
         $helperFactory = $this->createStub(HelperFactoryInterface::class);
         $helperFactory->method('getHelper')
             ->with('HealthCheckerHelper')
-            ->willReturn($helper);
+            ->willReturn($healthCheckerHelper);
 
-        $dispatcher->setHelperFactory($helperFactory);
+        $testableDispatcher->setHelperFactory($helperFactory);
 
-        $layoutData = $dispatcher->exposeGetLayoutData();
+        $layoutData = $testableDispatcher->exposeGetLayoutData();
 
         // If we got here without errors, the helper was called correctly
         $this->assertArrayHasKey('healthStats', $layoutData);
@@ -230,20 +230,20 @@ class DispatcherTest extends TestCase
      */
     private function createHelperFactory(): HelperFactoryInterface
     {
-        $helper = new HealthCheckerHelper();
+        $healthCheckerHelper = new HealthCheckerHelper();
 
-        return new class ($helper) implements HelperFactoryInterface {
+        return new class ($healthCheckerHelper) implements HelperFactoryInterface {
             public function __construct(
-                private readonly HealthCheckerHelper $helper,
+                private readonly HealthCheckerHelper $healthCheckerHelper,
             ) {}
 
             public function getHelper(string $name, array $config = []): mixed
             {
                 if ($name === 'HealthCheckerHelper') {
-                    return $this->helper;
+                    return $this->healthCheckerHelper;
                 }
 
-                throw new \InvalidArgumentException("Unknown helper: {$name}");
+                throw new \InvalidArgumentException('Unknown helper: ' . $name);
             }
         };
     }

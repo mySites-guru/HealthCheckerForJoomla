@@ -31,9 +31,6 @@ class MockHttpFactory
     public static function createWithGetResponse(int $code, string $body = '', array $headers = []): Http
     {
         return new class ($code, $body, $headers) extends Http {
-            /**
-             * @param array<string, string|array<string>> $headers
-             */
             public function __construct(
                 private readonly int $code,
                 private readonly string $body,
@@ -62,9 +59,6 @@ class MockHttpFactory
     public static function createWithHeadResponse(int $code, array $headers = []): Http
     {
         return new class ($code, $headers) extends Http {
-            /**
-             * @param array<string, string|array<string>> $headers
-             */
             public function __construct(
                 private readonly int $code,
                 private readonly array $responseHeaders,

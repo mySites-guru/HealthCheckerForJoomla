@@ -19,7 +19,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(HtmlexportView::class)]
 class HtmlexportViewTest extends TestCase
 {
-    private ?CMSApplication $originalApp = null;
+    private ?CMSApplication $cmsApplication = null;
 
     protected function setUp(): void
     {
@@ -27,36 +27,36 @@ class HtmlexportViewTest extends TestCase
 
         // Store original app if set
         try {
-            $this->originalApp = Factory::getApplication();
+            $this->cmsApplication = Factory::getApplication();
         } catch (\Exception) {
-            $this->originalApp = null;
+            $this->cmsApplication = null;
         }
 
         // Set up a mock application
-        $app = new CMSApplication();
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        Factory::setApplication($cmsApplication);
     }
 
     protected function tearDown(): void
     {
         // Restore original application
-        Factory::setApplication($this->originalApp);
+        Factory::setApplication($this->cmsApplication);
 
         parent::tearDown();
     }
 
     public function testViewCanBeInstantiated(): void
     {
-        $view = new HtmlexportView();
+        $htmlexportView = new HtmlexportView();
 
-        $this->assertInstanceOf(HtmlexportView::class, $view);
+        $this->assertInstanceOf(HtmlexportView::class, $htmlexportView);
     }
 
     public function testViewExtendsBaseHtmlView(): void
     {
-        $view = new HtmlexportView();
+        $htmlexportView = new HtmlexportView();
 
-        $this->assertInstanceOf(\Joomla\CMS\MVC\View\HtmlView::class, $view);
+        $this->assertInstanceOf(\Joomla\CMS\MVC\View\HtmlView::class, $htmlexportView);
     }
 
     public function testDisplayMethodExists(): void
@@ -66,8 +66,8 @@ class HtmlexportViewTest extends TestCase
 
     public function testDisplayMethodAcceptsNullTemplate(): void
     {
-        $reflection = new \ReflectionMethod(HtmlexportView::class, 'display');
-        $parameters = $reflection->getParameters();
+        $reflectionMethod = new \ReflectionMethod(HtmlexportView::class, 'display');
+        $parameters = $reflectionMethod->getParameters();
 
         $this->assertCount(1, $parameters);
         $this->assertSame('tpl', $parameters[0]->getName());
@@ -76,8 +76,8 @@ class HtmlexportViewTest extends TestCase
 
     public function testDisplayMethodReturnsVoid(): void
     {
-        $reflection = new \ReflectionMethod(HtmlexportView::class, 'display');
-        $returnType = $reflection->getReturnType();
+        $reflectionMethod = new \ReflectionMethod(HtmlexportView::class, 'display');
+        $returnType = $reflectionMethod->getReturnType();
 
         $this->assertNotNull($returnType);
         $this->assertSame('void', $returnType->getName());
@@ -85,59 +85,62 @@ class HtmlexportViewTest extends TestCase
 
     public function testViewHasCorrectNamespace(): void
     {
-        $reflection = new \ReflectionClass(HtmlexportView::class);
+        $reflectionClass = new \ReflectionClass(HtmlexportView::class);
 
         $this->assertSame(
             'MySitesGuru\HealthChecker\Component\Administrator\View\Report',
-            $reflection->getNamespaceName(),
+            $reflectionClass->getNamespaceName(),
         );
     }
 
     public function testViewIsNotAbstract(): void
     {
-        $reflection = new \ReflectionClass(HtmlexportView::class);
+        $reflectionClass = new \ReflectionClass(HtmlexportView::class);
 
-        $this->assertFalse($reflection->isAbstract());
+        $this->assertFalse($reflectionClass->isAbstract());
     }
 
     public function testViewIsNotFinal(): void
     {
-        $reflection = new \ReflectionClass(HtmlexportView::class);
+        $reflectionClass = new \ReflectionClass(HtmlexportView::class);
 
-        $this->assertFalse($reflection->isFinal());
+        $this->assertFalse($reflectionClass->isFinal());
     }
 
     public function testViewClassName(): void
     {
-        $reflection = new \ReflectionClass(HtmlexportView::class);
+        $reflectionClass = new \ReflectionClass(HtmlexportView::class);
 
-        $this->assertSame('HtmlexportView', $reflection->getShortName());
+        $this->assertSame('HtmlexportView', $reflectionClass->getShortName());
     }
 
     public function testRenderHtmlReportMethodExists(): void
     {
-        $reflection = new \ReflectionClass(HtmlexportView::class);
+        $reflectionClass = new \ReflectionClass(HtmlexportView::class);
 
-        $this->assertTrue($reflection->hasMethod('renderHtmlReport'));
+        $this->assertTrue($reflectionClass->hasMethod('renderHtmlReport'));
     }
 
     public function testRenderHtmlReportMethodIsPrivate(): void
     {
-        $reflection = new \ReflectionMethod(HtmlexportView::class, 'renderHtmlReport');
+        $reflectionMethod = new \ReflectionMethod(HtmlexportView::class, 'renderHtmlReport');
 
-        $this->assertTrue($reflection->isPrivate());
+        $this->assertTrue($reflectionMethod->isPrivate());
     }
 
     public function testRenderHtmlReportHasExpectedParameters(): void
     {
-        $reflection = new \ReflectionMethod(HtmlexportView::class, 'renderHtmlReport');
-        $parameters = $reflection->getParameters();
+        $reflectionMethod = new \ReflectionMethod(HtmlexportView::class, 'renderHtmlReport');
+        $parameters = $reflectionMethod->getParameters();
 
         // Method has 12 parameters based on the source
         $this->assertCount(12, $parameters);
 
         // Check parameter names
-        $paramNames = array_map(fn($p) => $p->getName(), $parameters);
+        $paramNames = array_map(
+            fn(\ReflectionParameter $reflectionParameter): string => $reflectionParameter->getName(),
+            $parameters,
+        );
         $this->assertContains('results', $paramNames);
         $this->assertContains('categories', $paramNames);
         $this->assertContains('providers', $paramNames);
@@ -154,40 +157,40 @@ class HtmlexportViewTest extends TestCase
 
     public function testViewUsesModelForData(): void
     {
-        $reflection = new \ReflectionMethod(HtmlexportView::class, 'display');
-        $source = file_get_contents($reflection->getFileName());
+        $reflectionMethod = new \ReflectionMethod(HtmlexportView::class, 'display');
+        $source = file_get_contents($reflectionMethod->getFileName());
 
         $this->assertStringContainsString('getModel', $source);
     }
 
     public function testViewUsesRunChecksFromModel(): void
     {
-        $reflection = new \ReflectionMethod(HtmlexportView::class, 'display');
-        $source = file_get_contents($reflection->getFileName());
+        $reflectionMethod = new \ReflectionMethod(HtmlexportView::class, 'display');
+        $source = file_get_contents($reflectionMethod->getFileName());
 
         $this->assertStringContainsString('runChecks', $source);
     }
 
     public function testViewGetsResultsByCategory(): void
     {
-        $reflection = new \ReflectionMethod(HtmlexportView::class, 'display');
-        $source = file_get_contents($reflection->getFileName());
+        $reflectionMethod = new \ReflectionMethod(HtmlexportView::class, 'display');
+        $source = file_get_contents($reflectionMethod->getFileName());
 
         $this->assertStringContainsString('getResultsByCategory', $source);
     }
 
     public function testViewUsesPluginHelper(): void
     {
-        $reflection = new \ReflectionClass(HtmlexportView::class);
-        $source = file_get_contents($reflection->getFileName());
+        $reflectionClass = new \ReflectionClass(HtmlexportView::class);
+        $source = file_get_contents($reflectionClass->getFileName());
 
         $this->assertStringContainsString('PluginHelper', $source);
     }
 
     public function testViewUsesHealthStatusEnum(): void
     {
-        $reflection = new \ReflectionClass(HtmlexportView::class);
-        $source = file_get_contents($reflection->getFileName());
+        $reflectionClass = new \ReflectionClass(HtmlexportView::class);
+        $source = file_get_contents($reflectionClass->getFileName());
 
         $this->assertStringContainsString('HealthStatus', $source);
     }

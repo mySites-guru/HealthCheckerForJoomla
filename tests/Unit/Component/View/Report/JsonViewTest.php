@@ -19,7 +19,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(JsonView::class)]
 class JsonViewTest extends TestCase
 {
-    private ?CMSApplication $originalApp = null;
+    private ?CMSApplication $cmsApplication = null;
 
     protected function setUp(): void
     {
@@ -27,36 +27,36 @@ class JsonViewTest extends TestCase
 
         // Store original app if set
         try {
-            $this->originalApp = Factory::getApplication();
+            $this->cmsApplication = Factory::getApplication();
         } catch (\Exception) {
-            $this->originalApp = null;
+            $this->cmsApplication = null;
         }
 
         // Set up a mock application
-        $app = new CMSApplication();
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        Factory::setApplication($cmsApplication);
     }
 
     protected function tearDown(): void
     {
         // Restore original application
-        Factory::setApplication($this->originalApp);
+        Factory::setApplication($this->cmsApplication);
 
         parent::tearDown();
     }
 
     public function testViewCanBeInstantiated(): void
     {
-        $view = new JsonView();
+        $jsonView = new JsonView();
 
-        $this->assertInstanceOf(JsonView::class, $view);
+        $this->assertInstanceOf(JsonView::class, $jsonView);
     }
 
     public function testViewExtendsBaseJsonView(): void
     {
-        $view = new JsonView();
+        $jsonView = new JsonView();
 
-        $this->assertInstanceOf(\Joomla\CMS\MVC\View\JsonView::class, $view);
+        $this->assertInstanceOf(\Joomla\CMS\MVC\View\JsonView::class, $jsonView);
     }
 
     public function testDisplayMethodExists(): void
@@ -66,8 +66,8 @@ class JsonViewTest extends TestCase
 
     public function testDisplayMethodAcceptsNullTemplate(): void
     {
-        $reflection = new \ReflectionMethod(JsonView::class, 'display');
-        $parameters = $reflection->getParameters();
+        $reflectionMethod = new \ReflectionMethod(JsonView::class, 'display');
+        $parameters = $reflectionMethod->getParameters();
 
         $this->assertCount(1, $parameters);
         $this->assertSame('tpl', $parameters[0]->getName());
@@ -76,8 +76,8 @@ class JsonViewTest extends TestCase
 
     public function testDisplayMethodReturnsVoid(): void
     {
-        $reflection = new \ReflectionMethod(JsonView::class, 'display');
-        $returnType = $reflection->getReturnType();
+        $reflectionMethod = new \ReflectionMethod(JsonView::class, 'display');
+        $returnType = $reflectionMethod->getReturnType();
 
         $this->assertNotNull($returnType);
         $this->assertSame('void', $returnType->getName());
@@ -85,40 +85,40 @@ class JsonViewTest extends TestCase
 
     public function testViewHasCorrectNamespace(): void
     {
-        $reflection = new \ReflectionClass(JsonView::class);
+        $reflectionClass = new \ReflectionClass(JsonView::class);
 
         $this->assertSame(
             'MySitesGuru\HealthChecker\Component\Administrator\View\Report',
-            $reflection->getNamespaceName(),
+            $reflectionClass->getNamespaceName(),
         );
     }
 
     public function testViewIsNotAbstract(): void
     {
-        $reflection = new \ReflectionClass(JsonView::class);
+        $reflectionClass = new \ReflectionClass(JsonView::class);
 
-        $this->assertFalse($reflection->isAbstract());
+        $this->assertFalse($reflectionClass->isAbstract());
     }
 
     public function testViewIsNotFinal(): void
     {
-        $reflection = new \ReflectionClass(JsonView::class);
+        $reflectionClass = new \ReflectionClass(JsonView::class);
 
-        $this->assertFalse($reflection->isFinal());
+        $this->assertFalse($reflectionClass->isFinal());
     }
 
     public function testViewClassName(): void
     {
-        $reflection = new \ReflectionClass(JsonView::class);
+        $reflectionClass = new \ReflectionClass(JsonView::class);
 
-        $this->assertSame('JsonView', $reflection->getShortName());
+        $this->assertSame('JsonView', $reflectionClass->getShortName());
     }
 
     public function testViewUsesModelForData(): void
     {
         // The display method uses $this->getModel() to get data
-        $reflection = new \ReflectionMethod(JsonView::class, 'display');
-        $source = file_get_contents($reflection->getFileName());
+        $reflectionMethod = new \ReflectionMethod(JsonView::class, 'display');
+        $source = file_get_contents($reflectionMethod->getFileName());
 
         // Extract the display method body
         $this->assertStringContainsString('getModel', $source);
@@ -126,16 +126,16 @@ class JsonViewTest extends TestCase
 
     public function testViewUsesRunChecksFromModel(): void
     {
-        $reflection = new \ReflectionMethod(JsonView::class, 'display');
-        $source = file_get_contents($reflection->getFileName());
+        $reflectionMethod = new \ReflectionMethod(JsonView::class, 'display');
+        $source = file_get_contents($reflectionMethod->getFileName());
 
         $this->assertStringContainsString('runChecks', $source);
     }
 
     public function testViewUsesToJsonFromModel(): void
     {
-        $reflection = new \ReflectionMethod(JsonView::class, 'display');
-        $source = file_get_contents($reflection->getFileName());
+        $reflectionMethod = new \ReflectionMethod(JsonView::class, 'display');
+        $source = file_get_contents($reflectionMethod->getFileName());
 
         $this->assertStringContainsString('toJson', $source);
     }
