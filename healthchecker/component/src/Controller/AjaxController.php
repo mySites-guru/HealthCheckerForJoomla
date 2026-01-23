@@ -12,6 +12,7 @@ namespace MySitesGuru\HealthChecker\Component\Administrator\Controller;
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Log\Log;
 use Joomla\CMS\MVC\Controller\BaseController;
 use Joomla\CMS\Response\JsonResponse;
 use Joomla\CMS\Session\Session;
@@ -83,8 +84,10 @@ class AjaxController extends BaseController
             $cmsApplication->setHeader('Content-Type', 'application/json');
             echo new JsonResponse($data);
         } catch (\Exception $exception) {
+            // Security: Log full exception server-side, return generic message to client
+            Log::add('Health check metadata error: ' . $exception->getMessage(), Log::ERROR, 'com_healthchecker');
             $cmsApplication->setHeader('Content-Type', 'application/json');
-            echo new JsonResponse(null, $exception->getMessage(), true);
+            echo new JsonResponse(null, Text::_('COM_HEALTHCHECKER_ERROR'), true);
         }
 
         $cmsApplication->close();
@@ -148,8 +151,10 @@ class AjaxController extends BaseController
                 'results' => $results,
             ]);
         } catch (\Exception $exception) {
+            // Security: Log full exception server-side, return generic message to client
+            Log::add('Health check category error: ' . $exception->getMessage(), Log::ERROR, 'com_healthchecker');
             $cmsApplication->setHeader('Content-Type', 'application/json');
-            echo new JsonResponse(null, $exception->getMessage(), true);
+            echo new JsonResponse(null, Text::_('COM_HEALTHCHECKER_ERROR'), true);
         }
 
         $cmsApplication->close();
@@ -222,8 +227,10 @@ class AjaxController extends BaseController
             $cmsApplication->setHeader('Content-Type', 'application/json');
             echo new JsonResponse($result->toArray());
         } catch (\Exception $exception) {
+            // Security: Log full exception server-side, return generic message to client
+            Log::add('Health check error: ' . $exception->getMessage(), Log::ERROR, 'com_healthchecker');
             $cmsApplication->setHeader('Content-Type', 'application/json');
-            echo new JsonResponse(null, $exception->getMessage(), true);
+            echo new JsonResponse(null, Text::_('COM_HEALTHCHECKER_ERROR'), true);
         }
 
         $cmsApplication->close();
@@ -296,8 +303,10 @@ class AjaxController extends BaseController
             $cmsApplication->setHeader('Content-Type', 'application/json');
             echo new JsonResponse($data);
         } catch (\Exception $exception) {
+            // Security: Log full exception server-side, return generic message to client
+            Log::add('Health check stats error: ' . $exception->getMessage(), Log::ERROR, 'com_healthchecker');
             $cmsApplication->setHeader('Content-Type', 'application/json');
-            echo new JsonResponse(null, $exception->getMessage(), true);
+            echo new JsonResponse(null, Text::_('COM_HEALTHCHECKER_ERROR'), true);
         }
 
         $cmsApplication->close();
@@ -351,8 +360,14 @@ class AjaxController extends BaseController
                 'message' => Text::_('COM_HEALTHCHECKER_CACHE_CLEARED'),
             ]);
         } catch (\Exception $exception) {
+            // Security: Log full exception server-side, return generic message to client
+            Log::add(
+                'Health check clear cache error: ' . $exception->getMessage(),
+                Log::ERROR,
+                'com_healthchecker',
+            );
             $cmsApplication->setHeader('Content-Type', 'application/json');
-            echo new JsonResponse(null, $exception->getMessage(), true);
+            echo new JsonResponse(null, Text::_('COM_HEALTHCHECKER_ERROR'), true);
         }
 
         $cmsApplication->close();
@@ -411,8 +426,10 @@ class AjaxController extends BaseController
             $cmsApplication->setHeader('Content-Type', 'application/json');
             echo new JsonResponse($data);
         } catch (\Exception $exception) {
+            // Security: Log full exception server-side, return generic message to client
+            Log::add('Health check run error: ' . $exception->getMessage(), Log::ERROR, 'com_healthchecker');
             $cmsApplication->setHeader('Content-Type', 'application/json');
-            echo new JsonResponse(null, $exception->getMessage(), true);
+            echo new JsonResponse(null, Text::_('COM_HEALTHCHECKER_ERROR'), true);
         }
 
         $cmsApplication->close();

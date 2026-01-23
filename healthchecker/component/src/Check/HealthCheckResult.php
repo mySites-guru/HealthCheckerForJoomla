@@ -126,4 +126,29 @@ final class HealthCheckResult
             'provider' => $this->provider,
         ];
     }
+
+    /**
+     * Create a HealthCheckResult from an array (deserialization).
+     *
+     * This is used to reconstruct HealthCheckResult objects from cached JSON data.
+     * It's the inverse of toArray() and provides a safe alternative to unserialize().
+     *
+     * @param array{status: string, title: string, description: string, slug: string, category: string, provider?: string} $data
+     *               Array representation of the result (as produced by toArray())
+     *
+     * @return self The reconstructed HealthCheckResult object
+     *
+     * @since 1.0.0
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            healthStatus: HealthStatus::from($data['status']),
+            title: $data['title'],
+            description: $data['description'],
+            slug: $data['slug'],
+            category: $data['category'],
+            provider: $data['provider'] ?? 'core',
+        );
+    }
 }

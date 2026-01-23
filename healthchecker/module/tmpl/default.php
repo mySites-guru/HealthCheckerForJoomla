@@ -105,7 +105,6 @@ $showRefreshButton = !empty($healthStats['enableCache']) || $params->get('enable
             <span class="visually-hidden"><?php echo Text::_('MOD_HEALTHCHECKER_REFRESH_CACHE'); ?></span>
         </button>
         <?php endif; ?>
-        <!-- Debug: showRefreshButton = <?php echo var_export($showRefreshButton, true); ?>, enable_cache param = <?php echo var_export($params->get('enable_cache', '1'), true); ?> -->
     </div>
 
     <div id="<?php echo $moduleId; ?>-timestamp" class="mt-2 text-center text-muted small d-none"></div>

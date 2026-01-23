@@ -53,7 +53,11 @@ $categoryUrl = Route::_('index.php?option=com_healthchecker&task=ajax.category&f
       data-text-warning="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_WARNING')); ?>"
       data-text-good="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_GOOD')); ?>">
 
-    <?php // Allow plugins to inject content (banners, notices) before the report ?>
+    <?php
+    // Allow plugins to inject content (banners, notices) before the report.
+    // Security note: This HTML comes from installed Joomla plugins which are trusted code
+    // (they require administrator installation privileges). No user input flows here.
+    ?>
     <?php if (!empty($this->beforeReportHtml)): ?>
         <?php echo $this->beforeReportHtml; ?>
     <?php endif; ?>

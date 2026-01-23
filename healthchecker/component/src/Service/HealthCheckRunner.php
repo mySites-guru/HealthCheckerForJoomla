@@ -594,9 +594,16 @@ final class HealthCheckRunner
 
         if ($cachedData !== false && $cachedData !== null) {
             // Cache hit - use cached data
-            $data = @unserialize($cachedData);
+            // Security: Use JSON instead of unserialize to prevent object injection attacks
+            $data = json_decode($cachedData, true);
             if (is_array($data) && isset($data['results']) && isset($data['lastRun'])) {
-                $this->results = $data['results'];
+                // Reconstruct HealthCheckResult objects from cached array data
+                /** @var array<array{status: string, title: string, description: string, slug: string, category: string, provider?: string}> $cachedResults */
+                $cachedResults = $data['results'];
+                $this->results = array_map(
+                    fn(array $resultData): HealthCheckResult => HealthCheckResult::fromArray($resultData),
+                    $cachedResults,
+                );
                 $this->dateTimeImmutable = new \DateTimeImmutable($data['lastRun']);
                 return;
             }
@@ -605,10 +612,11 @@ final class HealthCheckRunner
         // Cache miss or invalid data - run checks and store
         $this->run();
         $data = [
-            'results' => $this->results,
+            'results' => array_map(fn(HealthCheckResult $r): array => $r->toArray(), $this->results),
             'lastRun' => $this->dateTimeImmutable?->format('c'),
         ];
-        $cache->store(serialize($data), $cacheId);
+        // Security: Use JSON instead of serialize to prevent object injection attacks
+        $cache->store(json_encode($data), $cacheId);
     }
 
     /**
