@@ -1,0 +1,97 @@
+/* Fix logo overflow in sidebar */
+.VPSidebarItem .logo {
+  max-width: 100%;
+  height: auto;
+  max-height: 32px;
+}
+
+.VPNavBarTitle .logo {
+  max-height: 32px;
+  height: 32px;
+  width: auto;
+}
+
+/* Ensure logo container doesn't overflow */
+.VPSidebarItem {
+  overflow: hidden;
+}
+
+/* Fix brand title truncation */
+.VPNavBarTitle {
+  overflow: visible !important;
+  flex-shrink: 0;
+}
+
+.VPNavBarTitle .title {
+  white-space: nowrap;
+  overflow: visible !important;
+  text-overflow: clip;
+}
+
+/* Make brand title link to main website */
+.VPNavBarTitle .title {
+  pointer-events: auto;
+}
+
+.VPNavBarTitle a[href="/docs/"] {
+  pointer-events: none;
+}
+
+.VPNavBarTitle .title a {
+  pointer-events: auto !important;
+}
+
+/* Ensure proper font rendering for keyboard shortcut symbols */
+.DocSearch-Button-Keys {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji";
+}
+
+/* Sponsor page cards - Dark mode compatible */
+.sponsor-card {
+  padding: 2rem;
+  border-radius: 0.75rem;
+  margin: 2rem 0;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+}
+
+.sponsor-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sponsor-card .logo-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sponsor-card .mysites-logo {
+  background: var(--vp-c-bg-alt);
+  color: var(--vp-c-text-1);
+}
+
+.sponsor-card .avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.75rem;
+  object-fit: cover;
+}
+
+.sponsor-card .card-title {
+  margin: 0;
+  color: var(--vp-c-text-1);
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+.sponsor-card .card-subtitle {
+  margin: 0;
+  color: var(--vp-c-text-2);
+  font-size: 0.875rem;
+}

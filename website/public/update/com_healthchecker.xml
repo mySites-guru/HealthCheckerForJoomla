@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<updates>
+    <update>
+        <name>Health Checker Component</name>
+        <description>Health Checker core component</description>
+        <element>com_healthchecker</element>
+        <type>component</type>
+        <client>administrator</client>
+        <version>3.0.30</version>
+        <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/com_healthchecker-3.0.30.zip</downloadurl>
+        </downloads>
+        <sha512>d7c55e83f2daa80015b6aa834a594f671f4e40ca6d5225170c8645f7e046b134fe77f929bcd4ca60aef9a24665f201bf9d71ece0177d0b563095fdbc06698e41</sha512>
+        <tags>
+            <tag>stable</tag>
+        </tags>
+        <maintainer>mySites.guru / Phil E. Taylor</maintainer>
+        <maintainerurl>https://www.phil-taylor.com</maintainerurl>
+        <targetplatform name="joomla" version="(5|6)\.[0-9]+" />
+        <php_minimum>8.1.0</php_minimum>
+    </update>
+</updates>

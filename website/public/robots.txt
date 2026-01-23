@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.joomlahealthchecker.com/docs/sitemap.xml

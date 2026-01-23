@@ -1,0 +1,45 @@
+name = "joomlahealthchecker"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+account_id = "3daef84f0b44a778a448d8d299d0d0c9"
+
+# Serve static assets - Worker adds security headers
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+# Custom domains - automatically creates DNS records
+[[routes]]
+pattern = "joomlahealthchecker.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.joomlahealthchecker.com"
+custom_domain = true
+
+[[routes]]
+pattern = "joomlahealthcheck.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.joomlahealthcheck.com"
+custom_domain = true
+
+[[routes]]
+pattern = "myjoomlahealthcheck.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.myjoomlahealthcheck.com"
+custom_domain = true
+
+# D1 Database for waitlist
+[[d1_databases]]
+binding = "DB"
+database_name = "healthchecker-waitlist"
+database_id = "28539e7d-6d04-4025-bab0-b0af71b4fe55"
+
+# Email sending
+[[send_email]]
+name = "SEND_EMAIL"

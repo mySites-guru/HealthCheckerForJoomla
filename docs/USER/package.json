@@ -1,0 +1,16 @@
+{
+  "name": "health-checker-docs",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Documentation for Health Checker for Joomla",
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:build:production": "vitepress build && ./update-search-hash.sh",
+    "docs:preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^2.0.0-alpha.15",
+    "vitepress-plugin-llms": "^1.10.0"
+  }
+}

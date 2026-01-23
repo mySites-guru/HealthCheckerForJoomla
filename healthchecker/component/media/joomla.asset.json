@@ -1,0 +1,24 @@
+{
+  "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+  "name": "com_healthchecker",
+  "version": "3.0.30",
+  "description": "Health Checker for Joomla - Component Assets",
+  "license": "GPL-2.0-or-later",
+  "assets": [
+    {
+      "name": "com_healthchecker.report",
+      "type": "style",
+      "uri": "com_healthchecker/admin-report.min.css",
+      "dependencies": []
+    },
+    {
+      "name": "com_healthchecker.report",
+      "type": "script",
+      "uri": "com_healthchecker/admin-report.min.js",
+      "attributes": {
+        "defer": true
+      },
+      "dependencies": []
+    }
+  ]
+}

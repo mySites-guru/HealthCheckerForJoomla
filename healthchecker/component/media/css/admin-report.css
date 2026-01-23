@@ -1,0 +1,91 @@
+/**
+ * Health Checker Component - Report Admin Styles
+ *
+ * @copyright   (C) 2026 https://mySites.guru + Phil E. Taylor <phil@phil-taylor.com>
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+@view-transition {
+    navigation: auto;
+}
+
+.status-filter-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.status-filter-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.status-filter-card.active {
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.5), 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.status-filter-card.dimmed {
+    opacity: 0.5;
+}
+
+.mysitesguru-banner {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.mysitesguru-banner-logo {
+    height: 48px;
+    width: auto;
+    flex-shrink: 0;
+}
+
+.mysitesguru-banner-content {
+    flex: 1;
+    color: #1a1a1a;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.mysitesguru-banner-link {
+    color: #1a1a1a;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.mysitesguru-banner-link:hover {
+    color: #333;
+}
+
+.mysitesguru-banner-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+}
+
+.mysitesguru-banner-close:hover {
+    color: #1a1a1a;
+}
+
+@media (max-width: 768px) {
+    .mysitesguru-banner {
+        flex-direction: column;
+        text-align: center;
+        padding-top: 2rem;
+    }
+    .mysitesguru-banner-logo {
+        height: 40px;
+    }
+}

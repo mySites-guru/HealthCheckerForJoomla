@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<extension type="plugin" group="healthchecker" method="upgrade">
+    <name>plg_healthchecker_example</name>
+    <author>mySites.guru / Phil E. Taylor</author>
+    <creationDate>2026</creationDate>
+    <copyright>(C) 2026 mySites.guru / Phil E. Taylor</copyright>
+    <license
+    >GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>phil@phil-taylor.com</authorEmail>
+    <authorUrl>https://mySites.guru</authorUrl>
+    <version>3.0.30</version>
+    <description>PLG_HEALTHCHECKER_EXAMPLE_XML_DESCRIPTION</description>
+    <namespace path="src">MySitesGuru\HealthChecker\Plugin\Example</namespace>
+    <files>
+        <folder plugin="example">services</folder>
+        <folder>src</folder>
+        <folder>language</folder>
+    </files>
+
+    <updateservers>
+        <server
+            type="extension"
+            priority="1"
+            name="Health Checker - Example Plugin"
+        >https://www.joomlahealthchecker.com/update/plg_healthchecker_example.xml</server>
+    </updateservers>
+
+    <client>0</client>
+</extension>

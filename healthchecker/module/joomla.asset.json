@@ -1,0 +1,24 @@
+{
+  "$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+  "name": "mod_healthchecker",
+  "version": "3.0.30",
+  "description": "Health Checker for Joomla - Module Assets",
+  "license": "GPL-2.0-or-later",
+  "assets": [
+    {
+      "name": "mod_healthchecker.card",
+      "type": "style",
+      "uri": "mod_healthchecker/module-card.min.css",
+      "dependencies": []
+    },
+    {
+      "name": "mod_healthchecker.stats",
+      "type": "script",
+      "uri": "mod_healthchecker/module-stats.min.js",
+      "attributes": {
+        "defer": true
+      },
+      "dependencies": []
+    }
+  ]
+}

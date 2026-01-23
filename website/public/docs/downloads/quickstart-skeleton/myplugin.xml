@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" group="healthchecker" method="upgrade">
+    <name>PLG_HEALTHCHECKER_MYPLUGIN</name>
+    <author>Your Name</author>
+    <creationDate>January 2026</creationDate>
+    <copyright>(C) 2026 Your Company</copyright>
+    <license>GNU General Public License version 2 or later</license>
+    <authorEmail>you@example.com</authorEmail>
+    <authorUrl>https://example.com</authorUrl>
+    <version>1.0.0</version>
+    <description>PLG_HEALTHCHECKER_MYPLUGIN_XML_DESCRIPTION</description>
+
+    <namespace path="src">YourCompany\Plugin\HealthChecker\MyPlugin</namespace>
+
+    <files>
+        <folder>src</folder>
+        <folder>services</folder>
+        <folder>language</folder>
+    </files>
+
+    <languages folder="language">
+        <language tag="en-GB">en-GB/plg_healthchecker_myplugin.ini</language>
+        <language tag="en-GB">en-GB/plg_healthchecker_myplugin.sys.ini</language>
+    </languages>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <!-- Add your plugin parameters here -->
+            </fieldset>
+        </fields>
+    </config>
+</extension>

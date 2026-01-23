@@ -1,0 +1,9 @@
+/* TEAM */
+Developer: Phil Taylor / mySites.guru
+Site: https://www.phil-taylor.com
+Location: Jersey, Channel Islands
+
+/* SITE */
+Last update: 2026/01/01
+Standards: HTML5, CSS3
+Software: Cloudflare Workers

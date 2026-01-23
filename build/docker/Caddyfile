@@ -1,0 +1,20 @@
+{
+    frankenphp
+    auto_https disable_redirects
+}
+
+healthchecker.local, localhost, :80 {
+    root * /app/joomla
+
+    encode zstd br gzip
+
+    php_server
+    file_server
+
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        X-Content-Type-Options "nosniff"
+        -Server
+    }
+}

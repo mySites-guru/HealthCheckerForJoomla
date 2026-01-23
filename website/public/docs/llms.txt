@@ -1,0 +1,61 @@
+# Health Checker
+
+> for Joomla
+
+Comprehensive health monitoring for your Joomla 5+ site
+
+## Table of Contents
+
+### Getting Started
+
+- [Getting Started](/docs/getting-started.md)
+- [Introduction](/docs/introduction.md)
+- [Installation](/docs/installation.md)
+
+### User Guide
+
+- [Understanding Health Checks](/docs/understanding-checks.md)
+- [Running Health Checks](/docs/running-checks.md)
+- [Reading Results](/docs/reading-results.md)
+- [Managing Health Checks](/docs/guide/managing-checks.md)
+- [Exporting Reports](/docs/exporting-reports.md)
+- [Dashboard Widget](/docs/dashboard-widget.md)
+
+### Health Checks Reference
+
+- [Health Checks Reference](/docs/checks.md)
+- [System & Hosting Checks](/docs/checks/system.md)
+- [Database Checks](/docs/checks/database.md)
+- [Security Checks](/docs/checks/security.md)
+- [Users Checks](/docs/checks/users.md)
+- [Extensions Checks](/docs/checks/extensions.md)
+- [Performance Checks](/docs/checks/performance.md)
+- [SEO Checks](/docs/checks/seo.md)
+- [Content Quality Checks](/docs/checks/content.md)
+
+### For Developers
+
+- [Developer Guide](/docs/developers.md)
+- [Quick Start](/docs/developers/quick-start.md)
+- [Creating Health Checks](/docs/developers/creating-checks.md)
+- [Custom Categories](/docs/developers/custom-categories.md)
+- [Provider Metadata](/docs/developers/provider-metadata.md)
+- [API Reference](/docs/developers/api-reference.md)
+- [Best Practices](/docs/developers/best-practices.md)
+- [Examples](/docs/developers/examples.md)
+
+### Optional Integrations
+
+- [Akeeba Backup Integration](/docs/integrations/akeeba-backup.md)
+- [Akeeba Admin Tools Integration](/docs/integrations/akeeba-admin-tools.md)
+
+### About
+
+- [Code Quality Commitment](/docs/code-quality.md)
+- [The Sponsor](/docs/sponsor.md)
+- [License](/docs/license.md)
+
+### Other
+
+- [Health Checker for Joomla - User Documentation](/docs/README.md)
+- [Health Checker Quick Start Skeleton](/docs/public/downloads/quickstart-skeleton/README.md)
