@@ -1525,8 +1525,8 @@ final class AkeebaBackupPlugin extends CMSPlugin implements SubscriberInterface
         $collectProvidersEvent->addResult(new ProviderMetadata(
             slug: 'akeeba_backup',
             name: 'Akeeba Backup (Unofficial)',
-            url: 'https://www.akeeba.com',
             description: 'Checks provided unofficially for this plugin as an example of 3rd party integration',
+            url: 'https://www.akeeba.com',
             logoUrl: '/media/plg_healthchecker_akeebabackup/logo.png',
         ));
     }

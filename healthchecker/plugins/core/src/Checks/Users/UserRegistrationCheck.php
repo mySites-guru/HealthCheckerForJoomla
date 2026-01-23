@@ -93,8 +93,8 @@ final class UserRegistrationCheck extends AbstractHealthCheck
     protected function performCheck(): HealthCheckResult
     {
         // Read the component parameters for com_users to check registration setting
-        $params = ComponentHelper::getParams('com_users');
-        $allowUserRegistration = (int) $params->get('allowUserRegistration', 0);
+        $registry = ComponentHelper::getParams('com_users');
+        $allowUserRegistration = (int) $registry->get('allowUserRegistration', 0);
 
         // Registration enabled = potential security concern if not properly protected
         // Ensure CAPTCHA (System -> Global Configuration -> Users -> CAPTCHA) and

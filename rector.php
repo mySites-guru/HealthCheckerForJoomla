@@ -2,24 +2,22 @@
 
 declare(strict_types=1);
 
+/**
+ * @copyright   (C) 2026 https://mySites.guru + Phil E. Taylor <phil@phil-taylor.com>
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ * @link        https://github.com/mySites-guru/HealthCheckerForJoomla
+ */
+
 use Rector\Config\RectorConfig;
-use Rector\PHPUnit\Set\PHPUnitSetList;
-use Rector\Set\ValueObject\LevelSetList;
-use Rector\Set\ValueObject\SetList;
-use Rector\TypeDeclaration\Rector\ClassMethod\AddMethodCallBasedStrictParamTypeRector;
+use Rector\Privatization\Rector\Property\PrivatizeFinalClassPropertyRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddParamTypeFromPropertyTypeRector;
-use Rector\TypeDeclaration\Rector\ClassMethod\AddVoidReturnTypeWhereNoReturnRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\ParamTypeByMethodCallTypeRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\ParamTypeByParentCallTypeRector;
 use Rector\TypeDeclaration\Rector\Property\TypedPropertyFromAssignsRector;
 use Rector\TypeDeclaration\Rector\Property\TypedPropertyFromStrictConstructorRector;
-use Rector\Privatization\Rector\Property\PrivatizeFinalClassPropertyRector;
 
 return RectorConfig::configure()
-    ->withPaths([
-        __DIR__ . '/healthchecker',
-        __DIR__ . '/tests',
-    ])
+    ->withPaths([__DIR__ . '/healthchecker', __DIR__ . '/tests', __DIR__ . '/rector.php', __DIR__ . '/ecs.php'])
     ->withSkip([
         // Skip language files
         '*/language/*',
@@ -36,23 +34,24 @@ return RectorConfig::configure()
         // Joomla compatibility: Don't add type hints to methods that override parent classes
         // The parent Joomla classes don't use strict typing, so we must match their signatures
         AddParamTypeFromPropertyTypeRector::class => [
-            __DIR__ . '/healthchecker/component/src/Controller/DisplayController.php',
+            __DIR__ .
+            '/healthchecker/component/src/Controller/DisplayController.php',
             __DIR__ . '/healthchecker/component/src/View/Report/HtmlView.php',
         ],
         ParamTypeByMethodCallTypeRector::class => [
-            __DIR__ . '/healthchecker/component/src/Controller/DisplayController.php',
+            __DIR__ .
+            '/healthchecker/component/src/Controller/DisplayController.php',
             __DIR__ . '/healthchecker/component/src/View/Report/HtmlView.php',
         ],
         ParamTypeByParentCallTypeRector::class => [
-            __DIR__ . '/healthchecker/component/src/Controller/DisplayController.php',
+            __DIR__ .
+            '/healthchecker/component/src/Controller/DisplayController.php',
             __DIR__ . '/healthchecker/component/src/View/Report/HtmlView.php',
         ],
 
         // Joomla compatibility: Don't add type hints to $autoloadLanguage property
         // CMSPlugin parent class doesn't have a type, so we can't add one
-        TypedPropertyFromAssignsRector::class => [
-            __DIR__ . '/healthchecker/plugins/*/src/Extension/*Plugin.php',
-        ],
+        TypedPropertyFromAssignsRector::class => [__DIR__ . '/healthchecker/plugins/*/src/Extension/*Plugin.php'],
         TypedPropertyFromStrictConstructorRector::class => [
             __DIR__ . '/healthchecker/plugins/*/src/Extension/*Plugin.php',
         ],
