@@ -74,8 +74,19 @@ use Joomla\Database\DatabaseInterface;
 
 class Factory
 {
+    private static ?CMSApplication $application = null;
+
+    public static function setApplication(?CMSApplication $app): void
+    {
+        self::$application = $app;
+    }
+
     public static function getApplication(): CMSApplication
     {
+        if (self::$application !== null) {
+            return self::$application;
+        }
+
         return new CMSApplication();
     }
 
@@ -221,17 +232,92 @@ class Factory
             {
                 return '';
             }
+
+            public function getNullDate(): string
+            {
+                return '0000-00-00 00:00:00';
+            }
+
+            public function getTableList(): array
+            {
+                return [];
+            }
+
+            public function getVersion(): string
+            {
+                return '8.0.30';
+            }
         };
     }
 }
 
 namespace Joomla\CMS\Application;
 
+use Joomla\CMS\User\User;
+use Joomla\Input\Input;
+
 class CMSApplication
 {
     private array $config = [];
 
+    private ?User $identity = null;
+
+    private ?Input $input = null;
+
+    private array $headers = [];
+
+    private bool $closed = false;
+
     public function input(): mixed
+    {
+        return $this->input;
+    }
+
+    public function getInput(): Input
+    {
+        if ($this->input === null) {
+            $this->input = new Input();
+        }
+
+        return $this->input;
+    }
+
+    public function setInput(Input $input): void
+    {
+        $this->input = $input;
+    }
+
+    public function getIdentity(): ?User
+    {
+        return $this->identity;
+    }
+
+    public function setIdentity(?User $identity): void
+    {
+        $this->identity = $identity;
+    }
+
+    public function setHeader(string $name, string $value, bool $replace = false): void
+    {
+        $this->headers[$name] = $value;
+    }
+
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    public function close(int $code = 0): void
+    {
+        $this->closed = true;
+    }
+
+    public function isClosed(): bool
+    {
+        return $this->closed;
+    }
+
+    public function bootComponent(string $component): mixed
     {
         return null;
     }
@@ -253,10 +339,82 @@ class CMSApplication
     }
 }
 
+namespace Joomla\CMS\User;
+
+class User
+{
+    public int $id = 0;
+
+    public string $name = '';
+
+    public string $username = '';
+
+    public string $email = '';
+
+    private array $authorisations = [];
+
+    public function __construct(int $id = 0)
+    {
+        $this->id = $id;
+    }
+
+    public function authorise(string $action, ?string $assetname = null): bool
+    {
+        $key = $action . ':' . ($assetname ?? '');
+
+        return $this->authorisations[$key] ?? false;
+    }
+
+    public function setAuthorisation(string $action, ?string $assetname, bool $allowed): void
+    {
+        $key = $action . ':' . ($assetname ?? '');
+        $this->authorisations[$key] = $allowed;
+    }
+}
+
+namespace Joomla\Input;
+
+class Input
+{
+    private array $data = [];
+
+    public function __construct(array $source = [])
+    {
+        $this->data = $source;
+    }
+
+    public function get(string $name, mixed $default = null, string $filter = 'cmd'): mixed
+    {
+        return $this->data[$name] ?? $default;
+    }
+
+    public function getString(string $name, string $default = ''): string
+    {
+        return (string) ($this->data[$name] ?? $default);
+    }
+
+    public function getInt(string $name, int $default = 0): int
+    {
+        return (int) ($this->data[$name] ?? $default);
+    }
+
+    public function set(string $name, mixed $value): void
+    {
+        $this->data[$name] = $value;
+    }
+}
+
 namespace Joomla\CMS\Session;
 
 class Session
 {
+    private static bool $tokenValid = true;
+
+    public static function setTokenValid(bool $valid): void
+    {
+        self::$tokenValid = $valid;
+    }
+
     public function get(string $name, mixed $default = null, string $namespace = 'default'): mixed
     {
         return null;
@@ -279,7 +437,7 @@ class Session
 
     public static function checkToken(string $method = 'post'): bool
     {
-        return true;
+        return self::$tokenValid;
     }
 
     public static function getFormToken(bool $forceNew = false): string
@@ -406,11 +564,13 @@ interface ModuleInterface {}
 
 namespace Joomla\CMS\Component;
 
+use Joomla\Registry\Registry;
+
 class ComponentHelper
 {
-    public static function getParams(string $name): mixed
+    public static function getParams(string $name): Registry
     {
-        return null;
+        return new Registry();
     }
 }
 

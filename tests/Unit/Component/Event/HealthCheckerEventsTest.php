@@ -40,7 +40,17 @@ class HealthCheckerEventsTest extends TestCase
     public function testEnumHasCorrectNumberOfCases(): void
     {
         $cases = HealthCheckerEvents::cases();
-        $this->assertCount(4, $cases);
+        $this->assertCount(5, $cases);
+    }
+
+    public function testAfterToolbarBuildEventValue(): void
+    {
+        $this->assertSame('onHealthCheckerAfterToolbarBuild', HealthCheckerEvents::AFTER_TOOLBAR_BUILD->value);
+    }
+
+    public function testGetHandlerMethodForAfterToolbarBuild(): void
+    {
+        $this->assertSame('onAfterToolbarBuild', HealthCheckerEvents::AFTER_TOOLBAR_BUILD->getHandlerMethod());
     }
 
     public function testAllEventNamesStartWithOnHealthChecker(): void

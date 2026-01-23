@@ -8,83 +8,76 @@ declare(strict_types=1);
  * @link        https://github.com/mySites-guru/HealthCheckerForJoomla
  */
 
-namespace Joomla\Database;
+namespace HealthChecker\Tests\Unit\Plugin\Core\Checks\Database;
 
-interface DatabaseInterface
+use HealthChecker\Tests\Utilities\MockDatabaseFactory;
+use Joomla\Database\DatabaseInterface;
+use Joomla\Database\QueryInterface;
+use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
+use MySitesGuru\HealthChecker\Plugin\Core\Checks\Database\ConnectionCheck;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+
+#[CoversClass(ConnectionCheck::class)]
+class ConnectionCheckTest extends TestCase
 {
-    public function getVersion(): string;
+    private ConnectionCheck $check;
 
-    public function getQuery(bool $new = false): QueryInterface;
-
-    public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self;
-
-    public function loadResult(): mixed;
-
-    public function loadColumn(): array;
-
-    public function loadAssoc(): ?array;
-
-    public function loadAssocList(string $key = '', string $column = ''): array;
-
-    public function loadObject(): ?object;
-
-    public function loadObjectList(): array;
-
-    public function execute(): bool;
-
-    public function quoteName(array|string $name, ?string $as = null): array|string;
-
-    public function quote(array|string $text, bool $escape = true): array|string;
-
-    public function getPrefix(): string;
-
-    public function getNullDate(): string;
-
-    public function getTableList(): array;
-}
-
-interface QueryInterface
-{
-    public function select(array|string $columns): self;
-
-    public function from(string $table, ?string $alias = null): self;
-
-    public function where(array|string $conditions): self;
-
-    public function join(string $type, string $table, string $condition = ''): self;
-
-    public function leftJoin(string $table, string $condition = ''): self;
-
-    public function innerJoin(string $table, string $condition = ''): self;
-
-    public function order(array|string $columns): self;
-
-    public function group(array|string $columns): self;
-
-    public function having(array|string $conditions): self;
-
-    public function __toString(): string;
-}
-
-trait DatabaseAwareTrait
-{
-    protected ?DatabaseInterface $db = null;
-
-    public function setDatabase(DatabaseInterface $database): void
+    protected function setUp(): void
     {
-        $this->db = $database;
+        $this->check = new ConnectionCheck();
     }
 
-    /**
-     * Get the database driver.
-     *
-     * @return DatabaseInterface Always returns non-null (throws if not set at runtime)
-     *
-     * @phpstan-return DatabaseInterface
-     */
-    public function getDatabase(): DatabaseInterface
+    public function testGetSlugReturnsCorrectValue(): void
     {
-        return $this->db ?? new class implements DatabaseInterface {
+        $this->assertSame('database.connection', $this->check->getSlug());
+    }
+
+    public function testGetCategoryReturnsDatabase(): void
+    {
+        $this->assertSame('database', $this->check->getCategory());
+    }
+
+    public function testGetProviderReturnsCore(): void
+    {
+        $this->assertSame('core', $this->check->getProvider());
+    }
+
+    public function testGetTitleReturnsString(): void
+    {
+        $title = $this->check->getTitle();
+
+        $this->assertIsString($title);
+        $this->assertNotEmpty($title);
+    }
+
+    public function testRunWithoutDatabaseReturnsWarning(): void
+    {
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+    }
+
+    public function testRunWithWorkingConnectionReturnsGood(): void
+    {
+        $database = MockDatabaseFactory::createWithResult(1);
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertStringContainsString('working correctly', $result->description);
+    }
+
+    public function testRunWithFailedConnectionReturnsCritical(): void
+    {
+        // Create a database mock that throws an exception
+        $database = new class implements DatabaseInterface {
+            public function getVersion(): string
+            {
+                return '8.0.30';
+            }
+
             public function getQuery(bool $new = false): QueryInterface
             {
                 return new class implements QueryInterface {
@@ -140,7 +133,7 @@ trait DatabaseAwareTrait
                 };
             }
 
-            public function setQuery(QueryInterface|string $query): self
+            public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
             {
                 return $this;
             }
@@ -160,7 +153,7 @@ trait DatabaseAwareTrait
                 return null;
             }
 
-            public function loadAssocList(): array
+            public function loadAssocList(string $key = '', string $column = ''): array
             {
                 return [];
             }
@@ -177,7 +170,7 @@ trait DatabaseAwareTrait
 
             public function execute(): bool
             {
-                return false;
+                throw new \Exception('Connection refused');
             }
 
             public function quoteName(array|string $name, ?string $as = null): array|string
@@ -205,5 +198,12 @@ trait DatabaseAwareTrait
                 return [];
             }
         };
+
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertStringContainsString('failed', $result->description);
     }
 }
