@@ -81,7 +81,6 @@ composer phpstan      # Static analysis (Level 8)
 
 ## Project Status
 
-**Current Version**: 1.0.11
 **Status**: Active Development
 
 | Component | Status |

@@ -14,12 +14,18 @@ class Text
 {
     public static function _(string $string, mixed ...$args): string
     {
-        return '';
+        // Return the language key for testing purposes
+        return $string;
     }
 
     public static function sprintf(string $string, mixed ...$args): string
     {
-        return '';
+        // Return the first arg if any, otherwise the key
+        if ($args !== []) {
+            return (string) $args[0];
+        }
+
+        return $string;
     }
 
     public static function script(string $string, bool $jsSafe = false, bool $interpretBackSlashes = true): void {}
@@ -29,16 +35,34 @@ namespace Joomla\CMS\Event\Result;
 
 trait ResultAware
 {
-    protected array $results = [];
+    // Note: The using class must define $arguments property
+    // E.g., public $arguments; or protected array $arguments = [];
+
+    abstract public function typeCheckResult(mixed $data): void;
+
+    public function addResult(mixed $data): void
+    {
+        $this->typeCheckResult($data);
+
+        if (! isset($this->arguments['result'])) {
+            $this->arguments['result'] = [];
+        }
+
+        $this->arguments['result'][] = $data;
+    }
 
     public function getArgument(string $name, mixed $default = null): mixed
     {
-        return null;
+        return $this->arguments[$name] ?? $default;
     }
 }
 
 interface ResultAwareInterface
 {
+    public function addResult(mixed $data): void;
+
+    public function typeCheckResult(mixed $data): void;
+
     public function getArgument(string $name, mixed $default = null): mixed;
 }
 
@@ -205,6 +229,8 @@ namespace Joomla\CMS\Application;
 
 class CMSApplication
 {
+    private array $config = [];
+
     public function input(): mixed
     {
         return null;
@@ -213,6 +239,18 @@ class CMSApplication
     public function enqueueMessage(string $msg, string $type = 'info'): void {}
 
     public function redirect(string $url, int $status = 303): void {}
+
+    public function get(string $name, mixed $default = null): mixed
+    {
+        return $this->config[$name] ?? $default;
+    }
+
+    public function set(string $name, mixed $value): mixed
+    {
+        $old = $this->config[$name] ?? null;
+        $this->config[$name] = $value;
+        return $old;
+    }
 }
 
 namespace Joomla\CMS\Session;
@@ -397,7 +435,7 @@ namespace Joomla\CMS\Router;
 
 class Route
 {
-    public static function _(string $url, bool $xhtml = true, int $ssl = null): string
+    public static function _(string $url, bool $xhtml = true, ?int $ssl = null): string
     {
         return '';
     }
@@ -415,6 +453,11 @@ class Uri
     public static function getInstance(string $uri = 'SERVER'): static
     {
         return new static();
+    }
+
+    public function isSsl(): bool
+    {
+        return false;
     }
 }
 

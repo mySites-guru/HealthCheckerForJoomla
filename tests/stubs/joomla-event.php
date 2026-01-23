@@ -72,5 +72,5 @@ interface SubscriberInterface
 
 interface DispatcherInterface
 {
-    public function dispatch(string $name, EventInterface $event = null): EventInterface;
+    public function dispatch(string $name, ?EventInterface $event = null): EventInterface;
 }

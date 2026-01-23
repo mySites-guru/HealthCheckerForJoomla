@@ -16,7 +16,13 @@ if (! defined('_JEXEC')) {
 // Load Composer autoloader
 require_once __DIR__ . '/../vendor/autoload.php';
 
+// Load Joomla stubs - these provide minimal implementations of Joomla classes
+require_once __DIR__ . '/stubs/psr-container.php';
+require_once __DIR__ . '/stubs/joomla-di.php';
+require_once __DIR__ . '/stubs/joomla-database.php';
+require_once __DIR__ . '/stubs/joomla-event.php';
+require_once __DIR__ . '/stubs/joomla-cms.php';
+
 // Load test utilities and mocks
 require_once __DIR__ . '/Utilities/JoomlaMocks.php';
-require_once __DIR__ . '/Utilities/JoomlaTextMock.php';
 require_once __DIR__ . '/Utilities/MockFactory.php';

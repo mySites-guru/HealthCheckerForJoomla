@@ -8,71 +8,43 @@ declare(strict_types=1);
  * @link        https://github.com/mySites-guru/HealthCheckerForJoomla
  */
 
-namespace Joomla\Database;
-
-/**
- * Mock DatabaseInterface for testing
- */
-interface DatabaseInterface
-{
-    // Minimal interface for testing
-}
-
-namespace Joomla\Event;
-
-/**
- * Mock Event class for testing
- */
-class Event
-{
-    protected string $name;
-
-    public $arguments;
-
-    public function __construct(string $name, array $arguments = [])
-    {
-        $this->name = $name;
-        $this->arguments = $arguments;
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getArguments(): array
-    {
-        return $this->arguments;
-    }
-}
+// This file provides additional test mock functionality.
+// Base interfaces and classes are defined in tests/stubs/ files.
+// This file only extends with additional functionality for testing.
 
 namespace Joomla\CMS\Event\Result;
 
-/**
- * Mock ResultAware trait for testing
- */
-trait ResultAware
-{
-    abstract public function typeCheckResult(mixed $data): void;
-
-    public function addResult(mixed $data): void
+// Only define if not already defined by stubs
+if (! trait_exists(ResultAware::class, false)) {
+    /**
+     * Mock ResultAware trait for testing
+     */
+    trait ResultAware
     {
-        $this->typeCheckResult($data);
+        abstract public function typeCheckResult(mixed $data): void;
 
-        if (! isset($this->arguments['result'])) {
-            $this->arguments['result'] = [];
+        public function addResult(mixed $data): void
+        {
+            $this->typeCheckResult($data);
+
+            if (! isset($this->arguments['result'])) {
+                $this->arguments['result'] = [];
+            }
+
+            $this->arguments['result'][] = $data;
         }
-
-        $this->arguments['result'][] = $data;
     }
 }
 
-/**
- * Mock ResultAwareInterface for testing
- */
-interface ResultAwareInterface
-{
-    public function addResult(mixed $data): void;
+// Only define if not already defined by stubs
+if (! interface_exists(ResultAwareInterface::class, false)) {
+    /**
+     * Mock ResultAwareInterface for testing
+     */
+    interface ResultAwareInterface
+    {
+        public function addResult(mixed $data): void;
 
-    public function typeCheckResult(mixed $data): void;
+        public function typeCheckResult(mixed $data): void;
+    }
 }

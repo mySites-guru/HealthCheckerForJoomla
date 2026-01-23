@@ -51,18 +51,18 @@ class MockFactory
     /**
      * Create a mock HealthCategory
      *
-     * @param string $slug  The category slug
-     * @param string $label The category label
-     * @param string $icon  The icon class
-     * @param int    $sort  The sort order
+     * @param string $slug      The category slug
+     * @param string $label     The category label
+     * @param string $icon      The icon class
+     * @param int    $sortOrder The sort order
      */
     public static function createCategory(
         string $slug = 'test',
         string $label = 'Test Category',
         string $icon = 'fa-test',
-        int $sort = 100,
+        int $sortOrder = 100,
     ): HealthCategory {
-        return new HealthCategory(slug: $slug, label: $label, icon: $icon, sort: $sort);
+        return new HealthCategory(slug: $slug, label: $label, icon: $icon, sortOrder: $sortOrder);
     }
 
     /**
