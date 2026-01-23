@@ -1,4 +1,4 @@
-# <img src="https://www.joomlahealthchecker.com/favicon.svg" width="32" height="32" alt="Logo" style="vertical-align: middle;"> Health Checker for Joomla
+# <img src="https://www.joomlahealthchecker.com/favicon.svg" width="32" height="32" alt="Logo" align="center"> Health Checker for Joomla
 
 A comprehensive health monitoring extension for Joomla 5+ with over 130 checks across 8+ categories and an extensible plugin architecture.
 
