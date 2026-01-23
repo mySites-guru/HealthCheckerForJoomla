@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         executionOrder="depends,defects"
+         beStrictAboutOutputDuringTests="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         colors="true">
+    <testsuites>
+        <testsuite name="default">
+            <directory>tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory>healthchecker/component/src</directory>
+            <directory>healthchecker/plugins</directory>
+            <directory>healthchecker/module/src</directory>
+        </include>
+        <exclude>
+            <directory>healthchecker/component/src/View</directory>
+            <directory>healthchecker/plugins/*/language</directory>
+        </exclude>
+    </source>
+
+    <php>
+        <const name="_JEXEC" value="1"/>
+        <ini name="display_errors" value="1"/>
+        <ini name="error_reporting" value="E_ALL"/>
+    </php>
+</phpunit>

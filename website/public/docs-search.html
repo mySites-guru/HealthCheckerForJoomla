@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Documentation</title>
+    <script>
+        // Immediately redirect to docs with search query if provided
+        const params = new URLSearchParams(window.location.search);
+        const query = params.get('q');
+
+        if (query) {
+            // Redirect to docs and trigger search
+            window.location.href = `/docs/?q=${encodeURIComponent(query)}`;
+        } else {
+            // Just redirect to docs
+            window.location.href = '/docs/';
+        }
+    </script>
+</head>
+<body>
+    <p>Redirecting to documentation search...</p>
+</body>
+</html>

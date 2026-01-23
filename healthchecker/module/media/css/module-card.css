@@ -1,0 +1,19 @@
+/**
+ * Health Checker Module - Card Styles
+ *
+ * @copyright   (C) 2026 https://mySites.guru + Phil E. Taylor <phil@phil-taylor.com>
+ * @license     GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+@view-transition {
+    navigation: auto;
+}
+
+.healthchecker-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.healthchecker-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}

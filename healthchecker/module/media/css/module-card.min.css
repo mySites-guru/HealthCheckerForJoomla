@@ -1,0 +1,2 @@
+@view-transition{navigation:auto}.healthchecker-card{transition:transform .2s ease,box-shadow .2s ease}.healthchecker-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+/*# sourceMappingURL=module-card.min.css.map */

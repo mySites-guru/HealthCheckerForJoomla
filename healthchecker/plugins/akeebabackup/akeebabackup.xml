@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<extension type="plugin" group="healthchecker" method="upgrade" enabled="1">
+    <name>plg_healthchecker_akeebabackup</name>
+    <author>mySites.guru / Phil E. Taylor</author>
+    <creationDate>2026</creationDate>
+    <copyright>(C) 2026 mySites.guru / Phil E. Taylor</copyright>
+    <license
+    >GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>phil@phil-taylor.com</authorEmail>
+    <authorUrl>https://mysites.guru</authorUrl>
+    <version>3.0.28</version>
+    <description>PLG_HEALTHCHECKER_AKEEBABACKUP_XML_DESCRIPTION</description>
+    <namespace
+        path="src"
+    >MySitesGuru\HealthChecker\Plugin\AkeebaBackup</namespace>
+    <files>
+        <folder plugin="akeebabackup">services</folder>
+        <folder>src</folder>
+        <folder>language</folder>
+    </files>
+
+    <config>
+        <fields name="params">
+            <fieldset
+                name="checks"
+                label="PLG_HEALTHCHECKER_AKEEBABACKUP_FIELDSET_CHECKS_LABEL"
+                description="PLG_HEALTHCHECKER_AKEEBABACKUP_FIELDSET_CHECKS_DESC"
+            >
+                <!-- Individual check toggles -->
+                <field
+                    name="check_akeeba_backup_installed"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_INSTALLED_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_backup_last_backup"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_LAST_BACKUP_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_backup_success_rate"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_SUCCESS_RATE_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_backup_stuck_backups"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_STUCK_BACKUPS_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_backup_files_exist"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_FILES_EXIST_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_backup_backup_size"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_BACKUP_SIZE_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_backup_profile_exists"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_PROFILE_EXISTS_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_backup_profile_configured"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_PROFILE_CONFIGURED_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_backup_failed_backups"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_FAILED_BACKUPS_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_backup_frequency"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_FREQUENCY_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+            </fieldset>
+        </fields>
+    </config>
+
+    <updateservers>
+        <server
+            type="extension"
+            priority="1"
+            name="Health Checker - Akeeba Backup Plugin"
+        >https://www.joomlahealthchecker.com/update/plg_healthchecker_akeebabackup.xml</server>
+    </updateservers>
+
+    <client>0</client>
+</extension>

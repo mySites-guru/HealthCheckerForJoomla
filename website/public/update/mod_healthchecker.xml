@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<updates>
+    <update>
+        <name>Health Checker Dashboard Module</name>
+        <description>Dashboard widget for Health Checker</description>
+        <element>mod_healthchecker</element>
+        <type>module</type>
+        <client>administrator</client>
+        <version>3.0.28</version>
+        <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/mod_healthchecker-3.0.28.zip</downloadurl>
+        </downloads>
+        <sha512>1cebde1a10b2816db30b721fc6af0d7e4bdf4765a05691c962c27fe4599b9e04a38b6c1967885c4abfad5ba6bcb2d8b311f0b22cd06e56c97ca9c04fc0b40b46</sha512>
+        <tags>
+            <tag>stable</tag>
+        </tags>
+        <maintainer>mySites.guru / Phil E. Taylor</maintainer>
+        <maintainerurl>https://www.phil-taylor.com</maintainerurl>
+        <targetplatform name="joomla" version="(5|6)\.[0-9]+" />
+        <php_minimum>8.1.0</php_minimum>
+    </update>
+</updates>

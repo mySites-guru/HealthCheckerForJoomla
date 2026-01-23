@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<extension type="module" client="administrator" method="upgrade">
+    <name>mod_healthchecker</name>
+    <author>Phil E. Taylor</author>
+    <authorEmail>phil@phil-taylor.com</authorEmail>
+    <authorUrl>https://mysites.guru</authorUrl>
+    <creationDate>2026-01</creationDate>
+    <copyright>(C) 2026 mySites.guru / Phil E. Taylor</copyright>
+    <license
+    >GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <version>3.0.28</version>
+    <description>MOD_HEALTHCHECKER_XML_DESCRIPTION</description>
+    <namespace path="src">MySitesGuru\HealthChecker\Module</namespace>
+
+    <files>
+        <filename>joomla.asset.json</filename>
+        <folder module="mod_healthchecker">services</folder>
+        <folder>src</folder>
+        <folder>tmpl</folder>
+    </files>
+
+    <media destination="mod_healthchecker" folder="media">
+        <folder>css</folder>
+        <folder>js</folder>
+    </media>
+
+    <languages folder="language">
+        <language tag="en-GB">en-GB/mod_healthchecker.ini</language>
+        <language tag="en-GB">en-GB/mod_healthchecker.sys.ini</language>
+    </languages>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                    name="enable_cache"
+                    type="radio"
+                    label="MOD_HEALTHCHECKER_ENABLE_CACHE"
+                    description="MOD_HEALTHCHECKER_ENABLE_CACHE_DESC_GLOBAL"
+                    layout="joomla.form.field.radio.switcher"
+                    default="1"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field
+                    name="cache_duration"
+                    type="number"
+                    label="MOD_HEALTHCHECKER_CACHE_DURATION"
+                    description="MOD_HEALTHCHECKER_CACHE_DURATION_DESC"
+                    default="900"
+                    min="60"
+                    max="86400"
+                    step="60"
+                    showon="enable_cache:1"
+                />
+                <field
+                    name="@spacer1"
+                    type="spacer"
+                    label="MOD_HEALTHCHECKER_CACHE_NOTE"
+                    class="alert alert-info"
+                />
+                <field
+                    name="show_critical"
+                    type="radio"
+                    label="MOD_HEALTHCHECKER_SHOW_CRITICAL"
+                    layout="joomla.form.field.radio.switcher"
+                    default="1"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field
+                    name="show_warning"
+                    type="radio"
+                    label="MOD_HEALTHCHECKER_SHOW_WARNING"
+                    layout="joomla.form.field.radio.switcher"
+                    default="1"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                <field
+                    name="show_good"
+                    type="radio"
+                    label="MOD_HEALTHCHECKER_SHOW_GOOD"
+                    layout="joomla.form.field.radio.switcher"
+                    default="1"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+            </fieldset>
+            <fieldset name="advanced">
+                <field
+                    name="layout"
+                    type="modulelayout"
+                    label="JFIELD_ALT_LAYOUT_LABEL"
+                    class="form-select"
+                    validate="moduleLayout"
+                />
+                <field
+                    name="moduleclass_sfx"
+                    type="textarea"
+                    label="COM_MODULES_FIELD_MODULECLASS_SFX_LABEL"
+                    rows="3"
+                />
+                <field
+                    name="cache"
+                    type="list"
+                    label="COM_MODULES_FIELD_CACHING_LABEL"
+                    default="0"
+                    filter="integer"
+                >
+                    <option value="0">JGLOBAL_USE_GLOBAL</option>
+                    <option value="1">JCACHE</option>
+                </field>
+                <field
+                    name="cache_time"
+                    type="number"
+                    label="COM_MODULES_FIELD_CACHE_TIME_LABEL"
+                    default="900"
+                    filter="integer"
+                />
+            </fieldset>
+        </fields>
+    </config>
+
+    <updateservers>
+        <server
+            type="extension"
+            priority="1"
+            name="Health Checker Module"
+        >https://www.joomlahealthchecker.com/update/mod_healthchecker.xml</server>
+    </updateservers>
+</extension>

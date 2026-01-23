@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="component" method="upgrade">
+    <name>com_healthchecker</name>
+    <author>Phil E. Taylor</author>
+    <creationDate>2026-01</creationDate>
+    <copyright>(C) 2026 mySites.guru / Phil E. Taylor</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>phil@phil-taylor.com</authorEmail>
+    <authorUrl>https://mySites.guru</authorUrl>
+    <version>3.0.28</version>
+    <description>COM_HEALTHCHECKER_XML_DESCRIPTION</description>
+    <namespace path="src">MySitesGuru\HealthChecker\Component</namespace>
+
+    <administration>
+        <menu link="option=com_healthchecker&amp;view=report" img="class:heartbeat">COM_HEALTHCHECKER</menu>
+        <files>
+            <filename>access.xml</filename>
+            <filename>config.xml</filename>
+            <folder>language</folder>
+            <folder>services</folder>
+            <folder>src</folder>
+            <folder>tmpl</folder>
+        </files>
+    </administration>
+
+    <media destination="com_healthchecker" folder="media">
+        <filename>joomla.asset.json</filename>
+        <filename>mysitesguru-logo.png</filename>
+        <folder>css</folder>
+        <folder>js</folder>
+    </media>
+
+    <updateservers>
+        <server type="extension" priority="1" name="Health Checker Component">https://www.joomlahealthchecker.com/update/com_healthchecker.xml</server>
+    </updateservers>
+</extension>

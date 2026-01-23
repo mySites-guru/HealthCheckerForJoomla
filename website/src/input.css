@@ -1,0 +1,327 @@
+@import "tailwindcss";
+
+@theme {
+  --color-joomla-primary: #0f0f0f;
+  --color-joomla-secondary: #000000;
+  --color-joomla-link: #0f0f0f;
+  --color-joomla-success: #457d54;
+  --color-joomla-danger: #c52827;
+  --color-joomla-warning: #ffb514;
+  --color-joomla-bg-light: #f5f5f5;
+  --color-joomla-bg-dark: #0f0f0f;
+}
+
+@custom-variant dark (.dark &);
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* Text selection highlight */
+  ::selection {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: inherit;
+  }
+
+  ::-moz-selection {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: inherit;
+  }
+}
+
+@keyframes scroll-checks {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+.animate-scroll-checks {
+  animation: scroll-checks 30s linear infinite;
+}
+
+@keyframes float-perspective {
+  0%, 100% {
+    transform: rotateY(-10deg) rotateX(10deg) scale(1.1);
+  }
+  50% {
+    transform: rotateY(-6deg) rotateX(6deg) scale(1.06);
+  }
+}
+
+.animate-float-perspective {
+  animation: float-perspective 2s ease-in-out infinite;
+  transition: transform 0.7s ease-in-out;
+}
+
+.animate-float-perspective:hover {
+  animation-play-state: paused;
+  transform: rotateY(0deg) rotateX(0deg) scale(1) !important;
+}
+
+/* Dark Mode Overrides */
+@layer utilities {
+  /* Override Joomla primary color in dark mode to be light gray for contrast */
+  .dark .text-joomla-primary {
+    color: rgb(229 231 235); /* gray-200 */
+  }
+
+  .dark .hover\:text-joomla-secondary:hover {
+    color: rgb(255 255 255); /* white */
+  }
+
+  /* Override light backgrounds to dark */
+  .dark .bg-joomla-bg-light {
+    background-color: rgb(17 24 39); /* gray-900 */
+  }
+
+  .dark .bg-white {
+    background-color: rgb(17 24 39); /* gray-900 */
+  }
+
+  .dark .bg-gray-50 {
+    background-color: rgb(17 24 39); /* gray-900 */
+  }
+
+  .dark .bg-gray-100 {
+    background-color: rgb(31 41 55); /* gray-800 */
+  }
+
+  /* Override text colors for readability */
+  .dark .text-gray-500 {
+    color: rgb(209 213 219); /* gray-300 */
+  }
+
+  .dark .text-gray-600 {
+    color: rgb(229 231 235); /* gray-200 */
+  }
+
+  .dark .text-gray-700 {
+    color: rgb(243 244 246); /* gray-100 */
+  }
+
+  .dark .text-gray-800,
+  .dark .text-gray-900 {
+    color: rgb(255 255 255); /* white */
+  }
+
+  /* Override borders in light mode to use off-black */
+  .border-gray-100,
+  .border-gray-200 {
+    border-color: rgb(15 15 15); /* off-black #0f0f0f */
+  }
+
+  .border-gray-300 {
+    border-color: rgb(15 15 15); /* off-black #0f0f0f */
+  }
+
+  /* Override borders in dark mode */
+  .dark .border-gray-100,
+  .dark .border-gray-200 {
+    border-color: rgb(75 85 99); /* gray-600 */
+  }
+
+  .dark .border-gray-300 {
+    border-color: rgb(75 85 99); /* gray-600 */
+  }
+
+  /* Fix "View All Checks" button in dark mode */
+  .dark a.bg-white {
+    background-color: rgb(31 41 55) !important; /* gray-800 */
+    border-color: rgb(75 85 99) !important; /* gray-600 */
+    color: rgb(229 231 235) !important; /* gray-200 */
+  }
+
+  .dark a.bg-white:hover {
+    background-color: rgb(55 65 81) !important; /* gray-700 */
+    border-color: rgb(107 114 128) !important; /* gray-500 */
+  }
+
+  /* Fix search button in top right header */
+  .dark #docs-search-btn,
+  .dark button[aria-label*="Search"] {
+    background-color: rgb(55 65 81) !important; /* gray-700 */
+    border-color: rgb(75 85 99) !important; /* gray-600 */
+    color: rgb(209 213 219) !important; /* gray-300 */
+  }
+
+  .dark #docs-search-btn:hover,
+  .dark button[aria-label*="Search"]:hover {
+    background-color: rgb(75 85 99) !important; /* gray-600 */
+  }
+
+  /* Override status badge backgrounds */
+  .dark .bg-green-50 {
+    background-color: rgb(5 46 22 / 0.4); /* green-950 with opacity */
+  }
+
+  .dark .bg-yellow-50 {
+    background-color: rgb(66 32 6 / 0.4); /* yellow-950 with opacity */
+  }
+
+  .dark .bg-red-50 {
+    background-color: rgb(69 10 10 / 0.4); /* red-950 with opacity */
+  }
+
+  /* Override status text colors */
+  .dark .text-green-700 {
+    color: rgb(134 239 172); /* green-300 */
+  }
+
+  .dark .text-yellow-700 {
+    color: rgb(253 224 71); /* yellow-300 */
+  }
+
+  .dark .text-red-700 {
+    color: rgb(252 165 165); /* red-300 */
+  }
+
+  /* Fix "Built for Extension Developers" section (off-black background) */
+  .dark section.bg-joomla-primary {
+    background-color: rgb(15 23 42) !important; /* slate-900 - dark gray for dark mode contrast */
+  }
+
+  /* Override the inline dark:bg-blue-600 class for sections only */
+  .dark section.dark\:bg-blue-600 {
+    background-color: rgb(15 23 42) !important; /* slate-900 */
+  }
+
+  .dark section.dark\:hover\:bg-blue-700:hover {
+    background-color: rgb(30 41 59) !important; /* slate-800 for hover */
+  }
+
+  /* Fix gradient backgrounds - override specific gradient classes */
+  .dark .from-joomla-bg-light {
+    --tw-gradient-from: rgb(17 24 39);
+    --tw-gradient-to: rgb(31 41 55);
+  }
+
+  .dark .to-white {
+    --tw-gradient-to: rgb(31 41 55);
+  }
+
+  .dark .bg-gradient-to-br {
+    background-image: linear-gradient(to bottom right, var(--tw-gradient-from, rgb(17 24 39)), var(--tw-gradient-to, rgb(31 41 55)));
+  }
+
+  /* Fix waitlist popup background */
+  .dark #waitlist-popover,
+  .dark [id*="waitlist"] {
+    background-color: rgb(31 41 55) !important; /* gray-800 */
+  }
+
+  /* Fix waitlist popup header background in dark mode */
+  .dark #waitlist-popover .popover-header {
+    background: rgb(31 41 55) !important; /* gray-800 to match popup body */
+  }
+
+  /* Fix waitlist popup - ensure form inputs are consistently styled */
+  .dark #waitlist-popover input[type="text"],
+  .dark #waitlist-popover input[type="email"],
+  .dark [id*="waitlist"] input[type="text"],
+  .dark [id*="waitlist"] input[type="email"] {
+    background-color: rgb(55 65 81) !important; /* gray-700 */
+    border-color: rgb(75 85 99) !important; /* gray-600 */
+    color: rgb(243 244 246) !important; /* gray-100 */
+  }
+
+  .dark #waitlist-popover input[type="text"]::placeholder,
+  .dark #waitlist-popover input[type="email"]::placeholder,
+  .dark [id*="waitlist"] input[type="text"]::placeholder,
+  .dark [id*="waitlist"] input[type="email"]::placeholder {
+    color: rgb(156 163 175) !important; /* gray-400 */
+  }
+
+  .dark #waitlist-popover input[type="text"]:focus,
+  .dark #waitlist-popover input[type="email"]:focus,
+  .dark [id*="waitlist"] input[type="text"]:focus,
+  .dark [id*="waitlist"] input[type="email"]:focus {
+    border-color: rgb(59 130 246) !important; /* blue-500 */
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Fix waitlist button styling for consistency */
+  .dark #waitlist-popover button,
+  .dark [id*="waitlist"] button {
+    background-color: rgb(37 99 235) !important; /* blue-600 */
+    color: rgb(255 255 255) !important; /* white */
+    border-color: rgb(37 99 235) !important;
+  }
+
+  .dark #waitlist-popover button:hover,
+  .dark [id*="waitlist"] button:hover {
+    background-color: rgb(29 78 216) !important; /* blue-700 */
+    border-color: rgb(29 78 216) !important;
+  }
+
+  /* Fix search popup modal */
+  .dark #search-modal,
+  .dark [role="dialog"],
+  .dark [role="dialog"] > div {
+    background-color: rgb(31 41 55) !important; /* gray-800 */
+  }
+
+  /* Fix VitePress search modal white container */
+  .dark #vitepress-search-modal > div {
+    background-color: rgb(31 41 55) !important; /* gray-800 */
+  }
+
+  /* Fix the inner white container in search dialog */
+  .dark [role="dialog"] [class*="bg-white"],
+  .dark #search-modal [class*="bg-white"] {
+    background-color: rgb(31 41 55) !important; /* gray-800 */
+  }
+
+  /* Fix search input in modal */
+  .dark #search-modal input,
+  .dark [role="dialog"] input[type="search"],
+  .dark [role="dialog"] input[type="text"] {
+    background-color: rgb(55 65 81) !important; /* gray-700 */
+    border-color: rgb(75 85 99) !important; /* gray-600 */
+    color: rgb(243 244 246) !important; /* gray-100 */
+  }
+
+  /* Fix search results list */
+  .dark #search-results,
+  .dark [role="dialog"] ul,
+  .dark [role="dialog"] li {
+    background-color: transparent;
+    color: rgb(229 231 235); /* gray-200 */
+  }
+
+  /* Fix search result items hover */
+  .dark #search-results li:hover,
+  .dark [role="dialog"] li:hover,
+  .dark [role="dialog"] a:hover {
+    background-color: rgb(55 65 81) !important; /* gray-700 */
+  }
+
+  /* Fix search result links */
+  .dark #search-results a,
+  .dark [role="dialog"] a {
+    color: rgb(229 231 235); /* gray-200 */
+  }
+
+  /* Fix search hints at bottom */
+  .dark [role="dialog"] kbd,
+  .dark #search-modal kbd {
+    background-color: rgb(55 65 81); /* gray-700 */
+    border-color: rgb(75 85 99); /* gray-600 */
+    color: rgb(209 213 219); /* gray-300 */
+  }
+
+  /* Fix bright blue "Next" badges in search results */
+  .dark [role="dialog"] a span[style],
+  .dark #search-modal a span[style] {
+    background-color: rgb(30 58 138) !important; /* blue-900 - much darker blue */
+    color: rgb(191 219 254) !important; /* blue-200 - lighter text for contrast */
+  }
+}

@@ -1,0 +1,67 @@
+parameters:
+    level: 8
+
+    # Bootstrap file to define Joomla classes
+    bootstrapFiles:
+        - tests/phpstan-bootstrap.php
+
+    paths:
+        - healthchecker/component/src
+        - healthchecker/component/services
+        - healthchecker/module/services
+        - healthchecker/plugins/core/src
+        - healthchecker/plugins/core/services
+        - healthchecker/plugins/akeebabackup/src
+        - healthchecker/plugins/akeebabackup/services
+        - healthchecker/plugins/akeebaadmintools/src
+        - healthchecker/plugins/akeebaadmintools/services
+        - healthchecker/plugins/example/src
+        - healthchecker/plugins/example/services
+        - healthchecker/plugins/mysitesguru/src
+        - healthchecker/plugins/mysitesguru/services
+
+    # Exclude files that don't benefit from PHPStan analysis:
+    # - Template files mix PHP with HTML and have different coding standards
+    # - Service provider files use framework-specific instantiation patterns
+    excludePaths:
+        - healthchecker/component/tmpl/*
+        - healthchecker/module/tmpl/*
+        - healthchecker/component/services/*
+        - healthchecker/module/services/*
+        - healthchecker/plugins/*/services/*
+
+    # Joomla-specific ignores
+    ignoreErrors:
+        # Joomla uses mixed types frequently
+        - '#Method .* has parameter \$\w+ with no value type specified in iterable type array#'
+        - '#Method .* return type has no value type specified in iterable type array#'
+        # Allow Joomla magic methods and properties
+        - '#Access to an undefined property#'
+        - '#Call to an undefined method#'
+        # Defensive coding: allow always-true conditions for clarity and future-proofing
+        - '#Right side of && is always true#'
+        - '#Ternary operator condition is always true#'
+        - '#Negated boolean expression is always true#'
+        # Joomla database table prefix is always string at runtime, not array
+        - '#Parameter \#1 \$table of method Joomla\\Database\\QueryInterface::from\(\) expects string, array\|string given#'
+        - '#Parameter \#2 \$table of method Joomla\\Database\\QueryInterface::join\(\) expects string, array\|string given#'
+        - '#Binary operation#'
+        - '#Parameter \#2 \.\.\.\$values of function sprintf expects#'
+        # implode() with array of array|string is safe at runtime
+        - '#Parameter \#2 \$array of function implode expects array<string>, array<int, array\|string> given#'
+        # Joomla plugin properties that are read by Joomla core (not our code)
+        - '#Property .+::\$autoloadLanguage is never read, only written#'
+        # Joomla Event classes call parent::__construct() which PHPStan sees as static call
+        - '#Call to an undefined static method Joomla\\Event\\Event::__construct\(\)#'
+        # Joomla parent classes don't use strict types - we removed our type hints to match parent signatures
+        # PHPStan may still complain about missing return types or parameter types that we intentionally removed
+        - '#Method .+::display\(\) has no return type specified#'
+        - '#Method .+::display\(\) has parameter .+ with no type specified#'
+        - '#Return type mixed of method .+::display\(\) is not covariant with return type .+ of method .+::display\(\)#'
+        # Joomla CMSPlugin::$autoloadLanguage property has no type in parent class
+        - '#Property .+::\$autoloadLanguage has no type specified#'
+        # Joomla Event::$arguments property has no type in parent class - we can't add one without breaking compatibility
+        - '#Property .+Event::\$arguments has no type specified#'
+
+    # Report only actual issues in our code
+    reportUnmatchedIgnoredErrors: false

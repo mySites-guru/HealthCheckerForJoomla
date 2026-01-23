@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<extension type="plugin" group="healthchecker" method="upgrade" enabled="1">
+    <name>plg_healthchecker_akeebaadmintools</name>
+    <author>mySites.guru / Phil E. Taylor</author>
+    <creationDate>2026</creationDate>
+    <copyright>(C) 2026 mySites.guru / Phil E. Taylor</copyright>
+    <license
+    >GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>phil@phil-taylor.com</authorEmail>
+    <authorUrl>https://mysites.guru</authorUrl>
+    <version>3.0.28</version>
+    <description
+    >PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_XML_DESCRIPTION</description>
+    <namespace
+        path="src"
+    >MySitesGuru\HealthChecker\Plugin\AkeebaAdminTools</namespace>
+    <files>
+        <folder plugin="akeebaadmintools">services</folder>
+        <folder>src</folder>
+        <folder>language</folder>
+    </files>
+
+    <config>
+        <fields name="params">
+            <fieldset
+                name="checks"
+                label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_FIELDSET_CHECKS_LABEL"
+                description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_FIELDSET_CHECKS_DESC"
+            >
+                <!-- Individual check toggles -->
+                <field
+                    name="check_akeeba_admintools_installed"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_INSTALLED_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_waf_enabled"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_WAF_ENABLED_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_security_events"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_SECURITY_EVENTS_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_blocked_attacks"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_BLOCKED_ATTACKS_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_active_bans"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_ACTIVE_BANS_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_scan_age"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_SCAN_AGE_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_file_alerts"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_FILE_ALERTS_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_temp_superusers"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_TEMP_SUPERUSERS_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_ip_whitelist"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_IP_WHITELIST_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_waf_rules"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_WAF_RULES_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_login_failures"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_LOGIN_FAILURES_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_geoblocking"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_GEOBLOCKING_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_sqli_blocks"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_SQLI_BLOCKS_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_xss_blocks"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_XSS_BLOCKS_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
+                    name="check_akeeba_admintools_admin_access"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_ADMIN_ACCESS_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+            </fieldset>
+        </fields>
+    </config>
+
+    <updateservers>
+        <server
+            type="extension"
+            priority="1"
+            name="Health Checker - Admin Tools Plugin"
+        >https://www.joomlahealthchecker.com/update/plg_healthchecker_akeebaadmintools.xml</server>
+    </updateservers>
+
+    <client>0</client>
+</extension>

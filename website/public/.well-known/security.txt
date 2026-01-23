@@ -1,0 +1,3 @@
+Contact: mailto:phil@phil-taylor.com
+Preferred-Languages: en
+Canonical: https://joomlahealthchecker.com/.well-known/security.txt

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<updates>
+    <!-- Component Update -->
+    <update>
+        <name>Health Checker Component</name>
+        <description>Health Checker core component</description>
+        <element>com_healthchecker</element>
+        <type>component</type>
+        <client>administrator</client>
+        <version>3.0.28</version>
+        <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/com_healthchecker-3.0.28.zip</downloadurl>
+        </downloads>
+        <sha512>4ffc35fb8816168c9e59bfbade4bc5318a4bb3f783f25bff3731e1e97f024d4ba025444f369ea3066f7512fbc95a480f8c33413726de2568bd33a833934d9c2b</sha512>
+        <tags>
+            <tag>stable</tag>
+        </tags>
+        <maintainer>mySites.guru / Phil E. Taylor</maintainer>
+        <maintainerurl>https://www.phil-taylor.com</maintainerurl>
+        <targetplatform name="joomla" version="(5|6)\.[0-9]+" />
+        <php_minimum>8.1.0</php_minimum>
+    </update>
+
+    <!-- Module Update -->
+    <update>
+        <name>Health Checker Dashboard Module</name>
+        <description>Dashboard widget for Health Checker</description>
+        <element>mod_healthchecker</element>
+        <type>module</type>
+        <client>administrator</client>
+        <version>3.0.28</version>
+        <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/mod_healthchecker-3.0.28.zip</downloadurl>
+        </downloads>
+        <sha512>1cebde1a10b2816db30b721fc6af0d7e4bdf4765a05691c962c27fe4599b9e04a38b6c1967885c4abfad5ba6bcb2d8b311f0b22cd06e56c97ca9c04fc0b40b46</sha512>
+        <tags>
+            <tag>stable</tag>
+        </tags>
+        <maintainer>mySites.guru / Phil E. Taylor</maintainer>
+        <maintainerurl>https://www.phil-taylor.com</maintainerurl>
+        <targetplatform name="joomla" version="(5|6)\.[0-9]+" />
+        <php_minimum>8.1.0</php_minimum>
+    </update>
+
+    <!-- Core Plugin Update -->
+    <update>
+        <name>Health Checker - Core Checks</name>
+        <description>Core health check plugin with over 130 checks</description>
+        <element>core</element>
+        <type>plugin</type>
+        <client>site</client>
+        <folder>healthchecker</folder>
+        <version>3.0.28</version>
+        <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/plg_healthchecker_core-3.0.28.zip</downloadurl>
+        </downloads>
+        <sha512>8512b9c1b15efda654e4605e5c490d3dcfc4ce92095883f181289a027ccd692c927d84704004a4f3c11c287528dc910d07d428ed5da096ca72933afb40e37e76</sha512>
+        <tags>
+            <tag>stable</tag>
+        </tags>
+        <maintainer>mySites.guru / Phil E. Taylor</maintainer>
+        <maintainerurl>https://www.phil-taylor.com</maintainerurl>
+        <targetplatform name="joomla" version="(5|6)\.[0-9]+" />
+        <php_minimum>8.1.0</php_minimum>
+    </update>
+
+    <!-- Akeeba Backup Plugin Update -->
+    <update>
+        <name>Health Checker - Akeeba Backup Integration</name>
+        <description>Optional Akeeba Backup integration plugin</description>
+        <element>akeebabackup</element>
+        <type>plugin</type>
+        <client>site</client>
+        <folder>healthchecker</folder>
+        <version>3.0.28</version>
+        <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/plg_healthchecker_akeebabackup-3.0.28.zip</downloadurl>
+        </downloads>
+        <sha512>14faa6041d8a33507ed9324e8cbe5ed8bb23d3d88a6395b76de1765bd0bff3803007b55b61314ce93ab69882644808d893abbf5103b06232f4bef0765ffc783b</sha512>
+        <tags>
+            <tag>stable</tag>
+        </tags>
+        <maintainer>mySites.guru / Phil E. Taylor</maintainer>
+        <maintainerurl>https://www.phil-taylor.com</maintainerurl>
+        <targetplatform name="joomla" version="(5|6)\.[0-9]+" />
+        <php_minimum>8.1.0</php_minimum>
+    </update>
+
+    <!-- Akeeba Admin Tools Plugin Update -->
+    <update>
+        <name>Health Checker - Akeeba Admin Tools Integration</name>
+        <description>Optional Akeeba Admin Tools integration plugin</description>
+        <element>akeebaadmintools</element>
+        <type>plugin</type>
+        <client>site</client>
+        <folder>healthchecker</folder>
+        <version>3.0.28</version>
+        <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/plg_healthchecker_akeebaadmintools-3.0.28.zip</downloadurl>
+        </downloads>
+        <sha512>865a8a2df18fdcf943accac7a3a2428b63ecef96c69dd1dd123c6c975046a55d91e4669b652648c0e86dfe39e8c191dd3eebecf46f858fbb8e30f74533a87ed3</sha512>
+        <tags>
+            <tag>stable</tag>
+        </tags>
+        <maintainer>mySites.guru / Phil E. Taylor</maintainer>
+        <maintainerurl>https://www.phil-taylor.com</maintainerurl>
+        <targetplatform name="joomla" version="(5|6)\.[0-9]+" />
+        <php_minimum>8.1.0</php_minimum>
+    </update>
+
+    <!-- mySites.guru Plugin Update -->
+    <update>
+        <name>Health Checker - mySites.guru Integration</name>
+        <description>mySites.guru API integration plugin</description>
+        <element>mysitesguru</element>
+        <type>plugin</type>
+        <client>site</client>
+        <folder>healthchecker</folder>
+        <version>3.0.28</version>
+        <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/plg_healthchecker_mysitesguru-3.0.28.zip</downloadurl>
+        </downloads>
+        <sha512>a149952e727e535fbdc8a55e1e24b4970171eb6c65bf81bf3b91fd0030f52e34e10c5ec8bae43d7a548c19037aab57f5440b593dcb85fc4a585797230518f26f</sha512>
+        <tags>
+            <tag>stable</tag>
+        </tags>
+        <maintainer>mySites.guru / Phil E. Taylor</maintainer>
+        <maintainerurl>https://www.phil-taylor.com</maintainerurl>
+        <targetplatform name="joomla" version="(5|6)\.[0-9]+" />
+        <php_minimum>8.1.0</php_minimum>
+    </update>
+
+    <!-- Example Plugin Update -->
+    <update>
+        <name>Health Checker - Example Plugin</name>
+        <description>Example plugin for developers</description>
+        <element>example</element>
+        <type>plugin</type>
+        <client>site</client>
+        <folder>healthchecker</folder>
+        <version>3.0.28</version>
+        <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/plg_healthchecker_example-3.0.28.zip</downloadurl>
+        </downloads>
+        <sha512>5af3550f6e7fde68d4ee3852ef1e2f4c42d8f798be243d5a2fcc4878fcdc7df01fee0b40cbedc4953b67e075b2e74007252de5380499fcb74e729bf1fd5374fa</sha512>
+        <tags>
+            <tag>stable</tag>
+        </tags>
+        <maintainer>mySites.guru / Phil E. Taylor</maintainer>
+        <maintainerurl>https://www.phil-taylor.com</maintainerurl>
+        <targetplatform name="joomla" version="(5|6)\.[0-9]+" />
+        <php_minimum>8.1.0</php_minimum>
+    </update>
+
+    <!-- Package Update (listed last so individual extensions are matched first) -->
+    <update>
+        <name>Health Checker for Joomla</name>
+        <description>A comprehensive health check extension for Joomla</description>
+        <element>pkg_healthchecker</element>
+        <client>site</client>
+        <type>package</type>
+        <version>3.0.28</version>
+        <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/pkg_healthchecker-3.0.28.zip</downloadurl>
+        </downloads>
+        <sha512>f677b6baecf108d033518439d25eff95e559ab60072dcc9dc7b8b57ac25cdee9239ca67a32bbc177b3775dbc132e1824490ceaa96a7d52d782f6ac8000ed8fdb</sha512>
+        <tags>
+            <tag>stable</tag>
+        </tags>
+        <maintainer>mySites.guru / Phil E. Taylor</maintainer>
+        <maintainerurl>https://www.phil-taylor.com</maintainerurl>
+        <targetplatform name="joomla" version="(5|6)\.[0-9]+" />
+        <php_minimum>8.1.0</php_minimum>
+    </update>
+</updates>

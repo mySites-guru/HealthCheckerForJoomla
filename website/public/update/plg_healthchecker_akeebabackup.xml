@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<updates>
+    <update>
+        <name>Health Checker - Akeeba Backup Integration</name>
+        <description>Optional Akeeba Backup integration plugin</description>
+        <element>akeebabackup</element>
+        <type>plugin</type>
+        <client>site</client>
+        <folder>healthchecker</folder>
+        <version>3.0.28</version>
+        <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
+        <downloads>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/plg_healthchecker_akeebabackup-3.0.28.zip</downloadurl>
+        </downloads>
+        <sha512>14faa6041d8a33507ed9324e8cbe5ed8bb23d3d88a6395b76de1765bd0bff3803007b55b61314ce93ab69882644808d893abbf5103b06232f4bef0765ffc783b</sha512>
+        <tags>
+            <tag>stable</tag>
+        </tags>
+        <maintainer>mySites.guru / Phil E. Taylor</maintainer>
+        <maintainerurl>https://www.phil-taylor.com</maintainerurl>
+        <targetplatform name="joomla" version="(5|6)\.[0-9]+" />
+        <php_minimum>8.1.0</php_minimum>
+    </update>
+</updates>

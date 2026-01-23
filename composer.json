@@ -1,0 +1,62 @@
+{
+  "name": "mysitesguru/health-checker-for-joomla",
+  "description": "Health Checker component and plugins for Joomla",
+  "type": "project",
+  "license": "GPL-3.0-or-later",
+  "require": {
+    "php": ">=8.1"
+  },
+  "require-dev": {
+    "phpstan/extension-installer": "^1.4.3",
+    "phpstan/phpstan": "^2.1.33",
+    "phpunit/phpunit": "^10.5",
+    "rector/rector": "^2.3.1",
+    "symplify/easy-coding-standard": "^13.0.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "MySitesGuru\\HealthChecker\\Component\\Administrator\\": "healthchecker/component/src/",
+      "MySitesGuru\\HealthChecker\\Plugin\\Core\\": "healthchecker/plugins/core/src/",
+      "MySitesGuru\\HealthChecker\\Module\\Administrator\\": "healthchecker/module/src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "HealthChecker\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": true
+    },
+    "sort-packages": true,
+    "platform": {
+      "php": "8.1"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "test:coverage": "phpunit --coverage-html coverage/",
+    "ecs": "ecs check --ansi",
+    "ecs:fix": "ecs check --fix --ansi",
+    "rector": "rector process --dry-run --ansi",
+    "rector:fix": "rector process --ansi",
+    "phpstan": "phpstan analyse --ansi --memory-limit=512M",
+    "check": [
+      "@ecs",
+      "@rector",
+      "@ecs",
+      "@phpstan",
+      "@test"
+    ],
+    "cs": "@check",
+    "cs:check": "@check",
+    "cs:fix": [
+      "@ecs:fix",
+      "@rector:fix",
+      "@ecs:fix",
+      "@phpstan"
+    ]
+  }
+}

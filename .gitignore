@@ -1,0 +1,29 @@
+/vendor/
+.phpunit.cache/
+coverage/
+composer.lock
+phpstan-results.txt
+phpstan-level*.txt
+
+# Joomla installation (development/testing only)
+/joomla/
+
+# Build output
+/build/dist/
+
+# Build temporary/generated files
+/build/generated-config.txt
+/build/core-checks.json
+/build/core-config-section.xml
+/build/complete-core-config.xml
+
+# macOS
+.DS_Store
+
+# Documentation build artifacts
+/docs/USER/node_modules/
+/docs/USER/.vitepress/cache/
+/website/node_modules/
+/website/dist/
+/website/.wrangler
+website/tailwindcss-macos-arm64

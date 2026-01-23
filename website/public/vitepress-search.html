@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Documentation - Health Checker for Joomla</title>
+
+    <!-- VitePress Search Styles -->
+    <link rel="stylesheet" href="/docs/assets/style.Dl0_VEb7.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        #search-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999999;
+        }
+
+        /* Ensure search modal appears immediately */
+        .VPLocalSearchBox {
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="search-container"></div>
+
+    <!-- VitePress Dependencies -->
+    <script type="module">
+        // Load VitePress search components
+        import { createApp, h } from 'https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.esm-browser.prod.js';
+
+        // This is a simplified approach - we'll use an iframe instead
+        window.location.href = '/docs/?search=open';
+    </script>
+
+    <noscript>
+        <p>Please enable JavaScript to use the search feature, or visit <a href="/docs/">the documentation</a> directly.</p>
+    </noscript>
+</body>
+</html>

@@ -1,0 +1,82 @@
+services:
+  frankenphp:
+    image: philetaylor/base-frankenphp:latest
+    container_name: healthchecker-frankenphp
+    labels:
+      dev.orbstack.domains: healthchecker.local
+    ports:
+      - "8080:80"
+      - "8443:443"
+    environment:
+      SERVER_NAME: ":80"
+      APP_ENV: "dev"
+    volumes:
+      - ./build/docker/Caddyfile:/etc/frankenphp/Caddyfile
+      - .:/app
+      # Health Checker extension mounts (source code → joomla installation)
+      - ./healthchecker/component:/app/joomla/administrator/components/com_healthchecker
+      - ./healthchecker/module:/app/joomla/administrator/modules/mod_healthchecker
+      - ./healthchecker/plugins/core:/app/joomla/plugins/healthchecker/core
+      - ./healthchecker/plugins/example:/app/joomla/plugins/healthchecker/example
+      - ./healthchecker/plugins/akeebabackup:/app/joomla/plugins/healthchecker/akeebabackup
+      - ./healthchecker/plugins/akeebaadmintools:/app/joomla/plugins/healthchecker/akeebaadmintools
+      - ./healthchecker/plugins/mysitesguru:/app/joomla/plugins/healthchecker/mysitesguru
+      # Media mounts
+      - ./healthchecker/component/media:/app/joomla/media/com_healthchecker
+      - ./healthchecker/module/media:/app/joomla/media/mod_healthchecker
+      - ./healthchecker/plugins/akeebabackup/media:/app/joomla/media/plg_healthchecker_akeebabackup
+      - ./healthchecker/plugins/akeebaadmintools/media:/app/joomla/media/plg_healthchecker_akeebaadmintools
+      - ./healthchecker/plugins/mysitesguru/media:/app/joomla/media/plg_healthchecker_mysitesguru
+    extra_hosts:
+      - "db.healthchecker.local:host-gateway"
+    networks:
+      healthchecker:
+        ipv4_address: 10.2.0.2
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  website:
+    image: nginx:alpine
+    container_name: healthchecker-website
+    labels:
+      dev.orbstack.domains: website.healthchecker.local
+    ports:
+      - "8081:80"
+    volumes:
+      - ./website/public:/usr/share/nginx/html:ro
+    networks:
+      healthchecker:
+        ipv4_address: 10.2.0.4
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: healthchecker-mysql
+    labels:
+      dev.orbstack.domains: db.healthchecker.local
+    environment:
+      MYSQL_ROOT_PASSWORD: webdevroot
+      MYSQL_DATABASE: joomla
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      healthchecker:
+        ipv4_address: 10.2.0.3
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  healthchecker:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.2.0.0/24
+
+volumes:
+  mysql_data:
