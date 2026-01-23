@@ -18,7 +18,7 @@ Before installing, ensure your system meets these requirements:
 
 Download the latest version from one of these sources:
 
-* **GitHub Releases**: [github.com/mySites-guru/releases](https://github.com/mySites-guru/releases)
+* **GitHub Releases**: [github.com/mySites-guru/releases](https://github.com/mySites-guru/HealthCheckerForJoomla/releases)
 * **Joomla Extensions Directory**: *(Coming soon)*
 
 You'll download a file named `pkg_healthchecker_vX.X.X.zip`

@@ -47,3 +47,4 @@ AGENTS.md
 .roo/
 .goose/
 .sourcegraph/
+/coverage-report
