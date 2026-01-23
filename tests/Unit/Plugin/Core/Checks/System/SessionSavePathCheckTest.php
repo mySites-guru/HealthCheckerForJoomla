@@ -249,6 +249,9 @@ class SessionSavePathCheckTest extends TestCase
             $fallback = sys_get_temp_dir();
             $this->assertTrue(is_dir($fallback));
             $this->assertTrue(is_writable($fallback));
+        } else {
+            // Session save path is set, verify it's usable
+            $this->assertNotEmpty($savePath);
         }
     }
 
