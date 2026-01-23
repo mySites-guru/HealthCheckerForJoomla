@@ -16,6 +16,7 @@ use Joomla\CMS\Uri\Uri;
 use Joomla\Database\DatabaseAwareTrait;
 use Joomla\Event\SubscriberInterface;
 use MySitesGuru\HealthChecker\Component\Administrator\Category\HealthCategory;
+use MySitesGuru\HealthChecker\Component\Administrator\Event\AfterToolbarBuildEvent;
 use MySitesGuru\HealthChecker\Component\Administrator\Event\BeforeReportDisplayEvent;
 use MySitesGuru\HealthChecker\Component\Administrator\Event\CollectCategoriesEvent;
 use MySitesGuru\HealthChecker\Component\Administrator\Event\CollectChecksEvent;
@@ -76,6 +77,7 @@ final class MySitesGuruPlugin extends CMSPlugin implements SubscriberInterface
             HealthCheckerEvents::COLLECT_CHECKS->value => HealthCheckerEvents::COLLECT_CHECKS->getHandlerMethod(),
             HealthCheckerEvents::COLLECT_PROVIDERS->value => HealthCheckerEvents::COLLECT_PROVIDERS->getHandlerMethod(),
             HealthCheckerEvents::BEFORE_REPORT_DISPLAY->value => HealthCheckerEvents::BEFORE_REPORT_DISPLAY->getHandlerMethod(),
+            HealthCheckerEvents::AFTER_TOOLBAR_BUILD->value => HealthCheckerEvents::AFTER_TOOLBAR_BUILD->getHandlerMethod(),
         ];
     }
 
@@ -243,5 +245,31 @@ HTML;
 JS;
 
         $event->addHtmlContent($html . "\n" . $js);
+    }
+
+    /**
+     * Add mySites.guru toolbar button after the toolbar is built
+     *
+     * Adds a branded button to the toolbar that links to the mySites.guru website.
+     * This button only appears when this plugin is enabled, providing a seamless
+     * way to promote the monitoring service to users of the free Health Checker.
+     *
+     * The button appears after the component's built-in buttons (Run Again, Export,
+     * GitHub) but before the Options button.
+     *
+     * @param AfterToolbarBuildEvent $event Event object containing the toolbar
+     *
+     * @since 1.0.0
+     */
+    public function onAfterToolbarBuild(AfterToolbarBuildEvent $event): void
+    {
+        $toolbar = $event->getToolbar();
+
+        $toolbar->linkButton('mysitesguru')
+            ->text('mySites.guru')
+            ->url('https://mySites.guru')
+            ->icon('icon-tachometer-alt')
+            ->attributes(['target' => '_blank', 'style' => 'text-decoration:none'])
+            ->buttonClass('btn btn-primary healthchecker-no-external-icon');
     }
 }

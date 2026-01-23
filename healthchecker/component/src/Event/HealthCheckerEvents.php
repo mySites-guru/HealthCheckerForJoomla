@@ -60,6 +60,16 @@ enum HealthCheckerEvents: string
     case BEFORE_REPORT_DISPLAY = 'onHealthCheckerBeforeReportDisplay';
 
     /**
+     * Event triggered after the toolbar is built
+     *
+     * Plugins can listen to this event to add custom toolbar buttons.
+     * Buttons added here will appear after the component's built-in buttons.
+     *
+     * @since 1.0.0
+     */
+    case AFTER_TOOLBAR_BUILD = 'onHealthCheckerAfterToolbarBuild';
+
+    /**
      * Get the standard handler method name for this event
      *
      * Returns the conventional plugin method name that should handle this event.
@@ -75,6 +85,7 @@ enum HealthCheckerEvents: string
             self::COLLECT_CATEGORIES => 'onCollectCategories',
             self::COLLECT_CHECKS => 'onCollectChecks',
             self::BEFORE_REPORT_DISPLAY => 'onBeforeReportDisplay',
+            self::AFTER_TOOLBAR_BUILD => 'onAfterToolbarBuild',
         };
     }
 }

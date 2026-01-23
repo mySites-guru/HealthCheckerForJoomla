@@ -17,6 +17,7 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
 use Joomla\CMS\Toolbar\Toolbar;
 use Joomla\CMS\Toolbar\ToolbarHelper;
+use MySitesGuru\HealthChecker\Component\Administrator\Event\AfterToolbarBuildEvent;
 use MySitesGuru\HealthChecker\Component\Administrator\Event\BeforeReportDisplayEvent;
 use MySitesGuru\HealthChecker\Component\Administrator\Event\HealthCheckerEvents;
 
@@ -118,7 +119,21 @@ class HtmlView extends BaseHtmlView
             ->url($htmlUrl)
             ->icon('icon-file');
 
+        $toolbar->linkButton('github')
+            ->text('COM_HEALTHCHECKER_GITHUB')
+            ->url('https://github.com/mySites-guru/HealthCheckerForJoomla')
+            ->icon('icon-code-branch')
+            ->attributes(['target' => '_blank', 'style' => 'text-decoration:none'])
+            ->buttonClass('btn btn-primary healthchecker-no-external-icon');
+
+        // Dispatch event to allow plugins to add toolbar buttons
         $cmsApplication = Factory::getApplication();
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
+        $cmsApplication->getDispatcher()->dispatch(
+            HealthCheckerEvents::AFTER_TOOLBAR_BUILD->value,
+            $afterToolbarBuildEvent,
+        );
+
         $user = $cmsApplication->getIdentity();
 
         if ($user !== null && $user->authorise('core.admin', 'com_healthchecker')) {

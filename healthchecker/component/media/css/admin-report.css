@@ -89,3 +89,8 @@
         height: 40px;
     }
 }
+
+/* Hide the external link icon on toolbar buttons with this class */
+.healthchecker-no-external-icon::before {
+    display: none !important;
+}
