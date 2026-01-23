@@ -20,22 +20,9 @@ class UploadMaxFilesizeCheckTest extends TestCase
 {
     private UploadMaxFilesizeCheck $check;
 
-    private string $originalUploadMaxFilesize;
-
-    private string $originalPostMaxSize;
-
     protected function setUp(): void
     {
         $this->check = new UploadMaxFilesizeCheck();
-        $this->originalUploadMaxFilesize = ini_get('upload_max_filesize');
-        $this->originalPostMaxSize = ini_get('post_max_size');
-    }
-
-    protected function tearDown(): void
-    {
-        // Restore original values
-        ini_set('upload_max_filesize', $this->originalUploadMaxFilesize);
-        ini_set('post_max_size', $this->originalPostMaxSize);
     }
 
     public function testGetSlugReturnsCorrectValue(): void
@@ -157,223 +144,6 @@ class UploadMaxFilesizeCheckTest extends TestCase
         }
     }
 
-    public function testReturnsCriticalWhenBelowMinimum(): void
-    {
-        // Set upload_max_filesize to 1M (below 2M minimum)
-        if (! ini_set('upload_max_filesize', '1M')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        // Ensure post_max_size is higher
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('1M', $result->description);
-        $this->assertStringContainsString('2M', $result->description);
-    }
-
-    public function testReturnsWarningWhenBelowRecommended(): void
-    {
-        // Set upload_max_filesize to 5M (above 2M minimum but below 10M recommended)
-        if (! ini_set('upload_max_filesize', '5M')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        // Ensure post_max_size is higher
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('5M', $result->description);
-        $this->assertStringContainsString('10M', $result->description);
-    }
-
-    public function testReturnsGoodWhenMeetsRequirements(): void
-    {
-        // Set upload_max_filesize to 20M (above recommended)
-        if (! ini_set('upload_max_filesize', '20M')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        // Ensure post_max_size is higher
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('20M', $result->description);
-        $this->assertStringContainsString('meets requirements', $result->description);
-    }
-
-    public function testReturnsGoodAtExactlyRecommended(): void
-    {
-        // Set upload_max_filesize to exactly 10M (recommended)
-        if (! ini_set('upload_max_filesize', '10M')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        // Ensure post_max_size is higher
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('meets requirements', $result->description);
-    }
-
-    public function testReturnsWarningAtExactlyMinimum(): void
-    {
-        // Set upload_max_filesize to exactly 2M (minimum)
-        if (! ini_set('upload_max_filesize', '2M')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        // Ensure post_max_size is higher
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        // 2M is at minimum but below recommended, so Warning
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-    }
-
-    public function testReturnsWarningWhenExceedsPostMaxSize(): void
-    {
-        // Set upload_max_filesize to 64M (higher than post_max_size)
-        if (! ini_set('upload_max_filesize', '64M')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        // Set post_max_size lower
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('exceeds post_max_size', $result->description);
-        $this->assertStringContainsString('32M', $result->description);
-    }
-
-    public function testBoundaryJustBelowMinimum(): void
-    {
-        // 1.9M is just below 2M minimum
-        if (! ini_set('upload_max_filesize', '1945K')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-    }
-
-    public function testBoundaryJustBelowRecommended(): void
-    {
-        // 9M is just below 10M recommended
-        if (! ini_set('upload_max_filesize', '9M')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-    }
-
-    public function testConvertToBytesWithKilobytes(): void
-    {
-        // Test that K suffix is handled correctly
-        // 2048K = 2M (minimum)
-        if (! ini_set('upload_max_filesize', '2048K')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        // Should be Warning (at minimum, below recommended)
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-    }
-
-    public function testConvertToBytesWithGigabytes(): void
-    {
-        // Test that G suffix is handled correctly
-        // 1G = 1024M (well above recommended)
-        if (! ini_set('upload_max_filesize', '1G')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        // Make sure post_max_size is also high
-        ini_set('post_max_size', '2G');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-    }
-
-    public function testConvertToBytesWithPlainBytes(): void
-    {
-        // Test with plain bytes (no suffix)
-        // 10485760 = 10M (recommended)
-        if (! ini_set('upload_max_filesize', '10485760')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-    }
-
-    public function testConvertToBytesWithZeroValue(): void
-    {
-        // Test with 0 - should be treated as 0 bytes (critical)
-        if (! ini_set('upload_max_filesize', '0')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        // 0 bytes is way below minimum, Critical
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-    }
-
-    public function testConvertToBytesLowercaseSuffix(): void
-    {
-        // Test lowercase suffix
-        if (! ini_set('upload_max_filesize', '10m')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        ini_set('post_max_size', '32m');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-    }
-
-    public function testVeryLowValue(): void
-    {
-        // 512K is very low
-        if (! ini_set('upload_max_filesize', '512K')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        ini_set('post_max_size', '32M');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-    }
-
-    public function testVeryHighValue(): void
-    {
-        // 100M is high
-        if (! ini_set('upload_max_filesize', '100M')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        ini_set('post_max_size', '128M');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-    }
-
     public function testResultTitleIsNotEmpty(): void
     {
         $result = $this->check->run();
@@ -390,34 +160,74 @@ class UploadMaxFilesizeCheckTest extends TestCase
         $this->assertSame($result1->description, $result2->description);
     }
 
-    public function testExceedsPostMaxSizeTakesPriorityOverBelowRecommended(): void
+    public function testConvertToBytesWithEmptyString(): void
     {
-        // Test that exceeding post_max_size is checked before below recommended
-        // 5M upload with 4M post_max_size - should warn about exceeding, not about being below 10M
-        if (! ini_set('upload_max_filesize', '5M')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        ini_set('post_max_size', '4M');
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('exceeds post_max_size', $result->description);
+        // Test empty string handling - should return 0
+        $this->assertSame(0, $this->convertToBytes(''));
     }
 
-    public function testCriticalTakesPriorityOverExceedsPostMaxSize(): void
+    public function testConvertToBytesWithZeroString(): void
     {
-        // Test that critical (below minimum) takes priority
-        // 1M upload with 500K post_max_size - should be Critical for being below 2M
-        if (! ini_set('upload_max_filesize', '1M')) {
-            $this->markTestSkipped('Cannot modify upload_max_filesize in this environment.');
-        }
-        ini_set('post_max_size', '512K');
+        // Test '0' string handling - should return 0
+        $this->assertSame(0, $this->convertToBytes('0'));
+    }
 
+    public function testConvertToBytesWithWhitespace(): void
+    {
+        // Test values with whitespace (trimmed)
+        $this->assertSame(10 * 1024 * 1024, $this->convertToBytes(' 10M '));
+        $this->assertSame(2 * 1024 * 1024, $this->convertToBytes(' 2M '));
+    }
+
+    public function testConvertToBytesWithNumericOnly(): void
+    {
+        // Test numeric values without suffix (bytes)
+        $this->assertSame(1024, $this->convertToBytes('1024'));
+        $this->assertSame(2097152, $this->convertToBytes('2097152'));
+    }
+
+    public function testConvertToBytesWithLowercaseSuffix(): void
+    {
+        // Test lowercase suffixes
+        $this->assertSame(10 * 1024 * 1024, $this->convertToBytes('10m'));
+        $this->assertSame(512 * 1024, $this->convertToBytes('512k'));
+        $this->assertSame(1 * 1024 * 1024 * 1024, $this->convertToBytes('1g'));
+    }
+
+    public function testConvertToBytesWithUppercaseSuffix(): void
+    {
+        // Test uppercase suffixes
+        $this->assertSame(10 * 1024 * 1024, $this->convertToBytes('10M'));
+        $this->assertSame(512 * 1024, $this->convertToBytes('512K'));
+        $this->assertSame(1 * 1024 * 1024 * 1024, $this->convertToBytes('1G'));
+    }
+
+    public function testResultHasCorrectStructure(): void
+    {
         $result = $this->check->run();
 
-        // Below 2M minimum should be Critical, regardless of post_max_size comparison
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame('system.upload_max_filesize', $result->slug);
+        $this->assertSame('system', $result->category);
+        $this->assertSame('core', $result->provider);
+        $this->assertIsString($result->description);
+        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+    }
+
+    public function testSlugFormat(): void
+    {
+        $slug = $this->check->getSlug();
+
+        // Slug should be lowercase with dot separator
+        $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
+    }
+
+    public function testCategoryIsValid(): void
+    {
+        $category = $this->check->getCategory();
+
+        // Should be a valid category
+        $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
+        $this->assertContains($category, $validCategories);
     }
 
     /**

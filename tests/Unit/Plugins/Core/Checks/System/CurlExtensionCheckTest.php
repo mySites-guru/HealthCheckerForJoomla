@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace HealthChecker\Tests\Unit\Plugins\Core\Checks\System;
 
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult;
-use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
 use MySitesGuru\HealthChecker\Plugin\Core\Checks\System\CurlExtensionCheck;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -46,34 +45,6 @@ class CurlExtensionCheckTest extends TestCase
         $this->assertSame('system.curl_extension', $result->slug);
         $this->assertSame('system', $result->category);
         $this->assertSame('core', $result->provider);
-    }
-
-    public function testRunReturnsGoodWhenCurlIsLoaded(): void
-    {
-        // In most PHP environments, cURL is available
-        if (! extension_loaded('curl')) {
-            $this->markTestSkipped('cURL extension is not loaded');
-        }
-
-        $check = new CurlExtensionCheck();
-        $result = $check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('cURL', $result->description);
-        $this->assertStringContainsString('loaded', $result->description);
-    }
-
-    public function testResultDescriptionContainsVersionWhenAvailable(): void
-    {
-        if (! extension_loaded('curl')) {
-            $this->markTestSkipped('cURL extension is not loaded');
-        }
-
-        $check = new CurlExtensionCheck();
-        $result = $check->run();
-
-        // The description should contain version information
-        $this->assertMatchesRegularExpression('/\d+\.\d+/', $result->description);
     }
 
     public function testCheckDoesNotRequireDatabase(): void

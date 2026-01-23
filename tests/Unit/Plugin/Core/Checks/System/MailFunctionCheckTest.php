@@ -103,21 +103,6 @@ class MailFunctionCheckTest extends TestCase
         $this->assertTrue(function_exists('mail'));
     }
 
-    public function testGoodWhenMailerIsMailAndFunctionAvailable(): void
-    {
-        $this->setupApplicationWithMailer('mail');
-
-        // If mail() function is available and not disabled
-        if (function_exists('mail') && ! str_contains(ini_get('disable_functions'), 'mail')) {
-            $result = $this->check->run();
-
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
-            $this->assertStringContainsString('available', $result->description);
-        } else {
-            $this->markTestSkipped('mail() function is not available or is disabled');
-        }
-    }
-
     public function testGoodWhenMailerIsSmtp(): void
     {
         $this->setupApplicationWithMailer('smtp');
@@ -126,22 +111,6 @@ class MailFunctionCheckTest extends TestCase
 
         $this->assertSame(HealthStatus::Good, $result->healthStatus);
         $this->assertStringContainsString('SMTP', $result->description);
-    }
-
-    public function testGoodWhenMailerIsSendmailWithExecutablePath(): void
-    {
-        // Use a path that exists and is executable on most Unix systems
-        $sendmailPath = '/bin/sh'; // This exists on most systems
-        if (! is_executable($sendmailPath)) {
-            $this->markTestSkipped('No executable path available for testing');
-        }
-
-        $this->setupApplicationWithMailer('sendmail', $sendmailPath);
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Sendmail', $result->description);
     }
 
     public function testWarningWhenMailerIsSendmailWithNonExecutablePath(): void

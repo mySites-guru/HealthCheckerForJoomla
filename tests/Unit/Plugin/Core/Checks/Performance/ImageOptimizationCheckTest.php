@@ -304,6 +304,65 @@ class ImageOptimizationCheckTest extends TestCase
         $this->assertStringContainsString('2 image(s)', $result->description);
     }
 
+    public function testRunReportsLimitReachedWithNoOversizedImages(): void
+    {
+        mkdir($this->imagesPath, 0777, true);
+
+        // Create more than 1000 small images to trigger the scan limit
+        for ($i = 1; $i <= 1005; $i++) {
+            $this->createTestImage($this->imagesPath . "/small{$i}.jpg", 10 * 1024); // 10KB each
+        }
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertStringContainsString('first 1000 files scanned', $result->description);
+    }
+
+    public function testRunReportsLimitReachedWithOversizedImages(): void
+    {
+        mkdir($this->imagesPath, 0777, true);
+
+        // Create some large images first, then many small ones to reach the limit
+        for ($i = 1; $i <= 3; $i++) {
+            $this->createTestImage($this->imagesPath . "/large{$i}.jpg", 600 * 1024); // 600KB
+        }
+
+        // Create more files to exceed the 1000 limit
+        for ($i = 1; $i <= 1000; $i++) {
+            $this->createTestImage($this->imagesPath . "/small{$i}.png", 10 * 1024); // 10KB each
+        }
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('scan limited to 1000 files', $result->description);
+        $this->assertStringContainsString('may have more oversized images', $result->description);
+    }
+
+    public function testRunHandlesSymlinks(): void
+    {
+        mkdir($this->imagesPath, 0777, true);
+        mkdir($this->imagesPath . '/subdir', 0777, true);
+
+        // Create a regular large image
+        $this->createTestImage($this->imagesPath . '/large.jpg', 600 * 1024);
+
+        // Create a symlink to a directory (which isFile() returns false for)
+        $symlinkPath = $this->imagesPath . '/link';
+
+        if (! @symlink($this->imagesPath . '/subdir', $symlinkPath)) {
+            // If symlink creation fails (e.g., on Windows), skip the test
+            $this->markTestSkipped('Symlinks not supported on this platform');
+        }
+
+        $result = $this->check->run();
+
+        // Should still find the large image and report warning
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('1 image(s)', $result->description);
+    }
+
     /**
      * Create a test file with specified size
      */
@@ -343,7 +402,10 @@ class ImageOptimizationCheckTest extends TestCase
         foreach ($files as $file) {
             $path = $dir . '/' . $file;
 
-            if (is_dir($path)) {
+            // Handle symlinks first - they need unlink, not rmdir
+            if (is_link($path)) {
+                unlink($path);
+            } elseif (is_dir($path)) {
                 $this->removeDirectory($path);
             } else {
                 unlink($path);

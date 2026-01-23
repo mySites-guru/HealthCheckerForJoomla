@@ -12,6 +12,7 @@ namespace HealthChecker\Tests\Unit\Plugin\Core\Checks\Security;
 
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Uri\Uri;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
 use MySitesGuru\HealthChecker\Plugin\Core\Checks\Security\ForceSslCheck;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -28,12 +29,14 @@ class ForceSslCheckTest extends TestCase
     {
         $this->app = new CMSApplication();
         Factory::setApplication($this->app);
+        Uri::resetMockSsl();
         $this->check = new ForceSslCheck();
     }
 
     protected function tearDown(): void
     {
         Factory::setApplication(null);
+        Uri::resetMockSsl();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
@@ -210,5 +213,43 @@ class ForceSslCheckTest extends TestCase
 
         $this->assertSame(HealthStatus::Warning, $result->healthStatus);
         $this->assertStringContainsString('option 2', $result->description);
+    }
+
+    public function testRunWithForceSslDisabledButHttpsReturnsWarning(): void
+    {
+        // Force SSL disabled but currently using HTTPS
+        $this->app->set('force_ssl', 0);
+        Uri::setMockSsl(true);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('HTTPS', $result->description);
+        $this->assertStringContainsString('Force SSL is disabled', $result->description);
+    }
+
+    public function testRunWithForceSslMinusOneButHttpsReturnsWarning(): void
+    {
+        // Force SSL not set (-1) but currently using HTTPS
+        $this->app->set('force_ssl', -1);
+        Uri::setMockSsl(true);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('HTTPS', $result->description);
+        $this->assertStringContainsString('Force SSL is disabled', $result->description);
+    }
+
+    public function testWarningWhenHttpsButNoForceSslSuggestsEnabling(): void
+    {
+        // Using HTTPS but Force SSL is disabled - should suggest enabling
+        $this->app->set('force_ssl', 0);
+        Uri::setMockSsl(true);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('Enable Force SSL', $result->description);
     }
 }

@@ -239,4 +239,16 @@ class BackupAgeCheckTest extends TestCase
         $this->assertSame(HealthStatus::Good, $result->healthStatus);
         $this->assertStringContainsString('1 day(s) ago', $result->description);
     }
+
+    public function testRunHandlesExceptionGracefully(): void
+    {
+        // Test that exceptions during database queries are caught and handled
+        $database = MockDatabaseFactory::createWithException(new \RuntimeException('Connection failed'));
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        // Should return Warning (caught by AbstractHealthCheck::run())
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+    }
 }

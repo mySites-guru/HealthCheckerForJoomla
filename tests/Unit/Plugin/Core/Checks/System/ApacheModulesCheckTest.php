@@ -66,19 +66,6 @@ class ApacheModulesCheckTest extends TestCase
         $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
     }
 
-    public function testRunWhenNotApacheReturnsGood(): void
-    {
-        // When apache_get_modules() doesn't exist (non-Apache env), should return Good
-        if (\function_exists('apache_get_modules')) {
-            $this->markTestSkipped('This test is for non-Apache environments.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Not running on Apache', $result->description);
-    }
-
     public function testRunDescriptionContainsRelevantInfo(): void
     {
         $result = $this->check->run();

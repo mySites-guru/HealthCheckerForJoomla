@@ -12,6 +12,7 @@ namespace HealthChecker\Tests\Unit\Plugin\Core\Checks\Security;
 
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Uri\Uri;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
 use MySitesGuru\HealthChecker\Plugin\Core\Checks\Security\HttpsRedirectCheck;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -30,6 +31,7 @@ class HttpsRedirectCheckTest extends TestCase
     {
         $this->app = new CMSApplication();
         Factory::setApplication($this->app);
+        Uri::resetMockSsl();
         $this->check = new HttpsRedirectCheck();
         $this->htaccessPath = JPATH_ROOT . '/.htaccess';
 
@@ -47,6 +49,7 @@ class HttpsRedirectCheckTest extends TestCase
     protected function tearDown(): void
     {
         Factory::setApplication(null);
+        Uri::resetMockSsl();
 
         // Clean up .htaccess after each test
         if (file_exists($this->htaccessPath)) {
@@ -351,5 +354,111 @@ HTACCESS;
         $this->assertSame(HealthStatus::Warning, $result->healthStatus);
         // Should mention checking SSL certificate
         $this->assertStringContainsString('certificate', strtolower($result->description));
+    }
+
+    public function testRunReturnsGoodWhenForceSslEntireSiteAndHttps(): void
+    {
+        // Force SSL enabled for entire site AND currently using HTTPS - optimal
+        $this->app->set('force_ssl', 2);
+        Uri::setMockSsl(true);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertStringContainsString('enforced', strtolower($result->description));
+        $this->assertStringContainsString('entire site', strtolower($result->description));
+    }
+
+    public function testRunReturnsGoodWhenHtaccessRedirectAndHttps(): void
+    {
+        // .htaccess redirect configured AND currently using HTTPS
+        $htaccessContent = <<<'HTACCESS'
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+HTACCESS;
+        file_put_contents($this->htaccessPath, $htaccessContent);
+        $this->app->set('force_ssl', 0);
+        Uri::setMockSsl(true);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertStringContainsString('htaccess', strtolower($result->description));
+    }
+
+    public function testRunReturnsWarningWhenHttpsButNoRedirect(): void
+    {
+        // Using HTTPS but no automatic redirect configured
+        $this->app->set('force_ssl', 0);
+        Uri::setMockSsl(true);
+        // No .htaccess or no redirect patterns
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('redirect', strtolower($result->description));
+    }
+
+    public function testRunReturnsWarningWhenHttpsAndEmptyHtaccess(): void
+    {
+        // Using HTTPS but .htaccess has no redirect patterns
+        file_put_contents($this->htaccessPath, 'RewriteEngine On');
+        $this->app->set('force_ssl', 0);
+        Uri::setMockSsl(true);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('not be redirected', $result->description);
+    }
+
+    public function testGoodDescriptionMentionsJoomlaConfigForForceSsl(): void
+    {
+        $this->app->set('force_ssl', 2);
+        Uri::setMockSsl(true);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertStringContainsString('Joomla', $result->description);
+    }
+
+    public function testGoodDescriptionMentionsHtaccessForHtaccessRedirect(): void
+    {
+        $htaccessContent = <<<'HTACCESS'
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+HTACCESS;
+        file_put_contents($this->htaccessPath, $htaccessContent);
+        $this->app->set('force_ssl', 0);
+        Uri::setMockSsl(true);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertStringContainsString('.htaccess', $result->description);
+    }
+
+    public function testFallbackGoodCaseWhenHtaccessRedirectButNotHttps(): void
+    {
+        // .htaccess has redirect patterns but not currently on HTTPS
+        // This falls to the final "Good" fallback
+        $htaccessContent = <<<'HTACCESS'
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+HTACCESS;
+        file_put_contents($this->htaccessPath, $htaccessContent);
+        $this->app->set('force_ssl', 0);
+        // isHttps = false (default)
+
+        $result = $this->check->run();
+
+        // This case hits the final fallback since:
+        // - forceSsl != 2
+        // - forceSsl != 1
+        // - not critical (hasHtaccessRedirect is true OR isHttps is false... but htaccess exists)
+        // - falls to final Good
+        $this->assertSame(HealthStatus::Good, $result->healthStatus);
     }
 }

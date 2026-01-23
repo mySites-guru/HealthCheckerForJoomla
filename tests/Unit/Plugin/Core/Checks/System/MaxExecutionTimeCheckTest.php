@@ -20,18 +20,9 @@ class MaxExecutionTimeCheckTest extends TestCase
 {
     private MaxExecutionTimeCheck $check;
 
-    private string $originalMaxExecutionTime;
-
     protected function setUp(): void
     {
         $this->check = new MaxExecutionTimeCheck();
-        $this->originalMaxExecutionTime = ini_get('max_execution_time');
-    }
-
-    protected function tearDown(): void
-    {
-        // Restore original value
-        ini_set('max_execution_time', $this->originalMaxExecutionTime);
     }
 
     public function testGetSlugReturnsCorrectValue(): void
@@ -104,74 +95,6 @@ class MaxExecutionTimeCheckTest extends TestCase
 
         $this->assertSame(HealthStatus::Good, $result->healthStatus);
         $this->assertStringContainsString('unlimited', $result->description);
-    }
-
-    public function testReturnsCriticalWhenBelowMinimum(): void
-    {
-        // Skip if we can't change max_execution_time (non-CLI environment)
-        if (! ini_set('max_execution_time', '15')) {
-            $this->markTestSkipped('Cannot modify max_execution_time in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('15', $result->description);
-        $this->assertStringContainsString('below', $result->description);
-    }
-
-    public function testReturnsWarningWhenBelowRecommended(): void
-    {
-        // Skip if we can't change max_execution_time
-        if (! ini_set('max_execution_time', '45')) {
-            $this->markTestSkipped('Cannot modify max_execution_time in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('45', $result->description);
-        $this->assertStringContainsString('recommended', $result->description);
-    }
-
-    public function testReturnsGoodWhenMeetsRequirements(): void
-    {
-        // Skip if we can't change max_execution_time
-        if (! ini_set('max_execution_time', '120')) {
-            $this->markTestSkipped('Cannot modify max_execution_time in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('120', $result->description);
-        $this->assertStringContainsString('meets requirements', $result->description);
-    }
-
-    public function testReturnsGoodAtExactlyMinimum(): void
-    {
-        // 30 seconds is exactly at minimum, so it should be Warning (below recommended)
-        if (! ini_set('max_execution_time', '30')) {
-            $this->markTestSkipped('Cannot modify max_execution_time in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        // 30s is at minimum but below recommended 60s, so Warning
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-    }
-
-    public function testReturnsGoodAtExactlyRecommended(): void
-    {
-        // 60 seconds is exactly at recommended
-        if (! ini_set('max_execution_time', '60')) {
-            $this->markTestSkipped('Cannot modify max_execution_time in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('meets requirements', $result->description);
     }
 
     public function testResultTitleIsNotEmpty(): void

@@ -191,6 +191,60 @@ class AkeebaBackupPluginTest extends TestCase
         $this->assertStringContainsString('plg_healthchecker_akeebabackup', $categories[0]->logoUrl);
     }
 
+    public function testAllChecksReturnWarningWhenAkeebaBackupNotInstalled(): void
+    {
+        // Create database that returns empty array for SHOW TABLES query (Akeeba Backup not installed)
+        $database = $this->createMockDatabaseWithEmptyTables();
+        $this->plugin->setDatabase($database);
+
+        $event = new CollectChecksEvent();
+        $this->plugin->onCollectChecks($event);
+
+        $checks = $event->getChecks();
+
+        // Test each check returns warning when Akeeba Backup is not installed
+        foreach ($checks as $check) {
+            $result = $check->run();
+            $this->assertSame(
+                'warning',
+                $result->healthStatus->value,
+                "Check {$check->getSlug()} should return warning when Akeeba Backup not installed",
+            );
+            $this->assertStringContainsString(
+                'not installed',
+                $result->description,
+                "Check {$check->getSlug()} should mention 'not installed'",
+            );
+        }
+    }
+
+    public function testDisabledCheckNotRegistered(): void
+    {
+        // Create params with a disabled check
+        // Slug is 'akeeba_backup.installed' so param is 'check_akeeba_backup_installed'
+        $params = new \Joomla\Registry\Registry();
+        $params->set('check_akeeba_backup_installed', 0);
+        $this->plugin->params = $params;
+
+        $event = new CollectChecksEvent();
+        $this->plugin->onCollectChecks($event);
+
+        $checks = $event->getChecks();
+        $slugs = array_map(static fn(HealthCheckInterface $check) => $check->getSlug(), $checks);
+
+        $this->assertNotContains('akeeba_backup.installed', $slugs);
+    }
+
+    public function testRegisters10BackupChecks(): void
+    {
+        $event = new CollectChecksEvent();
+
+        $this->plugin->onCollectChecks($event);
+
+        $checks = $event->getChecks();
+        $this->assertCount(10, $checks);
+    }
+
     /**
      * Find a check by its slug from a list of checks
      *

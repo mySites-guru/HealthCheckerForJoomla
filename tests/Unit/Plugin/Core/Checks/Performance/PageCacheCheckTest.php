@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace HealthChecker\Tests\Unit\Plugin\Core\Checks\Performance;
 
+use Joomla\CMS\Plugin\PluginHelper;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
 use MySitesGuru\HealthChecker\Plugin\Core\Checks\Performance\PageCacheCheck;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -22,7 +23,13 @@ class PageCacheCheckTest extends TestCase
 
     protected function setUp(): void
     {
+        PluginHelper::resetEnabled();
         $this->check = new PageCacheCheck();
+    }
+
+    protected function tearDown(): void
+    {
+        PluginHelper::resetEnabled();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
@@ -55,5 +62,28 @@ class PageCacheCheckTest extends TestCase
 
         $this->assertSame(HealthStatus::Warning, $result->healthStatus);
         $this->assertStringContainsString('disabled', $result->description);
+    }
+
+    public function testRunReturnsGoodWhenPluginEnabled(): void
+    {
+        // Set the page cache plugin as enabled
+        PluginHelper::setEnabled('system', 'pagecache', true);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertStringContainsString('enabled', $result->description);
+    }
+
+    public function testCheckNeverReturnsCritical(): void
+    {
+        // Test with plugin disabled
+        $result = $this->check->run();
+        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+
+        // Test with plugin enabled
+        PluginHelper::setEnabled('system', 'pagecache', true);
+        $result = $this->check->run();
+        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
     }
 }

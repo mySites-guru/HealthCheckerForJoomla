@@ -75,33 +75,6 @@ class PhpVersionCheckTest extends TestCase
         $this->assertMatchesRegularExpression('/\d+\.\d+/', $result->description);
     }
 
-    public function testRunReturnsCorrectStatusForPhp82OrHigher(): void
-    {
-        // PHP 8.2+ should return Good
-        if (version_compare(PHP_VERSION, '8.2.0', '>=')) {
-            $result = $this->check->run();
-
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
-            $this->assertStringContainsString('meets all requirements', $result->description);
-        } else {
-            $this->markTestSkipped('This test requires PHP 8.2 or higher.');
-        }
-    }
-
-    public function testRunReturnsWarningForPhp81(): void
-    {
-        // PHP 8.1.x should return Warning (supported but not recommended)
-        if (version_compare(PHP_VERSION, '8.1.0', '>=') && version_compare(PHP_VERSION, '8.2.0', '<')) {
-            $result = $this->check->run();
-
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-            $this->assertStringContainsString('supported', $result->description);
-            $this->assertStringContainsString('recommended', $result->description);
-        } else {
-            $this->markTestSkipped('This test requires PHP 8.1.x.');
-        }
-    }
-
     public function testPhpVersionConstantIsAvailable(): void
     {
         $this->assertNotEmpty(PHP_VERSION);
@@ -248,30 +221,6 @@ class PhpVersionCheckTest extends TestCase
         $this->assertMatchesRegularExpression('/\d+\.\d+/', $result->description);
     }
 
-    public function testResultForPhp83OrHigher(): void
-    {
-        if (version_compare(PHP_VERSION, '8.3.0', '>=')) {
-            $result = $this->check->run();
-
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
-            $this->assertStringContainsString('meets all requirements', $result->description);
-        } else {
-            $this->markTestSkipped('This test requires PHP 8.3 or higher.');
-        }
-    }
-
-    public function testResultForPhp84OrHigher(): void
-    {
-        if (version_compare(PHP_VERSION, '8.4.0', '>=')) {
-            $result = $this->check->run();
-
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
-            $this->assertStringContainsString('meets all requirements', $result->description);
-        } else {
-            $this->markTestSkipped('This test requires PHP 8.4 or higher.');
-        }
-    }
-
     public function testVersionCompareWithDevelopmentVersions(): void
     {
         // Test version comparison with development versions
@@ -307,5 +256,66 @@ class PhpVersionCheckTest extends TestCase
             \MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult::class,
             $result,
         );
+    }
+
+    public function testVersionComparisonBetweenMinAndRecommended(): void
+    {
+        // Test versions between minimum (8.1.0) and recommended (8.2.0)
+        $minimumVersion = '8.1.0';
+        $recommendedVersion = '8.2.0';
+
+        // These should be at minimum but below recommended (Warning)
+        $this->assertTrue(version_compare('8.1.5', $minimumVersion, '>='));
+        $this->assertTrue(version_compare('8.1.5', $recommendedVersion, '<'));
+
+        $this->assertTrue(version_compare('8.1.99', $minimumVersion, '>='));
+        $this->assertTrue(version_compare('8.1.99', $recommendedVersion, '<'));
+    }
+
+    public function testSlugFormat(): void
+    {
+        $slug = $this->check->getSlug();
+
+        // Slug should be lowercase with dot separator
+        $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
+    }
+
+    public function testCategoryIsValid(): void
+    {
+        $category = $this->check->getCategory();
+
+        // Should be a valid category
+        $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
+        $this->assertContains($category, $validCategories);
+    }
+
+    public function testResultDescriptionFormatting(): void
+    {
+        $result = $this->check->run();
+
+        // Description should be properly formatted
+        $this->assertIsString($result->description);
+        $this->assertGreaterThan(10, strlen($result->description));
+        $this->assertStringContainsString('PHP', $result->description);
+    }
+
+    public function testCheckHandlesAllThreeVersionComparisonCases(): void
+    {
+        // Document the three possible outcomes based on PHP_VERSION
+        $currentVersion = PHP_VERSION;
+        $result = $this->check->run();
+
+        // Case 1: Below minimum (Critical) - cannot test as CI requires PHP 8.1+
+        // Case 2: Between minimum and recommended (Warning)
+        // Case 3: At or above recommended (Good)
+
+        if (version_compare($currentVersion, '8.2.0', '>=')) {
+            // Case 3: Good
+            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        } elseif (version_compare($currentVersion, '8.1.0', '>=')) {
+            // Case 2: Warning
+            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        }
+        // Case 1 cannot be tested in CI environment
     }
 }

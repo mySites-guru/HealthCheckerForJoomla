@@ -231,4 +231,73 @@ class PhpEolCheckTest extends TestCase
         $this->assertSame('system', $result->category);
         $this->assertSame('core', $result->provider);
     }
+
+    public function testRunReturnsWarningWhenDateParsingFails(): void
+    {
+        // Create EOL data with invalid date values that cannot be parsed
+        $cycle = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+        $eolData = [
+            [
+                'cycle' => $cycle,
+                'support' => 'invalid-date-format',
+                'eol' => 'also-not-a-date',
+            ],
+        ];
+
+        $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
+        $this->check->setHttpClient($httpClient);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('could not be parsed', $result->description);
+    }
+
+    public function testRunReturnsWarningWhenBooleanEolDate(): void
+    {
+        // Some versions return boolean `false` for EOL meaning "not yet determined"
+        $cycle = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+        $eolData = [
+            [
+                'cycle' => $cycle,
+                'support' => (new \DateTime('+1 year'))->format('Y-m-d'),
+                'eol' => false,  // PHP 8.x returns false when EOL not yet determined
+            ],
+        ];
+
+        $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
+        $this->check->setHttpClient($httpClient);
+
+        $result = $this->check->run();
+
+        // Should return warning because false cannot be parsed as a date
+        // The warning message will contain the underlying TypeError message from DateTime
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        // The error message contains 'DateTime' from the TypeError
+        $this->assertStringContainsString('DateTime', $result->description);
+    }
+
+    public function testRunReturnsWarningWhenSupportDateBoolean(): void
+    {
+        // API might return boolean for support date
+        $cycle = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+        $eolData = [
+            [
+                'cycle' => $cycle,
+                'support' => false,
+                'eol' => (new \DateTime('+2 years'))->format('Y-m-d'),
+            ],
+        ];
+
+        $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
+        $this->check->setHttpClient($httpClient);
+
+        $result = $this->check->run();
+
+        // Should return warning because false cannot be parsed as a date
+        // The warning message will contain the underlying TypeError message from DateTime
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        // The error message contains 'DateTime' from the TypeError
+        $this->assertStringContainsString('DateTime', $result->description);
+    }
 }

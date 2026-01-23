@@ -102,20 +102,6 @@ class JsonExtensionCheckTest extends TestCase
         $this->assertSame($result1->description, $result2->description);
     }
 
-    public function testRunReturnsCriticalWhenJsonNotLoaded(): void
-    {
-        // JSON is always loaded in PHP 8+ - cannot test critical path
-        if (extension_loaded('json')) {
-            $this->markTestSkipped('JSON extension is always loaded in PHP 8+ - cannot test critical path');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('JSON', $result->description);
-        $this->assertStringContainsString('not loaded', $result->description);
-    }
-
     /**
      * Document that the critical path requires JSON to be unloaded.
      *

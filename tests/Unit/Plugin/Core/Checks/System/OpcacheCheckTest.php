@@ -118,17 +118,6 @@ class OpcacheCheckTest extends TestCase
      *
      * This tests the "OPcache is enabled" path which requires the extension to be loaded.
      */
-    public function testRunWhenOpcacheExtensionLoaded(): void
-    {
-        if (! extension_loaded('Zend OPcache')) {
-            $this->markTestSkipped('OPcache extension not loaded');
-        }
-
-        $result = $this->check->run();
-
-        // If extension is loaded, we get either Good (enabled/working) or Warning (disabled/issue)
-        $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
-    }
 
     /**
      * Test behavior when OPcache extension is not loaded.
@@ -136,17 +125,6 @@ class OpcacheCheckTest extends TestCase
      * NOTE: This test can only run in environments without OPcache.
      * In typical PHP installations, OPcache is always available.
      */
-    public function testRunWhenOpcacheExtensionNotLoaded(): void
-    {
-        if (extension_loaded('Zend OPcache')) {
-            $this->markTestSkipped('OPcache extension is loaded - cannot test "not loaded" path');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not loaded', $result->description);
-    }
 
     /**
      * Test that the check handles enabled OPcache with various states.
@@ -154,42 +132,6 @@ class OpcacheCheckTest extends TestCase
      * The check has multiple branches for memory statistics handling.
      * These branches protect against edge cases in opcache_get_status() return values.
      */
-    public function testOpcacheEnabledHandlesMemoryStatistics(): void
-    {
-        if (! extension_loaded('Zend OPcache')) {
-            $this->markTestSkipped('OPcache extension not loaded');
-        }
-
-        // Get actual OPcache status to understand the current state
-        $opcacheEnabled = (bool) ini_get('opcache.enable');
-        $result = $this->check->run();
-
-        if (! $opcacheEnabled) {
-            // OPcache installed but not enabled
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-            $this->assertStringContainsString('not enabled', $result->description);
-        } else {
-            // OPcache is enabled - check memory stats handling
-            $status = @opcache_get_status(false);
-            if ($status === false) {
-                // Status unavailable
-                $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-            } elseif (! isset($status['memory_usage']) || ! is_array($status['memory_usage'])) {
-                // Memory stats not available (covers line 98-100)
-                $this->assertSame(HealthStatus::Good, $result->healthStatus);
-                $this->assertStringContainsString('memory statistics not available', $result->description);
-            } elseif (
-                ! isset($status['memory_usage']['used_memory'], $status['memory_usage']['free_memory'])
-            ) {
-                // Memory keys missing (covers line 105-107)
-                $this->assertSame(HealthStatus::Good, $result->healthStatus);
-                $this->assertStringContainsString('memory statistics incomplete', $result->description);
-            } else {
-                // Normal operation - either Good or Warning based on memory usage
-                $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
-            }
-        }
-    }
 
     /**
      * Document that certain OPcache branches depend on runtime state.
@@ -209,5 +151,38 @@ class OpcacheCheckTest extends TestCase
     {
         // This test serves as documentation for code paths that depend on OPcache state
         $this->assertTrue(true, 'OPcache state-dependent branches documented - see test docblock');
+    }
+
+    public function testOpcacheExtensionLoadedStatus(): void
+    {
+        $extensionLoaded = extension_loaded('Zend OPcache');
+        $result = $this->check->run();
+
+        // Verify check runs based on actual extension state
+        if ($extensionLoaded) {
+            // Should continue with further checks
+            $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        } else {
+            // Should warn about missing extension
+            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+            $this->assertStringContainsString('not loaded', $result->description);
+        }
+    }
+
+    public function testSlugFormat(): void
+    {
+        $slug = $this->check->getSlug();
+
+        // Slug should be lowercase with dot separator
+        $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z]+$/', $slug);
+    }
+
+    public function testCategoryIsValid(): void
+    {
+        $category = $this->check->getCategory();
+
+        // Should be a valid category
+        $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
+        $this->assertContains($category, $validCategories);
     }
 }

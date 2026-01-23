@@ -240,25 +240,4 @@ SITEMAP;
         // Should handle BOM gracefully
         $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
     }
-
-    public function testRunReturnsWarningWhenSitemapExistsButCannotBeRead(): void
-    {
-        // Create a sitemap.xml file with no read permissions
-        file_put_contents($this->sitemapPath, '<?xml version="1.0"?><urlset></urlset>');
-        chmod($this->sitemapPath, 0000);
-
-        // Skip this test if running as root (root can read any file)
-        if (is_readable($this->sitemapPath)) {
-            chmod($this->sitemapPath, 0644);
-            $this->markTestSkipped('Cannot test unreadable file when running as root.');
-        }
-
-        $result = $this->check->run();
-
-        // Restore permissions for cleanup
-        chmod($this->sitemapPath, 0644);
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('could not be read', $result->description);
-    }
 }

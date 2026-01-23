@@ -264,4 +264,173 @@ class IndexUsageCheckTest extends TestCase
         // Should show only first 5 and then "..."
         $this->assertStringContainsString('...', $result->description);
     }
+
+    public function testRunSkipsTablesWithQueryException(): void
+    {
+        // Test that exceptions during SHOW INDEX are handled gracefully
+        $database = MockDatabaseFactory::createWithSequentialQueries([
+            [
+                'method' => 'loadColumn',
+                'return' => ['test_content', 'test_problematic', 'test_users'],
+            ],
+            [
+                'method' => 'loadObjectList',
+                'return' => [
+                    (object) [
+                        'Key_name' => 'PRIMARY',
+                        'Column_name' => 'id',
+                    ],
+                ],
+            ], // test_content - OK
+            [
+                'method' => 'loadObjectList',
+                'exception' => new \RuntimeException('Access denied'),
+            ], // test_problematic - Exception
+            [
+                'method' => 'loadObjectList',
+                'return' => [
+                    (object) [
+                        'Key_name' => 'PRIMARY',
+                        'Column_name' => 'id',
+                    ],
+                ],
+            ], // test_users - OK
+        ]);
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        // Should still return GOOD because the problematic table is skipped
+        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        // Only 2 tables should be counted (skipped the problematic one)
+        $this->assertStringContainsString('3 tables', $result->description);
+    }
+
+    public function testRunExcludesAllDesignedWithoutPrimaryKeyTables(): void
+    {
+        // Test all tables in the TABLES_WITHOUT_PRIMARY_KEY_BY_DESIGN constant
+        $tablesWithoutPkByDesign = [
+            'test_contentitem_tag_map',
+            'test_fields_values',
+            'test_finder_terms_common',
+            'test_finder_tokens',
+            'test_finder_tokens_aggregate',
+            'test_messages_cfg',
+            'test_user_profiles',
+        ];
+
+        $queries = [
+            [
+                'method' => 'loadColumn',
+                'return' => $tablesWithoutPkByDesign,
+            ],
+        ];
+
+        // Each table has an index but no PRIMARY key
+        foreach ($tablesWithoutPkByDesign as $table) {
+            $queries[] = [
+                'method' => 'loadObjectList',
+                'return' => [
+                    (object) [
+                        'Key_name' => 'idx_something',
+                        'Column_name' => 'some_col',
+                    ],
+                ],
+            ];
+        }
+
+        $database = MockDatabaseFactory::createWithSequentialQueries($queries);
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        // Should be GOOD - all tables are excluded from primary key check
+        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+    }
+
+    public function testRunHandlesTableWithoutPrefix(): void
+    {
+        // Test the edge case where tableName doesn't start with prefix
+        // This covers the else branch in isTableWithoutPrimaryKeyByDesign
+        $database = MockDatabaseFactory::createWithSequentialQueries([
+            [
+                'method' => 'loadColumn',
+                'return' => ['other_prefix_table'],  // No "test_" prefix
+            ],
+            [
+                'method' => 'loadObjectList',
+                'return' => [],  // No indexes
+            ],
+        ]);
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        // Should return warning for missing primary key
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+    }
+
+    public function testRunWarnsAboutTablesWithOnlyNoPrimaryKeyAndNoOtherIndex(): void
+    {
+        // Test tables that have absolutely no indexes (neither PRIMARY nor other)
+        // This is different from "missing primary key" - it's "no indexes at all"
+        $database = MockDatabaseFactory::createWithSequentialQueries([
+            [
+                'method' => 'loadColumn',
+                'return' => ['test_content', 'test_totally_unindexed'],
+            ],
+            [
+                'method' => 'loadObjectList',
+                'return' => [
+                    (object) [
+                        'Key_name' => 'PRIMARY',
+                        'Column_name' => 'id',
+                    ],
+                ],
+            ], // test_content - has primary
+            [
+                'method' => 'loadObjectList',
+                'return' => [],  // test_totally_unindexed - no indexes at all
+            ],
+        ]);
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        // Should mention the table missing primary key
+        $this->assertStringContainsString('test_totally_unindexed', $result->description);
+    }
+
+    public function testRunPrioritizesMissingPrimaryKeyOverNoIndexes(): void
+    {
+        // When there are tables missing primary keys AND tables with no indexes,
+        // the primary key warning takes precedence
+        $database = MockDatabaseFactory::createWithSequentialQueries([
+            [
+                'method' => 'loadColumn',
+                'return' => ['test_no_pk', 'test_no_indexes'],
+            ],
+            [
+                'method' => 'loadObjectList',
+                'return' => [
+                    (object) [
+                        'Key_name' => 'idx_something',
+                        'Column_name' => 'col',
+                    ],
+                ],
+            ], // test_no_pk - has index, no PRIMARY
+            [
+                'method' => 'loadObjectList',
+                'return' => [],  // test_no_indexes - nothing at all
+            ],
+        ]);
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        // Should warn about missing primary key first
+        $this->assertStringContainsString('missing primary key', $result->description);
+    }
 }

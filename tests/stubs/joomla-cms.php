@@ -913,6 +913,18 @@ namespace Joomla\CMS\Uri;
 
 class Uri
 {
+    private static bool $mockSsl = false;
+
+    public static function setMockSsl(bool $ssl): void
+    {
+        self::$mockSsl = $ssl;
+    }
+
+    public static function resetMockSsl(): void
+    {
+        self::$mockSsl = false;
+    }
+
     public static function root(bool $pathonly = false, int $path = 0): string
     {
         return '';
@@ -925,7 +937,7 @@ class Uri
 
     public function isSsl(): bool
     {
-        return false;
+        return self::$mockSsl;
     }
 }
 

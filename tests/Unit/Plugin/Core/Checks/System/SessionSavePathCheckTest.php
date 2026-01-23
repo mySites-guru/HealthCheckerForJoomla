@@ -212,4 +212,79 @@ class SessionSavePathCheckTest extends TestCase
 
         $this->assertFalse(is_dir($nonExistentPath));
     }
+
+    public function testSlugFormat(): void
+    {
+        $slug = $this->check->getSlug();
+
+        // Slug should be lowercase with dot separator
+        $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
+    }
+
+    public function testCategoryIsValid(): void
+    {
+        $category = $this->check->getCategory();
+
+        // Should be a valid category
+        $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
+        $this->assertContains($category, $validCategories);
+    }
+
+    public function testSessionSavePathFunction(): void
+    {
+        // Test session_save_path returns a string
+        $path = session_save_path();
+
+        $this->assertIsString($path);
+    }
+
+    public function testFallbackLogicWithEmptyPath(): void
+    {
+        // Document the fallback logic - when session_save_path is empty,
+        // the check uses sys_get_temp_dir()
+        $savePath = session_save_path();
+
+        if ($savePath === '' || $savePath === '0') {
+            // Should fall back to sys_get_temp_dir()
+            $fallback = sys_get_temp_dir();
+            $this->assertTrue(is_dir($fallback));
+            $this->assertTrue(is_writable($fallback));
+        }
+    }
+
+    public function testCriticalMessageContainsPathInfo(): void
+    {
+        $result = $this->check->run();
+
+        if ($result->healthStatus === HealthStatus::Critical) {
+            // Critical message should explain the path issue
+            $this->assertTrue(
+                str_contains($result->description, 'exist') ||
+                str_contains($result->description, 'writable') ||
+                str_contains($result->description, 'path'),
+            );
+        } else {
+            // Not critical means path is valid
+            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        }
+    }
+
+    public function testGoodMessageConfirmsWritability(): void
+    {
+        $result = $this->check->run();
+
+        if ($result->healthStatus === HealthStatus::Good) {
+            // Good message should confirm the path is writable
+            $this->assertStringContainsString('writable', $result->description);
+        }
+    }
+
+    public function testSysTempDirIsWritable(): void
+    {
+        // System temp directory should always be writable
+        $tempDir = sys_get_temp_dir();
+
+        $this->assertTrue(is_writable($tempDir));
+        $this->assertTrue(is_dir($tempDir));
+    }
 }

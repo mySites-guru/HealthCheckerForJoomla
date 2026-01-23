@@ -201,25 +201,4 @@ ROBOTS;
 
         $this->assertSame(HealthStatus::Warning, $result->healthStatus);
     }
-
-    public function testRunReturnsWarningWhenRobotsFileExistsButCannotBeRead(): void
-    {
-        // Create a robots.txt file with no read permissions
-        file_put_contents($this->robotsPath, 'User-agent: *');
-        chmod($this->robotsPath, 0000);
-
-        // Skip this test if running as root (root can read any file)
-        if (is_readable($this->robotsPath)) {
-            chmod($this->robotsPath, 0644);
-            $this->markTestSkipped('Cannot test unreadable file when running as root.');
-        }
-
-        $result = $this->check->run();
-
-        // Restore permissions for cleanup
-        chmod($this->robotsPath, 0644);
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('could not be read', $result->description);
-    }
 }

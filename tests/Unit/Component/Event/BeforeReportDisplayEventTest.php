@@ -20,48 +20,48 @@ class BeforeReportDisplayEventTest extends TestCase
 {
     public function testEventHasCorrectName(): void
     {
-        $event = new BeforeReportDisplayEvent();
-        $this->assertSame(HealthCheckerEvents::BEFORE_REPORT_DISPLAY->value, $event->getName());
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
+        $this->assertSame(HealthCheckerEvents::BEFORE_REPORT_DISPLAY->value, $beforeReportDisplayEvent->getName());
     }
 
     public function testGetHtmlContentReturnsEmptyStringByDefault(): void
     {
-        $event = new BeforeReportDisplayEvent();
-        $this->assertSame('', $event->getHtmlContent());
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
+        $this->assertSame('', $beforeReportDisplayEvent->getHtmlContent());
     }
 
     public function testAddHtmlContentAddsContent(): void
     {
-        $event = new BeforeReportDisplayEvent();
-        $event->addHtmlContent('<div>Test content</div>');
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
+        $beforeReportDisplayEvent->addHtmlContent('<div>Test content</div>');
 
-        $this->assertSame('<div>Test content</div>', $event->getHtmlContent());
+        $this->assertSame('<div>Test content</div>', $beforeReportDisplayEvent->getHtmlContent());
     }
 
     public function testAddHtmlContentConcatenatesMultipleContents(): void
     {
-        $event = new BeforeReportDisplayEvent();
-        $event->addHtmlContent('<div>First</div>');
-        $event->addHtmlContent('<div>Second</div>');
-        $event->addHtmlContent('<div>Third</div>');
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
+        $beforeReportDisplayEvent->addHtmlContent('<div>First</div>');
+        $beforeReportDisplayEvent->addHtmlContent('<div>Second</div>');
+        $beforeReportDisplayEvent->addHtmlContent('<div>Third</div>');
 
         $expected = "<div>First</div>\n<div>Second</div>\n<div>Third</div>";
-        $this->assertSame($expected, $event->getHtmlContent());
+        $this->assertSame($expected, $beforeReportDisplayEvent->getHtmlContent());
     }
 
     public function testAddHtmlContentPreservesOrder(): void
     {
-        $event = new BeforeReportDisplayEvent();
-        $event->addHtmlContent('A');
-        $event->addHtmlContent('B');
-        $event->addHtmlContent('C');
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
+        $beforeReportDisplayEvent->addHtmlContent('A');
+        $beforeReportDisplayEvent->addHtmlContent('B');
+        $beforeReportDisplayEvent->addHtmlContent('C');
 
-        $this->assertStringContainsString('A', $event->getHtmlContent());
-        $this->assertStringContainsString('B', $event->getHtmlContent());
-        $this->assertStringContainsString('C', $event->getHtmlContent());
+        $this->assertStringContainsString('A', $beforeReportDisplayEvent->getHtmlContent());
+        $this->assertStringContainsString('B', $beforeReportDisplayEvent->getHtmlContent());
+        $this->assertStringContainsString('C', $beforeReportDisplayEvent->getHtmlContent());
 
         // Verify order
-        $content = $event->getHtmlContent();
+        $content = $beforeReportDisplayEvent->getHtmlContent();
         $posA = strpos($content, 'A');
         $posB = strpos($content, 'B');
         $posC = strpos($content, 'C');
@@ -72,28 +72,28 @@ class BeforeReportDisplayEventTest extends TestCase
 
     public function testAddHtmlContentAcceptsEmptyString(): void
     {
-        $event = new BeforeReportDisplayEvent();
-        $event->addHtmlContent('');
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
+        $beforeReportDisplayEvent->addHtmlContent('');
 
-        $this->assertSame('', $event->getHtmlContent());
+        $this->assertSame('', $beforeReportDisplayEvent->getHtmlContent());
     }
 
     public function testAddHtmlContentAcceptsComplexHtml(): void
     {
-        $event = new BeforeReportDisplayEvent();
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
         $html = '<div class="alert alert-info" data-id="123">
             <h4>Notice</h4>
             <p>Some <strong>important</strong> information.</p>
         </div>';
 
-        $event->addHtmlContent($html);
+        $beforeReportDisplayEvent->addHtmlContent($html);
 
-        $this->assertSame($html, $event->getHtmlContent());
+        $this->assertSame($html, $beforeReportDisplayEvent->getHtmlContent());
     }
 
     public function testEventExtendsJoomlaEvent(): void
     {
-        $event = new BeforeReportDisplayEvent();
-        $this->assertInstanceOf(\Joomla\Event\Event::class, $event);
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
+        $this->assertInstanceOf(\Joomla\Event\Event::class, $beforeReportDisplayEvent);
     }
 }

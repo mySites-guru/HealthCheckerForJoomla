@@ -23,91 +23,91 @@ class CollectChecksEventTest extends TestCase
 {
     public function testEventHasCorrectName(): void
     {
-        $event = new CollectChecksEvent();
-        $this->assertSame(HealthCheckerEvents::COLLECT_CHECKS->value, $event->getName());
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->assertSame(HealthCheckerEvents::COLLECT_CHECKS->value, $collectChecksEvent->getName());
     }
 
     public function testGetChecksReturnsEmptyArrayByDefault(): void
     {
-        $event = new CollectChecksEvent();
-        $this->assertSame([], $event->getChecks());
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->assertSame([], $collectChecksEvent->getChecks());
     }
 
     public function testAddResultAcceptsHealthCheckInterface(): void
     {
-        $event = new CollectChecksEvent();
-        $check = $this->createTestCheck();
+        $collectChecksEvent = new CollectChecksEvent();
+        $healthCheck = $this->createTestCheck();
 
-        $event->addResult($check);
+        $collectChecksEvent->addResult($healthCheck);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
         $this->assertCount(1, $checks);
-        $this->assertSame($check, $checks[0]);
+        $this->assertSame($healthCheck, $checks[0]);
     }
 
     public function testAddResultAcceptsMultipleChecks(): void
     {
-        $event = new CollectChecksEvent();
-        $check1 = $this->createTestCheck('test.check1');
+        $collectChecksEvent = new CollectChecksEvent();
+        $healthCheck = $this->createTestCheck('test.check1');
         $check2 = $this->createTestCheck('test.check2');
         $check3 = $this->createTestCheck('test.check3');
 
-        $event->addResult($check1);
-        $event->addResult($check2);
-        $event->addResult($check3);
+        $collectChecksEvent->addResult($healthCheck);
+        $collectChecksEvent->addResult($check2);
+        $collectChecksEvent->addResult($check3);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
         $this->assertCount(3, $checks);
-        $this->assertSame($check1, $checks[0]);
+        $this->assertSame($healthCheck, $checks[0]);
         $this->assertSame($check2, $checks[1]);
         $this->assertSame($check3, $checks[2]);
     }
 
     public function testTypeCheckResultThrowsExceptionForInvalidType(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('only accepts HealthCheckInterface instances');
 
-        $event->typeCheckResult('not a check');
+        $collectChecksEvent->typeCheckResult('not a check');
     }
 
     public function testTypeCheckResultThrowsExceptionForNull(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('only accepts HealthCheckInterface instances');
 
-        $event->typeCheckResult(null);
+        $collectChecksEvent->typeCheckResult(null);
     }
 
     public function testTypeCheckResultThrowsExceptionForObject(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('only accepts HealthCheckInterface instances');
 
-        $event->typeCheckResult(new \stdClass());
+        $collectChecksEvent->typeCheckResult(new \stdClass());
     }
 
     public function testTypeCheckResultAcceptsValidCheck(): void
     {
-        $event = new CollectChecksEvent();
-        $check = $this->createTestCheck();
+        $collectChecksEvent = new CollectChecksEvent();
+        $healthCheck = $this->createTestCheck();
 
         // Should not throw an exception
-        $event->typeCheckResult($check);
+        $collectChecksEvent->typeCheckResult($healthCheck);
 
         $this->assertTrue(true); // If we get here, the test passed
     }
 
     public function testEventImplementsResultAwareInterface(): void
     {
-        $event = new CollectChecksEvent();
-        $this->assertInstanceOf(\Joomla\CMS\Event\Result\ResultAwareInterface::class, $event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->assertInstanceOf(\Joomla\CMS\Event\Result\ResultAwareInterface::class, $collectChecksEvent);
     }
 
     /**

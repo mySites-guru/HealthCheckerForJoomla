@@ -291,6 +291,61 @@ class TemplateCheckTest extends TestCase
         $this->assertSame(HealthStatus::Good, $result->healthStatus);
     }
 
+    public function testRunWithAdminTemplateIssuesMergesWithSiteIssues(): void
+    {
+        // Create valid site template
+        $this->createTemplateDirectory(JPATH_SITE . '/templates/cassiopeia');
+        // Create admin template with invalid XML (this will trigger admin issues)
+        $this->createTemplateDirectory(JPATH_ADMINISTRATOR . '/templates/admin_test', true, true, false);
+
+        $database = $this->createDatabaseWithTemplates(
+            (object) [
+                'template' => 'cassiopeia',
+                'title' => 'Cassiopeia',
+            ],
+            (object) [
+                'template' => 'admin_test',
+                'title' => 'Admin Test',
+            ],
+        );
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        // Should return critical because admin template has invalid XML
+        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertStringContainsString('invalid templateDetails.xml', $result->description);
+        $this->assertStringContainsString('Admin', $result->description);
+    }
+
+    public function testRunWithBothTemplatesHavingIssuesReportsBoth(): void
+    {
+        // Create site template without index.php
+        $this->createTemplateDirectory(JPATH_SITE . '/templates/cassiopeia', true, false);
+        // Create admin template without templateDetails.xml
+        $this->createTemplateDirectory(JPATH_ADMINISTRATOR . '/templates/atum', false, true);
+
+        $database = $this->createDatabaseWithTemplates(
+            (object) [
+                'template' => 'cassiopeia',
+                'title' => 'Cassiopeia',
+            ],
+            (object) [
+                'template' => 'atum',
+                'title' => 'Atum',
+            ],
+        );
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        // Should return critical with both issues merged
+        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        // Should contain both site and admin issues
+        $this->assertStringContainsString('Site', $result->description);
+        $this->assertStringContainsString('Admin', $result->description);
+    }
+
     /**
      * Create a mock database that returns site and admin templates
      */

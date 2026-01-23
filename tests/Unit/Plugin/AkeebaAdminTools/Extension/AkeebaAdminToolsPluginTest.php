@@ -223,6 +223,169 @@ class AkeebaAdminToolsPluginTest extends TestCase
         $this->assertStringContainsString('No WAF rules', $result->description);
     }
 
+    public function testAllChecksReturnWarningWhenAdminToolsNotInstalled(): void
+    {
+        // Create database that returns empty array for SHOW TABLES query (Admin Tools not installed)
+        $database = $this->createMockDatabaseWithEmptyTables();
+        $this->plugin->setDatabase($database);
+
+        $event = new CollectChecksEvent();
+        $this->plugin->onCollectChecks($event);
+
+        $checks = $event->getChecks();
+
+        // Test each check returns warning when Admin Tools is not installed
+        foreach ($checks as $check) {
+            $result = $check->run();
+            $this->assertSame(
+                'warning',
+                $result->healthStatus->value,
+                "Check {$check->getSlug()} should return warning when Admin Tools not installed",
+            );
+            $this->assertStringContainsString(
+                'not installed',
+                $result->description,
+                "Check {$check->getSlug()} should mention 'not installed'",
+            );
+        }
+    }
+
+    public function testDisabledCheckNotRegistered(): void
+    {
+        // Create params with a disabled check
+        // Slug is 'akeeba_admintools.installed' so param is 'check_akeeba_admintools_installed'
+        $params = new \Joomla\Registry\Registry();
+        $params->set('check_akeeba_admintools_installed', 0);
+        $this->plugin->params = $params;
+
+        $event = new CollectChecksEvent();
+        $this->plugin->onCollectChecks($event);
+
+        $checks = $event->getChecks();
+        $slugs = array_map(static fn(HealthCheckInterface $check) => $check->getSlug(), $checks);
+
+        $this->assertNotContains('akeeba_admintools.installed', $slugs);
+    }
+
+    public function testScanAgeCheckReturnsCriticalWhenNoScansCompleted(): void
+    {
+        // Create database where scan table exists but no completed scans
+        $database = $this->createMockDatabaseWithScanTableButNoScans();
+        $this->plugin->setDatabase($database);
+
+        $event = new CollectChecksEvent();
+        $this->plugin->onCollectChecks($event);
+
+        $scanCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.scan_age');
+        $this->assertNotNull($scanCheck);
+
+        $result = $scanCheck->run();
+        $this->assertSame('critical', $result->healthStatus->value);
+        $this->assertStringContainsString('No file integrity scans', $result->description);
+    }
+
+    public function testScanAgeCheckReturnsCriticalWhenScanOlderThan30Days(): void
+    {
+        // Create database where last scan was over 30 days ago
+        $database = $this->createMockDatabaseWithOldScan(35);
+        $this->plugin->setDatabase($database);
+
+        $event = new CollectChecksEvent();
+        $this->plugin->onCollectChecks($event);
+
+        $scanCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.scan_age');
+        $this->assertNotNull($scanCheck);
+
+        $result = $scanCheck->run();
+        $this->assertSame('critical', $result->healthStatus->value);
+        $this->assertStringContainsString('days ago', $result->description);
+    }
+
+    public function testScanAgeCheckReturnsWarningWhenScanBetween7And30Days(): void
+    {
+        // Create database where last scan was 15 days ago
+        $database = $this->createMockDatabaseWithOldScan(15);
+        $this->plugin->setDatabase($database);
+
+        $event = new CollectChecksEvent();
+        $this->plugin->onCollectChecks($event);
+
+        $scanCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.scan_age');
+        $this->assertNotNull($scanCheck);
+
+        $result = $scanCheck->run();
+        $this->assertSame('warning', $result->healthStatus->value);
+        $this->assertStringContainsString('days ago', $result->description);
+    }
+
+    public function testFileAlertsCheckReturnsCriticalWhenHighThreatAlerts(): void
+    {
+        // Create database with high threat alerts
+        $database = $this->createMockDatabaseWithHighThreatAlerts();
+        $this->plugin->setDatabase($database);
+
+        $event = new CollectChecksEvent();
+        $this->plugin->onCollectChecks($event);
+
+        $alertsCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.file_alerts');
+        $this->assertNotNull($alertsCheck);
+
+        $result = $alertsCheck->run();
+        $this->assertSame('critical', $result->healthStatus->value);
+        $this->assertStringContainsString('high-threat', $result->description);
+    }
+
+    public function testFileAlertsCheckReturnsWarningWhenLowThreatAlerts(): void
+    {
+        // Create database with low threat alerts
+        $database = $this->createMockDatabaseWithLowThreatAlerts();
+        $this->plugin->setDatabase($database);
+
+        $event = new CollectChecksEvent();
+        $this->plugin->onCollectChecks($event);
+
+        $alertsCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.file_alerts');
+        $this->assertNotNull($alertsCheck);
+
+        $result = $alertsCheck->run();
+        $this->assertSame('warning', $result->healthStatus->value);
+        $this->assertStringContainsString('require review', $result->description);
+    }
+
+    public function testLoginFailuresCheckReturnsWarningWhenHighFailures(): void
+    {
+        // Create database with more than 10 login failures
+        $database = $this->createMockDatabaseWithLoginFailures(15);
+        $this->plugin->setDatabase($database);
+
+        $event = new CollectChecksEvent();
+        $this->plugin->onCollectChecks($event);
+
+        $loginCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.login_failures');
+        $this->assertNotNull($loginCheck);
+
+        $result = $loginCheck->run();
+        $this->assertSame('warning', $result->healthStatus->value);
+        $this->assertStringContainsString('15 login failures', $result->description);
+    }
+
+    public function testTempSuperUsersCheckReturnsWarningWhenExpiredFound(): void
+    {
+        // Create database with expired temporary super users
+        $database = $this->createMockDatabaseWithExpiredTempSuperUsers();
+        $this->plugin->setDatabase($database);
+
+        $event = new CollectChecksEvent();
+        $this->plugin->onCollectChecks($event);
+
+        $tempCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.temp_superusers');
+        $this->assertNotNull($tempCheck);
+
+        $result = $tempCheck->run();
+        $this->assertSame('warning', $result->healthStatus->value);
+        $this->assertStringContainsString('expired', $result->description);
+    }
+
     /**
      * Find a check by its slug from a list of checks
      *
@@ -629,6 +792,889 @@ class AkeebaAdminToolsPluginTest extends TestCase
             public function getTableList(): array
             {
                 return ['#__admintools_wafblacklists'];
+            }
+
+            private function createMockQuery(): QueryInterface
+            {
+                return new class implements QueryInterface {
+                    public function select(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function from(string $table, ?string $alias = null): self
+                    {
+                        return $this;
+                    }
+
+                    public function where(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function join(string $type, string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function leftJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function innerJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function order(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function group(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function having(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function __toString(): string
+                    {
+                        return '';
+                    }
+
+                    public function setLimit(int $limit = 0, int $offset = 0): self
+                    {
+                        return $this;
+                    }
+                };
+            }
+        };
+    }
+
+    /**
+     * Create a mock database where scan table exists but no completed scans
+     */
+    private function createMockDatabaseWithScanTableButNoScans(): DatabaseInterface
+    {
+        return new class implements DatabaseInterface {
+            public function getVersion(): string
+            {
+                return '8.0.30';
+            }
+
+            public function getQuery(bool $new = false): QueryInterface
+            {
+                return $this->createMockQuery();
+            }
+
+            public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
+            {
+                return $this;
+            }
+
+            public function loadResult(): mixed
+            {
+                // Return null (no completed scans found)
+                return null;
+            }
+
+            public function loadColumn(): array
+            {
+                // Return table name to indicate Admin Tools is installed
+                return ['#__admintools_scans'];
+            }
+
+            public function loadAssoc(): ?array
+            {
+                return null;
+            }
+
+            public function loadAssocList(string $key = '', string $column = ''): array
+            {
+                return [];
+            }
+
+            public function loadObject(): ?object
+            {
+                return null;
+            }
+
+            public function loadObjectList(): array
+            {
+                return [];
+            }
+
+            public function execute(): bool
+            {
+                return true;
+            }
+
+            public function quoteName(array|string $name, ?string $as = null): array|string
+            {
+                return is_array($name) ? '' : $name;
+            }
+
+            public function quote(array|string $text, bool $escape = true): array|string
+            {
+                return is_string($text) ? "'{$text}'" : '';
+            }
+
+            public function getPrefix(): string
+            {
+                return '#__';
+            }
+
+            public function getNullDate(): string
+            {
+                return '0000-00-00 00:00:00';
+            }
+
+            public function getTableList(): array
+            {
+                return ['#__admintools_scans'];
+            }
+
+            private function createMockQuery(): QueryInterface
+            {
+                return new class implements QueryInterface {
+                    public function select(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function from(string $table, ?string $alias = null): self
+                    {
+                        return $this;
+                    }
+
+                    public function where(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function join(string $type, string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function leftJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function innerJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function order(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function group(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function having(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function __toString(): string
+                    {
+                        return '';
+                    }
+
+                    public function setLimit(int $limit = 0, int $offset = 0): self
+                    {
+                        return $this;
+                    }
+                };
+            }
+        };
+    }
+
+    /**
+     * Create a mock database where last scan was X days ago
+     */
+    private function createMockDatabaseWithOldScan(int $daysAgo): DatabaseInterface
+    {
+        return new class ($daysAgo) implements DatabaseInterface {
+            public function __construct(
+                private int $daysAgo,
+            ) {}
+
+            public function getVersion(): string
+            {
+                return '8.0.30';
+            }
+
+            public function getQuery(bool $new = false): QueryInterface
+            {
+                return $this->createMockQuery();
+            }
+
+            public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
+            {
+                return $this;
+            }
+
+            public function loadResult(): mixed
+            {
+                // Return scan date from X days ago
+                return date('Y-m-d H:i:s', strtotime("-{$this->daysAgo} days"));
+            }
+
+            public function loadColumn(): array
+            {
+                return ['#__admintools_scans'];
+            }
+
+            public function loadAssoc(): ?array
+            {
+                return null;
+            }
+
+            public function loadAssocList(string $key = '', string $column = ''): array
+            {
+                return [];
+            }
+
+            public function loadObject(): ?object
+            {
+                return null;
+            }
+
+            public function loadObjectList(): array
+            {
+                return [];
+            }
+
+            public function execute(): bool
+            {
+                return true;
+            }
+
+            public function quoteName(array|string $name, ?string $as = null): array|string
+            {
+                return is_array($name) ? '' : $name;
+            }
+
+            public function quote(array|string $text, bool $escape = true): array|string
+            {
+                return is_string($text) ? "'{$text}'" : '';
+            }
+
+            public function getPrefix(): string
+            {
+                return '#__';
+            }
+
+            public function getNullDate(): string
+            {
+                return '0000-00-00 00:00:00';
+            }
+
+            public function getTableList(): array
+            {
+                return ['#__admintools_scans'];
+            }
+
+            private function createMockQuery(): QueryInterface
+            {
+                return new class implements QueryInterface {
+                    public function select(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function from(string $table, ?string $alias = null): self
+                    {
+                        return $this;
+                    }
+
+                    public function where(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function join(string $type, string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function leftJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function innerJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function order(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function group(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function having(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function __toString(): string
+                    {
+                        return '';
+                    }
+
+                    public function setLimit(int $limit = 0, int $offset = 0): self
+                    {
+                        return $this;
+                    }
+                };
+            }
+        };
+    }
+
+    /**
+     * Create a mock database with high threat file alerts
+     */
+    private function createMockDatabaseWithHighThreatAlerts(): DatabaseInterface
+    {
+        return new class implements DatabaseInterface {
+            private int $queryCount = 0;
+
+            public function getVersion(): string
+            {
+                return '8.0.30';
+            }
+
+            public function getQuery(bool $new = false): QueryInterface
+            {
+                return $this->createMockQuery();
+            }
+
+            public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
+            {
+                return $this;
+            }
+
+            public function loadResult(): mixed
+            {
+                $this->queryCount++;
+
+                // First count query returns high threat count
+                return 5;
+            }
+
+            public function loadColumn(): array
+            {
+                return ['#__admintools_scanalerts'];
+            }
+
+            public function loadAssoc(): ?array
+            {
+                return null;
+            }
+
+            public function loadAssocList(string $key = '', string $column = ''): array
+            {
+                return [];
+            }
+
+            public function loadObject(): ?object
+            {
+                return null;
+            }
+
+            public function loadObjectList(): array
+            {
+                return [];
+            }
+
+            public function execute(): bool
+            {
+                return true;
+            }
+
+            public function quoteName(array|string $name, ?string $as = null): array|string
+            {
+                return is_array($name) ? '' : $name;
+            }
+
+            public function quote(array|string $text, bool $escape = true): array|string
+            {
+                return is_string($text) ? "'{$text}'" : '';
+            }
+
+            public function getPrefix(): string
+            {
+                return '#__';
+            }
+
+            public function getNullDate(): string
+            {
+                return '0000-00-00 00:00:00';
+            }
+
+            public function getTableList(): array
+            {
+                return ['#__admintools_scanalerts'];
+            }
+
+            private function createMockQuery(): QueryInterface
+            {
+                return new class implements QueryInterface {
+                    public function select(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function from(string $table, ?string $alias = null): self
+                    {
+                        return $this;
+                    }
+
+                    public function where(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function join(string $type, string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function leftJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function innerJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function order(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function group(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function having(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function __toString(): string
+                    {
+                        return '';
+                    }
+
+                    public function setLimit(int $limit = 0, int $offset = 0): self
+                    {
+                        return $this;
+                    }
+                };
+            }
+        };
+    }
+
+    /**
+     * Create a mock database with low threat file alerts (no high threat)
+     */
+    private function createMockDatabaseWithLowThreatAlerts(): DatabaseInterface
+    {
+        return new class implements DatabaseInterface {
+            private int $queryCount = 0;
+
+            public function getVersion(): string
+            {
+                return '8.0.30';
+            }
+
+            public function getQuery(bool $new = false): QueryInterface
+            {
+                return $this->createMockQuery();
+            }
+
+            public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
+            {
+                return $this;
+            }
+
+            public function loadResult(): mixed
+            {
+                $this->queryCount++;
+
+                // First query (high threat count) returns 0, second (any alerts) returns > 0
+                return match ($this->queryCount) {
+                    1 => 0,  // No high threat alerts
+                    default => 3,  // Some low threat alerts
+                };
+            }
+
+            public function loadColumn(): array
+            {
+                return ['#__admintools_scanalerts'];
+            }
+
+            public function loadAssoc(): ?array
+            {
+                return null;
+            }
+
+            public function loadAssocList(string $key = '', string $column = ''): array
+            {
+                return [];
+            }
+
+            public function loadObject(): ?object
+            {
+                return null;
+            }
+
+            public function loadObjectList(): array
+            {
+                return [];
+            }
+
+            public function execute(): bool
+            {
+                return true;
+            }
+
+            public function quoteName(array|string $name, ?string $as = null): array|string
+            {
+                return is_array($name) ? '' : $name;
+            }
+
+            public function quote(array|string $text, bool $escape = true): array|string
+            {
+                return is_string($text) ? "'{$text}'" : '';
+            }
+
+            public function getPrefix(): string
+            {
+                return '#__';
+            }
+
+            public function getNullDate(): string
+            {
+                return '0000-00-00 00:00:00';
+            }
+
+            public function getTableList(): array
+            {
+                return ['#__admintools_scanalerts'];
+            }
+
+            private function createMockQuery(): QueryInterface
+            {
+                return new class implements QueryInterface {
+                    public function select(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function from(string $table, ?string $alias = null): self
+                    {
+                        return $this;
+                    }
+
+                    public function where(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function join(string $type, string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function leftJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function innerJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function order(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function group(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function having(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function __toString(): string
+                    {
+                        return '';
+                    }
+
+                    public function setLimit(int $limit = 0, int $offset = 0): self
+                    {
+                        return $this;
+                    }
+                };
+            }
+        };
+    }
+
+    /**
+     * Create a mock database with login failures
+     */
+    private function createMockDatabaseWithLoginFailures(int $count): DatabaseInterface
+    {
+        return new class ($count) implements DatabaseInterface {
+            public function __construct(
+                private int $failureCount,
+            ) {}
+
+            public function getVersion(): string
+            {
+                return '8.0.30';
+            }
+
+            public function getQuery(bool $new = false): QueryInterface
+            {
+                return $this->createMockQuery();
+            }
+
+            public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
+            {
+                return $this;
+            }
+
+            public function loadResult(): mixed
+            {
+                return $this->failureCount;
+            }
+
+            public function loadColumn(): array
+            {
+                return ['#__admintools_log'];
+            }
+
+            public function loadAssoc(): ?array
+            {
+                return null;
+            }
+
+            public function loadAssocList(string $key = '', string $column = ''): array
+            {
+                return [];
+            }
+
+            public function loadObject(): ?object
+            {
+                return null;
+            }
+
+            public function loadObjectList(): array
+            {
+                return [];
+            }
+
+            public function execute(): bool
+            {
+                return true;
+            }
+
+            public function quoteName(array|string $name, ?string $as = null): array|string
+            {
+                return is_array($name) ? '' : $name;
+            }
+
+            public function quote(array|string $text, bool $escape = true): array|string
+            {
+                return is_string($text) ? "'{$text}'" : '';
+            }
+
+            public function getPrefix(): string
+            {
+                return '#__';
+            }
+
+            public function getNullDate(): string
+            {
+                return '0000-00-00 00:00:00';
+            }
+
+            public function getTableList(): array
+            {
+                return ['#__admintools_log'];
+            }
+
+            private function createMockQuery(): QueryInterface
+            {
+                return new class implements QueryInterface {
+                    public function select(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function from(string $table, ?string $alias = null): self
+                    {
+                        return $this;
+                    }
+
+                    public function where(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function join(string $type, string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function leftJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function innerJoin(string $table, string $condition = ''): self
+                    {
+                        return $this;
+                    }
+
+                    public function order(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function group(array|string $columns): self
+                    {
+                        return $this;
+                    }
+
+                    public function having(array|string $conditions): self
+                    {
+                        return $this;
+                    }
+
+                    public function __toString(): string
+                    {
+                        return '';
+                    }
+
+                    public function setLimit(int $limit = 0, int $offset = 0): self
+                    {
+                        return $this;
+                    }
+                };
+            }
+        };
+    }
+
+    /**
+     * Create a mock database with expired temporary super users
+     */
+    private function createMockDatabaseWithExpiredTempSuperUsers(): DatabaseInterface
+    {
+        return new class implements DatabaseInterface {
+            public function getVersion(): string
+            {
+                return '8.0.30';
+            }
+
+            public function getQuery(bool $new = false): QueryInterface
+            {
+                return $this->createMockQuery();
+            }
+
+            public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
+            {
+                return $this;
+            }
+
+            public function loadResult(): mixed
+            {
+                // Return count of expired temp super users
+                return 2;
+            }
+
+            public function loadColumn(): array
+            {
+                return ['#__admintools_tempsupers'];
+            }
+
+            public function loadAssoc(): ?array
+            {
+                return null;
+            }
+
+            public function loadAssocList(string $key = '', string $column = ''): array
+            {
+                return [];
+            }
+
+            public function loadObject(): ?object
+            {
+                return null;
+            }
+
+            public function loadObjectList(): array
+            {
+                return [];
+            }
+
+            public function execute(): bool
+            {
+                return true;
+            }
+
+            public function quoteName(array|string $name, ?string $as = null): array|string
+            {
+                return is_array($name) ? '' : $name;
+            }
+
+            public function quote(array|string $text, bool $escape = true): array|string
+            {
+                return is_string($text) ? "'{$text}'" : '';
+            }
+
+            public function getPrefix(): string
+            {
+                return '#__';
+            }
+
+            public function getNullDate(): string
+            {
+                return '0000-00-00 00:00:00';
+            }
+
+            public function getTableList(): array
+            {
+                return ['#__admintools_tempsupers'];
             }
 
             private function createMockQuery(): QueryInterface

@@ -177,4 +177,120 @@ class HealthCheckResultTest extends TestCase
         $this->assertSame('warning', $decoded['status']);
         $this->assertSame('SSL Check', $decoded['title']);
     }
+
+    public function testFromArrayReconstructsResultCorrectly(): void
+    {
+        $data = [
+            'status' => 'critical',
+            'title' => 'Test Title',
+            'description' => 'Test Description',
+            'slug' => 'test.from_array',
+            'category' => 'security',
+            'provider' => 'test_provider',
+        ];
+
+        $result = HealthCheckResult::fromArray($data);
+
+        $this->assertInstanceOf(HealthCheckResult::class, $result);
+        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame('Test Title', $result->title);
+        $this->assertSame('Test Description', $result->description);
+        $this->assertSame('test.from_array', $result->slug);
+        $this->assertSame('security', $result->category);
+        $this->assertSame('test_provider', $result->provider);
+    }
+
+    public function testFromArrayWithWarningStatus(): void
+    {
+        $data = [
+            'status' => 'warning',
+            'title' => 'Warning Test',
+            'description' => 'Warning Description',
+            'slug' => 'test.warning',
+            'category' => 'system',
+            'provider' => 'core',
+        ];
+
+        $result = HealthCheckResult::fromArray($data);
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+    }
+
+    public function testFromArrayWithGoodStatus(): void
+    {
+        $data = [
+            'status' => 'good',
+            'title' => 'Good Test',
+            'description' => 'Good Description',
+            'slug' => 'test.good',
+            'category' => 'database',
+            'provider' => 'core',
+        ];
+
+        $result = HealthCheckResult::fromArray($data);
+
+        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+    }
+
+    public function testFromArrayDefaultsProviderToCore(): void
+    {
+        $data = [
+            'status' => 'good',
+            'title' => 'Test',
+            'description' => 'Test',
+            'slug' => 'test.default_provider',
+            'category' => 'system',
+            // provider is missing
+        ];
+
+        $result = HealthCheckResult::fromArray($data);
+
+        $this->assertSame('core', $result->provider);
+    }
+
+    public function testFromArrayRoundtripsCorrectly(): void
+    {
+        $original = new HealthCheckResult(
+            healthStatus: HealthStatus::Warning,
+            title: 'Roundtrip Test',
+            description: 'Testing roundtrip',
+            slug: 'test.roundtrip',
+            category: 'performance',
+            provider: 'custom_plugin',
+        );
+
+        $array = $original->toArray();
+        $reconstructed = HealthCheckResult::fromArray($array);
+
+        $this->assertSame($original->healthStatus, $reconstructed->healthStatus);
+        $this->assertSame($original->title, $reconstructed->title);
+        $this->assertSame($original->description, $reconstructed->description);
+        $this->assertSame($original->slug, $reconstructed->slug);
+        $this->assertSame($original->category, $reconstructed->category);
+        $this->assertSame($original->provider, $reconstructed->provider);
+    }
+
+    public function testFromArrayWithJsonEncodedData(): void
+    {
+        $original = new HealthCheckResult(
+            healthStatus: HealthStatus::Critical,
+            title: 'JSON Test',
+            description: 'Testing JSON round-trip',
+            slug: 'test.json',
+            category: 'security',
+            provider: 'core',
+        );
+
+        // Simulate JSON serialization/deserialization (as happens in cache)
+        $json = json_encode($original->toArray());
+        $decoded = json_decode($json, true);
+        $reconstructed = HealthCheckResult::fromArray($decoded);
+
+        $this->assertSame($original->healthStatus, $reconstructed->healthStatus);
+        $this->assertSame($original->title, $reconstructed->title);
+        $this->assertSame($original->description, $reconstructed->description);
+        $this->assertSame($original->slug, $reconstructed->slug);
+        $this->assertSame($original->category, $reconstructed->category);
+        $this->assertSame($original->provider, $reconstructed->provider);
+    }
 }

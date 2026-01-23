@@ -102,20 +102,6 @@ class DomExtensionCheckTest extends TestCase
         $this->assertNotSame(HealthStatus::Warning, $result->healthStatus);
     }
 
-    public function testRunReturnsCriticalWhenDomNotLoaded(): void
-    {
-        // DOM is always loaded in standard PHP - cannot test critical path
-        if (extension_loaded('dom')) {
-            $this->markTestSkipped('DOM extension is always loaded in PHP - cannot test critical path');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('DOM', $result->description);
-        $this->assertStringContainsString('not loaded', $result->description);
-    }
-
     /**
      * Document that the critical path requires DOM to be unloaded.
      *

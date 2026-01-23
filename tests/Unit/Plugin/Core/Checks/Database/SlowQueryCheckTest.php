@@ -221,4 +221,35 @@ class SlowQueryCheckTest extends TestCase
         $this->assertStringContainsString('Unable to check slow query log status', $result->description);
         $this->assertStringContainsString('Connection failed', $result->description);
     }
+
+    public function testRunContinuesWhenSlowQueryCountFails(): void
+    {
+        // Test that exceptions during SHOW GLOBAL STATUS are caught and the check continues
+        $this->app->set('debug', true);
+
+        $database = MockDatabaseFactory::createWithSequentialQueries([
+            [
+                'method' => 'loadResult',
+                'return' => '1',
+            ], // @@slow_query_log = enabled
+            [
+                'method' => 'loadResult',
+                'return' => '5',
+            ], // @@long_query_time = 5 seconds
+            [
+                'method' => 'loadObject',
+                'exception' => new \Exception('Access denied for SHOW GLOBAL STATUS'),
+            ], // Exception when getting slow query count
+        ]);
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        // Should still return Warning, just without the slow query count
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('enabled', $result->description);
+        $this->assertStringContainsString('5 seconds', $result->description);
+        // Should NOT contain slow query count since the query failed
+        $this->assertStringNotContainsString('slow queries recorded', $result->description);
+    }
 }

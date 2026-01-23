@@ -223,6 +223,16 @@ class AbstractHealthCheckTest extends TestCase
         $this->assertInstanceOf(\Joomla\CMS\Http\Http::class, $result);
     }
 
+    public function testGetHttpClientFallsBackToHttpFactory(): void
+    {
+        $check = $this->createTestCheckWithHttpClient();
+
+        // Don't inject any HTTP client, verify it falls back to HttpFactory
+        $result = $check->callGetHttpClient();
+
+        $this->assertInstanceOf(\Joomla\CMS\Http\Http::class, $result);
+    }
+
     /**
      * Create a test check instance with exposed protected methods
      */

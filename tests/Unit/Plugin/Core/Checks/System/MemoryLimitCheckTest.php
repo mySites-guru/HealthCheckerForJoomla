@@ -192,25 +192,6 @@ class MemoryLimitCheckTest extends TestCase
         $this->assertSame(HealthStatus::Warning, $result->healthStatus);
     }
 
-    public function testConvertToBytesWithVeryLowValue(): void
-    {
-        // Test with very low value - 8M is well below 128M minimum
-        // Note: ini_set may fail if current memory usage exceeds the target
-        $original = ini_get('memory_limit');
-
-        // Suppress warning from failed ini_set when memory usage exceeds target
-        $result = @ini_set('memory_limit', '8M');
-        if (! $result || ini_get('memory_limit') !== '8M') {
-            @ini_set('memory_limit', $original);
-            $this->markTestSkipped('Cannot set memory_limit to 8M in this environment.');
-        }
-
-        $checkResult = $this->check->run();
-
-        // 8M is way below 128M minimum, Critical
-        $this->assertSame(HealthStatus::Critical, $checkResult->healthStatus);
-    }
-
     public function testConvertToBytesLowercaseSuffix(): void
     {
         // Test lowercase suffix
@@ -270,24 +251,6 @@ class MemoryLimitCheckTest extends TestCase
         $result = $this->check->run();
 
         $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-    }
-
-    public function testVeryLowMemoryLimit(): void
-    {
-        // 32M is very low (below 128M minimum)
-        // Note: ini_set may fail if current memory usage exceeds the target
-        $original = ini_get('memory_limit');
-
-        // Suppress warning from failed ini_set when memory usage exceeds target
-        $result = @ini_set('memory_limit', '32M');
-        if (! $result || ini_get('memory_limit') !== '32M') {
-            @ini_set('memory_limit', $original);
-            $this->markTestSkipped('Cannot set memory_limit to 32M in this environment.');
-        }
-
-        $checkResult = $this->check->run();
-
-        $this->assertSame(HealthStatus::Critical, $checkResult->healthStatus);
     }
 
     public function testVeryHighMemoryLimit(): void

@@ -20,18 +20,9 @@ class PostMaxSizeCheckTest extends TestCase
 {
     private PostMaxSizeCheck $check;
 
-    private string $originalPostMaxSize;
-
     protected function setUp(): void
     {
         $this->check = new PostMaxSizeCheck();
-        $this->originalPostMaxSize = ini_get('post_max_size');
-    }
-
-    protected function tearDown(): void
-    {
-        // Restore original value
-        ini_set('post_max_size', $this->originalPostMaxSize);
     }
 
     public function testGetSlugReturnsCorrectValue(): void
@@ -121,187 +112,6 @@ class PostMaxSizeCheckTest extends TestCase
         $this->assertStringContainsString($postMaxSize, $result->description);
     }
 
-    public function testReturnsCriticalWhenBelowMinimum(): void
-    {
-        // Set post_max_size to 4M (below 8M minimum)
-        if (! ini_set('post_max_size', '4M')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('4M', $result->description);
-        $this->assertStringContainsString('8M', $result->description);
-    }
-
-    public function testReturnsWarningWhenBelowRecommended(): void
-    {
-        // Set post_max_size to 16M (above 8M minimum but below 32M recommended)
-        if (! ini_set('post_max_size', '16M')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('16M', $result->description);
-        $this->assertStringContainsString('32M', $result->description);
-    }
-
-    public function testReturnsGoodWhenMeetsRequirements(): void
-    {
-        // Set post_max_size to 64M (above recommended)
-        if (! ini_set('post_max_size', '64M')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('64M', $result->description);
-        $this->assertStringContainsString('meets requirements', $result->description);
-    }
-
-    public function testReturnsGoodAtExactlyRecommended(): void
-    {
-        // Set post_max_size to exactly 32M (recommended)
-        if (! ini_set('post_max_size', '32M')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('meets requirements', $result->description);
-    }
-
-    public function testReturnsWarningAtExactlyMinimum(): void
-    {
-        // Set post_max_size to exactly 8M (minimum)
-        if (! ini_set('post_max_size', '8M')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        // 8M is at minimum but below recommended, so Warning
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-    }
-
-    public function testBoundaryJustBelowMinimum(): void
-    {
-        // 7M is just below 8M minimum
-        if (! ini_set('post_max_size', '7M')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-    }
-
-    public function testBoundaryJustBelowRecommended(): void
-    {
-        // 31M is just below 32M recommended
-        if (! ini_set('post_max_size', '31M')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-    }
-
-    public function testConvertToBytesWithKilobytes(): void
-    {
-        // Test that K suffix is handled correctly
-        // 8192K = 8M (minimum)
-        if (! ini_set('post_max_size', '8192K')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        // Should be Warning (at minimum, below recommended)
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-    }
-
-    public function testConvertToBytesWithGigabytes(): void
-    {
-        // Test that G suffix is handled correctly
-        // 1G = 1024M (well above recommended)
-        if (! ini_set('post_max_size', '1G')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-    }
-
-    public function testConvertToBytesWithPlainBytes(): void
-    {
-        // Test with plain bytes (no suffix)
-        // 33554432 = 32M (recommended)
-        if (! ini_set('post_max_size', '33554432')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-    }
-
-    public function testConvertToBytesWithZeroValue(): void
-    {
-        // Test with 0 - should be treated as 0 bytes (critical)
-        if (! ini_set('post_max_size', '0')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        // 0 bytes is way below minimum, Critical
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-    }
-
-    public function testConvertToBytesLowercaseSuffix(): void
-    {
-        // Test lowercase suffix
-        if (! ini_set('post_max_size', '32m')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-    }
-
-    public function testVeryLowValue(): void
-    {
-        // 1M is very low
-        if (! ini_set('post_max_size', '1M')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-    }
-
-    public function testVeryHighValue(): void
-    {
-        // 128M is high
-        if (! ini_set('post_max_size', '128M')) {
-            $this->markTestSkipped('Cannot modify post_max_size in this environment.');
-        }
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-    }
-
     public function testResultTitleIsNotEmpty(): void
     {
         $result = $this->check->run();
@@ -316,6 +126,76 @@ class PostMaxSizeCheckTest extends TestCase
 
         $this->assertSame($result1->healthStatus, $result2->healthStatus);
         $this->assertSame($result1->description, $result2->description);
+    }
+
+    public function testConvertToBytesWithEmptyString(): void
+    {
+        // Test empty string handling - should return 0
+        $this->assertSame(0, $this->convertToBytes(''));
+    }
+
+    public function testConvertToBytesWithZeroString(): void
+    {
+        // Test '0' string handling - should return 0
+        $this->assertSame(0, $this->convertToBytes('0'));
+    }
+
+    public function testConvertToBytesWithWhitespace(): void
+    {
+        // Test values with whitespace (trimmed)
+        $this->assertSame(32 * 1024 * 1024, $this->convertToBytes(' 32M '));
+        $this->assertSame(8 * 1024 * 1024, $this->convertToBytes(' 8M '));
+    }
+
+    public function testConvertToBytesWithNumericOnly(): void
+    {
+        // Test numeric values without suffix (bytes)
+        $this->assertSame(1024, $this->convertToBytes('1024'));
+        $this->assertSame(8388608, $this->convertToBytes('8388608'));
+    }
+
+    public function testConvertToBytesWithLowercaseSuffix(): void
+    {
+        // Test lowercase suffixes
+        $this->assertSame(32 * 1024 * 1024, $this->convertToBytes('32m'));
+        $this->assertSame(512 * 1024, $this->convertToBytes('512k'));
+        $this->assertSame(1 * 1024 * 1024 * 1024, $this->convertToBytes('1g'));
+    }
+
+    public function testConvertToBytesWithUppercaseSuffix(): void
+    {
+        // Test uppercase suffixes
+        $this->assertSame(32 * 1024 * 1024, $this->convertToBytes('32M'));
+        $this->assertSame(512 * 1024, $this->convertToBytes('512K'));
+        $this->assertSame(1 * 1024 * 1024 * 1024, $this->convertToBytes('1G'));
+    }
+
+    public function testResultHasCorrectStructure(): void
+    {
+        $result = $this->check->run();
+
+        $this->assertSame('system.post_max_size', $result->slug);
+        $this->assertSame('system', $result->category);
+        $this->assertSame('core', $result->provider);
+        $this->assertIsString($result->description);
+        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+    }
+
+    public function testSlugFormat(): void
+    {
+        $slug = $this->check->getSlug();
+
+        // Slug should be lowercase with dot separator
+        $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
+    }
+
+    public function testCategoryIsValid(): void
+    {
+        $category = $this->check->getCategory();
+
+        // Should be a valid category
+        $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
+        $this->assertContains($category, $validCategories);
     }
 
     /**

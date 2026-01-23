@@ -21,84 +21,84 @@ class CollectCategoriesEventTest extends TestCase
 {
     public function testEventHasCorrectName(): void
     {
-        $event = new CollectCategoriesEvent();
-        $this->assertSame(HealthCheckerEvents::COLLECT_CATEGORIES->value, $event->getName());
+        $collectCategoriesEvent = new CollectCategoriesEvent();
+        $this->assertSame(HealthCheckerEvents::COLLECT_CATEGORIES->value, $collectCategoriesEvent->getName());
     }
 
     public function testGetCategoriesReturnsEmptyArrayByDefault(): void
     {
-        $event = new CollectCategoriesEvent();
-        $this->assertSame([], $event->getCategories());
+        $collectCategoriesEvent = new CollectCategoriesEvent();
+        $this->assertSame([], $collectCategoriesEvent->getCategories());
     }
 
     public function testAddResultAcceptsHealthCategory(): void
     {
-        $event = new CollectCategoriesEvent();
-        $category = MockFactory::createCategory('test', 'Test Category');
+        $collectCategoriesEvent = new CollectCategoriesEvent();
+        $healthCategory = MockFactory::createCategory('test', 'Test Category');
 
-        $event->addResult($category);
+        $collectCategoriesEvent->addResult($healthCategory);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertCount(1, $categories);
-        $this->assertSame($category, $categories[0]);
+        $this->assertSame($healthCategory, $categories[0]);
     }
 
     public function testAddResultAcceptsMultipleCategories(): void
     {
-        $event = new CollectCategoriesEvent();
-        $category1 = MockFactory::createCategory('system', 'System');
+        $collectCategoriesEvent = new CollectCategoriesEvent();
+        $healthCategory = MockFactory::createCategory('system', 'System');
         $category2 = MockFactory::createCategory('database', 'Database');
         $category3 = MockFactory::createCategory('security', 'Security');
 
-        $event->addResult($category1);
-        $event->addResult($category2);
-        $event->addResult($category3);
+        $collectCategoriesEvent->addResult($healthCategory);
+        $collectCategoriesEvent->addResult($category2);
+        $collectCategoriesEvent->addResult($category3);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertCount(3, $categories);
-        $this->assertSame($category1, $categories[0]);
+        $this->assertSame($healthCategory, $categories[0]);
         $this->assertSame($category2, $categories[1]);
         $this->assertSame($category3, $categories[2]);
     }
 
     public function testTypeCheckResultThrowsExceptionForString(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('only accepts HealthCategory instances');
 
-        $event->typeCheckResult('not a category');
+        $collectCategoriesEvent->typeCheckResult('not a category');
     }
 
     public function testTypeCheckResultThrowsExceptionForNull(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('only accepts HealthCategory instances');
 
-        $event->typeCheckResult(null);
+        $collectCategoriesEvent->typeCheckResult(null);
     }
 
     public function testTypeCheckResultThrowsExceptionForStdClass(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('only accepts HealthCategory instances');
 
-        $event->typeCheckResult(new \stdClass());
+        $collectCategoriesEvent->typeCheckResult(new \stdClass());
     }
 
     public function testTypeCheckResultThrowsExceptionForArray(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('only accepts HealthCategory instances');
 
-        $event->typeCheckResult([
+        $collectCategoriesEvent->typeCheckResult([
             'slug' => 'test',
             'label' => 'Test',
         ]);
@@ -106,31 +106,31 @@ class CollectCategoriesEventTest extends TestCase
 
     public function testTypeCheckResultAcceptsValidCategory(): void
     {
-        $event = new CollectCategoriesEvent();
-        $category = MockFactory::createCategory('test', 'Test Category');
+        $collectCategoriesEvent = new CollectCategoriesEvent();
+        $healthCategory = MockFactory::createCategory('test', 'Test Category');
 
         // Should not throw an exception
-        $event->typeCheckResult($category);
+        $collectCategoriesEvent->typeCheckResult($healthCategory);
 
         $this->assertTrue(true); // If we get here, the test passed
     }
 
     public function testEventImplementsResultAwareInterface(): void
     {
-        $event = new CollectCategoriesEvent();
-        $this->assertInstanceOf(\Joomla\CMS\Event\Result\ResultAwareInterface::class, $event);
+        $collectCategoriesEvent = new CollectCategoriesEvent();
+        $this->assertInstanceOf(\Joomla\CMS\Event\Result\ResultAwareInterface::class, $collectCategoriesEvent);
     }
 
     public function testCategoriesPreserveOrder(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
         // Add categories in specific order
-        $event->addResult(MockFactory::createCategory('third', 'Third', sortOrder: 300));
-        $event->addResult(MockFactory::createCategory('first', 'First', sortOrder: 100));
-        $event->addResult(MockFactory::createCategory('second', 'Second', sortOrder: 200));
+        $collectCategoriesEvent->addResult(MockFactory::createCategory('third', 'Third', sortOrder: 300));
+        $collectCategoriesEvent->addResult(MockFactory::createCategory('first', 'First', sortOrder: 100));
+        $collectCategoriesEvent->addResult(MockFactory::createCategory('second', 'Second', sortOrder: 200));
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
 
         // Should preserve insertion order, not sort order
         $this->assertSame('third', $categories[0]->slug);

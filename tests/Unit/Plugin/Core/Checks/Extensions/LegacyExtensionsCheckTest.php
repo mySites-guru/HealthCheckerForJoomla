@@ -472,4 +472,27 @@ class LegacyExtensionsCheckTest extends TestCase
         $this->assertStringContainsString('1 third-party extension', $result->description);
         $this->assertStringContainsString('Old Third Party', $result->description);
     }
+
+    public function testRunWithStrtotimeFallbackDateFormat(): void
+    {
+        // Use a date format that DateTime::createFromFormat doesn't handle
+        // but strtotime can parse (e.g., "1st June 2020")
+        $extensions = [
+            (object) [
+                'name' => 'Extension with strtotime date',
+                'element' => 'com_strtimedate',
+                'manifest_cache' => json_encode([
+                    'creationDate' => '1st June 2020',
+                ]),
+            ],
+        ];
+        $database = MockDatabaseFactory::createWithObjectList($extensions);
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        // Date "1st June 2020" is old (>2 years) so should return warning
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('strtotime date', $result->description);
+    }
 }

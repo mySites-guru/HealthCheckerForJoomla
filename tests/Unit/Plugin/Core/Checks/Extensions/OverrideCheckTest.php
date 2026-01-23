@@ -318,6 +318,32 @@ class OverrideCheckTest extends TestCase
         $this->assertStringContainsString('0 template override(s) tracked', $result->description);
     }
 
+    public function testRunWithMoreThan10TemplatesBreaksOuterLoop(): void
+    {
+        // Create more than MAX_DETAILS_TO_SHOW (10) overrides, each from a different template
+        // This tests the outer loop break (line 184) rather than the inner loop break
+        $outdatedOverrides = [];
+
+        for ($i = 1; $i <= 15; $i++) {
+            $outdatedOverrides[] = (object) [
+                'template' => "template{$i}",
+                'hash_id' => base64_encode("mod_file{$i}/default.php"),
+                'action' => 'changed',
+                'modified_date' => '2025-01-01 12:00:00',
+                'client_id' => 0,
+            ];
+        }
+        $database = $this->createDatabaseWithOverrides($outdatedOverrides, 20);
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('15', $result->description);
+        // Should show "and 5 more" for truncated output
+        $this->assertStringContainsString('and 5 more', $result->description);
+    }
+
     /**
      * Create a mock database without the template_overrides table
      */
