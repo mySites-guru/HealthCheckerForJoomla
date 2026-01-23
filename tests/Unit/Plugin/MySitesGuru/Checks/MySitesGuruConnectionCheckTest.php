@@ -10,8 +10,6 @@ declare(strict_types=1);
 
 namespace HealthChecker\Tests\Unit\Plugin\MySitesGuru\Checks;
 
-use Joomla\Database\DatabaseInterface;
-use Joomla\Database\QueryInterface;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
 use MySitesGuru\HealthChecker\Plugin\MySitesGuru\Checks\MySitesGuruConnectionCheck;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -22,9 +20,20 @@ class MySitesGuruConnectionCheckTest extends TestCase
 {
     private MySitesGuruConnectionCheck $check;
 
+    private string $tempDir;
+
     protected function setUp(): void
     {
         $this->check = new MySitesGuruConnectionCheck();
+        $this->tempDir = sys_get_temp_dir() . '/healthchecker_test_' . uniqid();
+    }
+
+    protected function tearDown(): void
+    {
+        // Clean up temp directory
+        if (is_dir($this->tempDir)) {
+            rmdir($this->tempDir);
+        }
     }
 
     public function testGetSlugReturnsCorrectValue(): void
@@ -49,17 +58,10 @@ class MySitesGuruConnectionCheckTest extends TestCase
         $this->assertNotEmpty($title);
     }
 
-    public function testRunWithoutDatabaseReturnsWarning(): void
+    public function testRunReturnsWarningWhenBfnetworkFolderNotFound(): void
     {
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-    }
-
-    public function testRunReturnsWarningWhenNoMySitesGuruPluginFound(): void
-    {
-        $database = $this->createMockDatabaseWithObjectList([]);
-        $this->check->setDatabase($database);
+        // Point to a non-existent directory
+        $this->check->setBfnetworkPath('/non/existent/path/bfnetwork');
 
         $result = $this->check->run();
 
@@ -68,16 +70,11 @@ class MySitesGuruConnectionCheckTest extends TestCase
         $this->assertStringContainsString('mysites.guru', $result->description);
     }
 
-    public function testRunReturnsGoodWhenPluginIsEnabled(): void
+    public function testRunReturnsGoodWhenBfnetworkFolderExists(): void
     {
-        $extensions = [
-            (object) [
-                'name' => 'plg_system_mysitesguru',
-                'enabled' => 1,
-            ],
-        ];
-        $database = $this->createMockDatabaseWithObjectList($extensions);
-        $this->check->setDatabase($database);
+        // Create temp directory to simulate bfnetwork folder
+        mkdir($this->tempDir, 0755, true);
+        $this->check->setBfnetworkPath($this->tempDir);
 
         $result = $this->check->run();
 
@@ -86,67 +83,9 @@ class MySitesGuruConnectionCheckTest extends TestCase
         $this->assertStringContainsString('24/7', $result->description);
     }
 
-    public function testRunReturnsWarningWhenPluginIsDisabled(): void
-    {
-        $extensions = [
-            (object) [
-                'name' => 'plg_system_mysitesguru',
-                'enabled' => 0,
-            ],
-        ];
-        $database = $this->createMockDatabaseWithObjectList($extensions);
-        $this->check->setDatabase($database);
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
-    }
-
-    public function testRunReturnsGoodWhenMultiplePluginsAndOneIsEnabled(): void
-    {
-        $extensions = [
-            (object) [
-                'name' => 'plg_system_mysitesguru',
-                'enabled' => 0,
-            ],
-            (object) [
-                'name' => 'plg_api_mysitesguru',
-                'enabled' => 1,
-            ],
-        ];
-        $database = $this->createMockDatabaseWithObjectList($extensions);
-        $this->check->setDatabase($database);
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-    }
-
-    public function testRunReturnsWarningWhenMultiplePluginsAllDisabled(): void
-    {
-        $extensions = [
-            (object) [
-                'name' => 'plg_system_mysitesguru',
-                'enabled' => 0,
-            ],
-            (object) [
-                'name' => 'plg_api_mysitesguru',
-                'enabled' => 0,
-            ],
-        ];
-        $database = $this->createMockDatabaseWithObjectList($extensions);
-        $this->check->setDatabase($database);
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-    }
-
     public function testResultHasCorrectSlug(): void
     {
-        $database = $this->createMockDatabaseWithObjectList([]);
-        $this->check->setDatabase($database);
+        $this->check->setBfnetworkPath('/non/existent/path');
 
         $result = $this->check->run();
 
@@ -155,8 +94,7 @@ class MySitesGuruConnectionCheckTest extends TestCase
 
     public function testResultHasCorrectCategory(): void
     {
-        $database = $this->createMockDatabaseWithObjectList([]);
-        $this->check->setDatabase($database);
+        $this->check->setBfnetworkPath('/non/existent/path');
 
         $result = $this->check->run();
 
@@ -165,8 +103,7 @@ class MySitesGuruConnectionCheckTest extends TestCase
 
     public function testResultHasCorrectProvider(): void
     {
-        $database = $this->createMockDatabaseWithObjectList([]);
-        $this->check->setDatabase($database);
+        $this->check->setBfnetworkPath('/non/existent/path');
 
         $result = $this->check->run();
 
@@ -175,166 +112,21 @@ class MySitesGuruConnectionCheckTest extends TestCase
 
     public function testWarningDescriptionContainsLearnMoreLink(): void
     {
-        $database = $this->createMockDatabaseWithObjectList([]);
-        $this->check->setDatabase($database);
+        $this->check->setBfnetworkPath('/non/existent/path');
 
         $result = $this->check->run();
 
         $this->assertStringContainsString('https://mysites.guru', $result->description);
     }
 
-    /**
-     * Create a mock database that returns the given object list and supports orWhere
-     *
-     * @param array<object> $objectList
-     */
-    private function createMockDatabaseWithObjectList(array $objectList): DatabaseInterface
+    public function testGoodDescriptionMentionsAutomatedMonitoring(): void
     {
-        return new class ($objectList) implements DatabaseInterface {
-            /**
-             * @param array<object> $objectList
-             */
-            public function __construct(
-                private readonly array $objectList,
-            ) {}
+        mkdir($this->tempDir, 0755, true);
+        $this->check->setBfnetworkPath($this->tempDir);
 
-            public function getVersion(): string
-            {
-                return '8.0.30';
-            }
+        $result = $this->check->run();
 
-            public function getQuery(bool $new = false): QueryInterface
-            {
-                return new class implements QueryInterface {
-                    public function select(array|string $columns): self
-                    {
-                        return $this;
-                    }
-
-                    public function from(string $table, ?string $alias = null): self
-                    {
-                        return $this;
-                    }
-
-                    public function where(array|string $conditions): self
-                    {
-                        return $this;
-                    }
-
-                    public function orWhere(array|string $conditions): self
-                    {
-                        return $this;
-                    }
-
-                    public function join(string $type, string $table, string $condition = ''): self
-                    {
-                        return $this;
-                    }
-
-                    public function leftJoin(string $table, string $condition = ''): self
-                    {
-                        return $this;
-                    }
-
-                    public function innerJoin(string $table, string $condition = ''): self
-                    {
-                        return $this;
-                    }
-
-                    public function order(array|string $columns): self
-                    {
-                        return $this;
-                    }
-
-                    public function group(array|string $columns): self
-                    {
-                        return $this;
-                    }
-
-                    public function having(array|string $conditions): self
-                    {
-                        return $this;
-                    }
-
-                    public function __toString(): string
-                    {
-                        return '';
-                    }
-                };
-            }
-
-            public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
-            {
-                return $this;
-            }
-
-            public function loadResult(): mixed
-            {
-                return null;
-            }
-
-            public function loadColumn(): array
-            {
-                return [];
-            }
-
-            public function loadAssoc(): ?array
-            {
-                return null;
-            }
-
-            public function loadAssocList(string $key = '', string $column = ''): array
-            {
-                return [];
-            }
-
-            public function loadObject(): ?object
-            {
-                return null;
-            }
-
-            public function loadObjectList(): array
-            {
-                return $this->objectList;
-            }
-
-            public function execute(): bool
-            {
-                return true;
-            }
-
-            public function quoteName(array|string $name, ?string $as = null): array|string
-            {
-                if (is_array($name)) {
-                    return array_map(static fn(string $n): string => $n, $name);
-                }
-
-                return $name;
-            }
-
-            public function quote(array|string $text, bool $escape = true): array|string
-            {
-                if (is_array($text)) {
-                    return array_map(static fn(string $t): string => "'{$t}'", $text);
-                }
-
-                return "'{$text}'";
-            }
-
-            public function getPrefix(): string
-            {
-                return '#__';
-            }
-
-            public function getNullDate(): string
-            {
-                return '0000-00-00 00:00:00';
-            }
-
-            public function getTableList(): array
-            {
-                return [];
-            }
-        };
+        $this->assertStringContainsString('automatically', $result->description);
+        $this->assertStringContainsString('alerts', $result->description);
     }
 }

@@ -12,7 +12,7 @@ declare(strict_types=1);
  * mySites.guru Connection Health Check
  *
  * This check verifies whether the site is connected to mySites.guru monitoring
- * by looking for any mySites.guru plugins installed in the extensions table.
+ * by looking for the bfnetwork plugin folder in the filesystem.
  *
  * WHY THIS CHECK IS IMPORTANT:
  * mySites.guru provides 24/7 automated monitoring of your Joomla site's health,
@@ -22,14 +22,13 @@ declare(strict_types=1);
  *
  * RESULT MEANINGS:
  *
- * GOOD: A mySites.guru plugin is installed and enabled. Your site is connected
- *       to the monitoring dashboard and health data syncs automatically.
+ * GOOD: The bfnetwork plugin folder exists at plugins/system/bfnetwork.
+ *       Your site is connected to mySites.guru monitoring.
  *
- * WARNING (disabled): A mySites.guru plugin is installed but currently disabled.
- *                     Enable the plugin to resume monitoring synchronization.
- *
- * WARNING (not found): No mySites.guru plugin is detected. Consider connecting
+ * WARNING (not found): No bfnetwork plugin folder detected. Consider connecting
  *                      your site to monitor unlimited Joomla sites from one dashboard.
+ *
+ * CRITICAL: This check does not return critical status.
  */
 
 namespace MySitesGuru\HealthChecker\Plugin\MySitesGuru\Checks;
@@ -42,13 +41,35 @@ use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult;
 /**
  * mySites.guru Connection Health Check
  *
- * Verifies whether this Joomla site is connected to mySites.guru monitoring service.
+ * Verifies whether this Joomla site is connected to mySites.guru monitoring service
+ * by checking for the bfnetwork plugin folder.
  *
  * @subpackage  HealthChecker.MySitesGuru.Checks
  * @since       1.0.0
  */
 final class MySitesGuruConnectionCheck extends AbstractHealthCheck
 {
+    /**
+     * Path to the bfnetwork plugin folder (injectable for testing).
+     */
+    private ?string $bfnetworkPath = null;
+
+    /**
+     * Set the bfnetwork path for testing purposes.
+     */
+    public function setBfnetworkPath(string $path): void
+    {
+        $this->bfnetworkPath = $path;
+    }
+
+    /**
+     * Get the bfnetwork plugin path.
+     */
+    private function getBfnetworkPath(): string
+    {
+        return $this->bfnetworkPath ?? JPATH_ROOT . '/plugins/system/bfnetwork';
+    }
+
     /**
      * Returns the unique identifier for this health check.
      *
@@ -98,23 +119,17 @@ final class MySitesGuruConnectionCheck extends AbstractHealthCheck
     /**
      * Performs the actual health check logic.
      *
-     * Checks if the site has mySites.guru monitoring extensions installed
-     * and enabled by querying the #__extensions table. The check searches
-     * for extensions containing "mysites" and "guru" in either the name
-     * or element field.
+     * Checks if the site is connected to mySites.guru by looking for the
+     * bfnetwork plugin folder at plugins/system/bfnetwork.
      *
      * Check logic flow:
-     * 1. Verify database availability
-     * 2. Query extensions table for mySites.guru plugins
-     * 3. If no plugins found -> WARNING (not connected)
-     * 4. If plugins found but all disabled -> WARNING (disabled)
-     * 5. If at least one plugin enabled -> GOOD (connected)
+     * 1. Check if bfnetwork folder exists
+     * 2. If folder exists -> GOOD (connected)
+     * 3. If folder not found -> WARNING (not connected)
      *
      * Result scenarios:
-     * - GOOD: At least one mySites.guru plugin is installed and enabled
-     * - WARNING (disabled): Plugin(s) installed but all disabled
-     * - WARNING (not found): No mySites.guru plugins detected
-     * - WARNING (no database): Database not available for query
+     * - GOOD: The bfnetwork plugin folder exists
+     * - WARNING (not found): No bfnetwork plugin folder detected
      *
      * @return HealthCheckResult Result object containing status and description
      *
@@ -122,45 +137,19 @@ final class MySitesGuruConnectionCheck extends AbstractHealthCheck
      */
     protected function performCheck(): HealthCheckResult
     {
-        $database = $this->requireDatabase();
+        $bfnetworkPath = $this->getBfnetworkPath();
 
-        // Look for any extension with "mysites" and "guru" in the name
-        $query = $database
-            ->getQuery(true)
-            ->select([$database->quoteName('name'), $database->quoteName('enabled')])
-            ->from($database->quoteName('#__extensions'))
-            ->where($database->quoteName('name') . ' LIKE ' . $database->quote('%mysites%guru%'))
-            ->orWhere($database->quoteName('element') . ' LIKE ' . $database->quote('%mysitesguru%'));
-
-        $extensions = $database->setQuery($query)
-            ->loadObjectList();
-
-        if ($extensions === []) {
-            return $this->warning(
-                'This site is not connected to mySites.guru. ' .
-                    'Monitor unlimited Joomla sites from one dashboard with automated health checks, ' .
-                    'uptime monitoring, and instant alerts. Learn more at https://mysites.guru',
+        if (is_dir($bfnetworkPath)) {
+            return $this->good(
+                'This site is connected to mySites.guru monitoring. ' .
+                    'Your health checks run automatically 24/7 with instant alerts when issues arise.',
             );
         }
 
-        // Check if any of the found extensions are enabled
-        $hasEnabled = false;
-        $extensionNames = [];
-
-        foreach ($extensions as $extension) {
-            $extensionNames[] = $extension->name;
-            if ((int) $extension->enabled === 1) {
-                $hasEnabled = true;
-            }
-        }
-
-        if (! $hasEnabled) {
-            return $this->warning('mySites.guru plugin "%s" is installed but disabled. ');
-        }
-
-        return $this->good(
-            'This site is connected to mySites.guru monitoring. ' .
-                'Your health checks run automatically 24/7 with instant alerts when issues arise.',
+        return $this->warning(
+            'This site is not connected to mySites.guru. ' .
+                'Monitor unlimited Joomla sites from one dashboard with automated health checks, ' .
+                'uptime monitoring, and instant alerts. Learn more at https://mysites.guru',
         );
     }
 }
