@@ -514,7 +514,7 @@ echo -e "${GREEN}✓ XML files updated${NC}"
 echo ""
 echo -e "${YELLOW}Updating website download buttons...${NC}"
 
-GITHUB_DOWNLOAD_URL="https://github.com/mySites-guru/HealthCheckerForJoomla/releases/download/v${NEW_VERSION}/pkg_healthchecker-v${NEW_VERSION}.zip"
+GITHUB_DOWNLOAD_URL="https://github.com/mySites-guru/HealthCheckerForJoomla/releases/download/v${NEW_VERSION}/pkg_healthchecker-${NEW_VERSION}.zip"
 GITHUB_RELEASE_URL="https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v${NEW_VERSION}"
 RELEASE_DATE=$(date "+%d %b %Y" | sed 's/^0//')
 
@@ -528,7 +528,8 @@ if [ -f "$WEBSITE_INDEX" ]; then
     sed -i '' "s|href=\"https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v[^\"]*\"|href=\"${GITHUB_RELEASE_URL}\"|g" "$WEBSITE_INDEX"
 
     # Update the version text (e.g., "Latest version: v3.0.28 Released 21st Jan 2026")
-    sed -i '' "s|>Latest version: v[0-9.]* Released [^<]*<|>Latest version: v${NEW_VERSION} Released ${RELEASE_DATE}<|g" "$WEBSITE_INDEX"
+    # Use perl for multiline matching since text may span lines
+    perl -i -0pe "s|>Latest version: v[0-9.]+ Released [^<]+<|>Latest version: v${NEW_VERSION} Released ${RELEASE_DATE}<|gs" "$WEBSITE_INDEX"
 
     # Update Schema.org metadata
     sed -i '' "s|\"softwareVersion\": \"[^\"]*\"|\"softwareVersion\": \"${NEW_VERSION}\"|g" "$WEBSITE_INDEX"
@@ -537,7 +538,7 @@ if [ -f "$WEBSITE_INDEX" ]; then
     sed -i '' "s|\"releaseNotes\": \"https://github.com/mySites-guru/HealthCheckerForJoomla/releases/[^\"]*\"|\"releaseNotes\": \"${GITHUB_RELEASE_URL}\"|g" "$WEBSITE_INDEX"
 
     # Update download links that point to GitHub package downloads
-    sed -i '' "s|href=\"https://github.com/mySites-guru/HealthCheckerForJoomla/releases/download/v[^/]*/pkg_healthchecker-v[^\"]*\.zip\"|href=\"${GITHUB_DOWNLOAD_URL}\"|g" "$WEBSITE_INDEX"
+    sed -i '' "s|href=\"https://github.com/mySites-guru/HealthCheckerForJoomla/releases/download/v[^/]*/pkg_healthchecker-[^\"]*\.zip\"|href=\"${GITHUB_DOWNLOAD_URL}\"|g" "$WEBSITE_INDEX"
 
     echo -e "${GREEN}✓ Website download buttons updated to v${NEW_VERSION}${NC}"
 fi
