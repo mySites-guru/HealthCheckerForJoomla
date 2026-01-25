@@ -36,7 +36,7 @@ declare(strict_types=1);
 
 namespace MySitesGuru\HealthChecker\Plugin\Core\Checks\Security;
 
-use Joomla\CMS\Factory;
+use Joomla\CMS\Component\ComponentHelper;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\AbstractHealthCheck;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult;
 
@@ -87,15 +87,15 @@ final class PasswordPolicyCheck extends AbstractHealthCheck
      */
     protected function performCheck(): HealthCheckResult
     {
-        $cmsApplication = Factory::getApplication();
+        // Password policy settings are stored in com_users component parameters
+        // (Users > Options > Password Options), not in global configuration
+        $registry = ComponentHelper::getParams('com_users');
 
-        // Retrieve password policy settings from global configuration
-        // Note: Joomla 5 default is 12 characters minimum (not stored in DB if using default)
-        $minLength = (int) $cmsApplication->get('minimum_length', 12);
-        $minIntegers = (int) $cmsApplication->get('minimum_integers', 0);
-        $minSymbols = (int) $cmsApplication->get('minimum_symbols', 0);
-        $minUppercase = (int) $cmsApplication->get('minimum_uppercase', 0);
-        $minLowercase = (int) $cmsApplication->get('minimum_lowercase', 0);
+        $minLength = (int) $registry->get('minimum_length', 12);
+        $minIntegers = (int) $registry->get('minimum_integers', 0);
+        $minSymbols = (int) $registry->get('minimum_symbols', 0);
+        $minUppercase = (int) $registry->get('minimum_uppercase', 0);
+        $minLowercase = (int) $registry->get('minimum_lowercase', 0);
 
         // Critical: Password length under 8 characters is dangerously weak
         if ($minLength < 8) {

@@ -10,8 +10,8 @@ declare(strict_types=1);
 
 namespace HealthChecker\Tests\Unit\Plugin\Core\Checks\Security;
 
-use Joomla\CMS\Application\CMSApplication;
-use Joomla\CMS\Factory;
+use Joomla\CMS\Component\ComponentHelper;
+use Joomla\Registry\Registry;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
 use MySitesGuru\HealthChecker\Plugin\Core\Checks\Security\PasswordPolicyCheck;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -22,18 +22,14 @@ class PasswordPolicyCheckTest extends TestCase
 {
     private PasswordPolicyCheck $check;
 
-    private CMSApplication $app;
-
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
         $this->check = new PasswordPolicyCheck();
     }
 
     protected function tearDown(): void
     {
-        Factory::setApplication(null);
+        ComponentHelper::resetParams();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
@@ -61,7 +57,10 @@ class PasswordPolicyCheckTest extends TestCase
 
     public function testRunReturnsCriticalWhenPasswordLengthTooShort(): void
     {
-        $this->app->set('minimum_length', 6);
+        $params = new Registry([
+            'minimum_length' => 6,
+        ]);
+        ComponentHelper::setParams('com_users', $params);
 
         $result = $this->check->run();
 
@@ -71,7 +70,10 @@ class PasswordPolicyCheckTest extends TestCase
 
     public function testRunReturnsWarningWhenPasswordLengthShort(): void
     {
-        $this->app->set('minimum_length', 10);
+        $params = new Registry([
+            'minimum_length' => 10,
+        ]);
+        ComponentHelper::setParams('com_users', $params);
 
         $result = $this->check->run();
 
@@ -81,11 +83,14 @@ class PasswordPolicyCheckTest extends TestCase
 
     public function testRunReturnsWarningWhenNoComplexity(): void
     {
-        $this->app->set('minimum_length', 12);
-        $this->app->set('minimum_integers', 0);
-        $this->app->set('minimum_symbols', 0);
-        $this->app->set('minimum_uppercase', 0);
-        $this->app->set('minimum_lowercase', 0);
+        $params = new Registry([
+            'minimum_length' => 12,
+            'minimum_integers' => 0,
+            'minimum_symbols' => 0,
+            'minimum_uppercase' => 0,
+            'minimum_lowercase' => 0,
+        ]);
+        ComponentHelper::setParams('com_users', $params);
 
         $result = $this->check->run();
 
@@ -95,8 +100,11 @@ class PasswordPolicyCheckTest extends TestCase
 
     public function testRunReturnsGoodWhenPasswordPolicyStrong(): void
     {
-        $this->app->set('minimum_length', 12);
-        $this->app->set('minimum_integers', 1);
+        $params = new Registry([
+            'minimum_length' => 12,
+            'minimum_integers' => 1,
+        ]);
+        ComponentHelper::setParams('com_users', $params);
 
         $result = $this->check->run();
 
