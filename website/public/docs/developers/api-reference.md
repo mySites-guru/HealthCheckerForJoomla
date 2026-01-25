@@ -52,6 +52,20 @@ interface HealthCheckInterface
      * Should be fast (< 1 second target)
      */
     public function run(): HealthCheckResult;
+
+    /**
+     * Get documentation URL for this check (optional)
+     * When set, displays (?) icon that opens URL in new tab
+     * @since 3.0.36
+     */
+    public function getDocsUrl(): ?string;
+
+    /**
+     * Get action URL for this check (optional)
+     * When set, makes result row clickable (navigates same window)
+     * @since 3.0.36
+     */
+    public function getActionUrl(): ?string;
 }
 ```
 
@@ -81,6 +95,10 @@ abstract class AbstractHealthCheck implements HealthCheckInterface
     public function getTitle(): string;
     public function getProvider(): string;
     public function run(): HealthCheckResult;
+
+    // Optional URL methods (return null by default)
+    public function getDocsUrl(): ?string;   // Override to add (?) docs link
+    public function getActionUrl(): ?string; // Override to make row clickable
 }
 ```
 
@@ -100,6 +118,8 @@ abstract class AbstractHealthCheck implements HealthCheckInterface
 * `getTitle()` - Loads from language file
 * `getProvider()` - Returns 'core' by default (override if needed)
 * `run()` - Wraps performCheck() with error handling
+* `getDocsUrl()` - Returns null by default (override to add docs link)
+* `getActionUrl()` - Returns null by default (override to make row clickable)
 
 ### Error Handling
 
@@ -226,24 +246,31 @@ Immutable result object returned by checks.
 final readonly class HealthCheckResult
 {
     public function __construct(
-        public HealthStatus $status,
+        public HealthStatus $healthStatus,
         public string $title,
         public string $description,
         public string $slug,
         public string $category,
-        public string $provider = 'core'
+        public string $provider = 'core',
+        public ?string $docsUrl = null,    // @since 3.0.36
+        public ?string $actionUrl = null   // @since 3.0.36
     );
+
+    public function toArray(): array;
+    public static function fromArray(array $data): self;
 }
 ```
 
 **Properties**:
 
-* `status` - One of: HealthStatus::Good, Warning, or Critical
+* `healthStatus` - One of: HealthStatus::Good, Warning, or Critical
 * `title` - Check title
 * `description` - Result description
 * `slug` - Check slug
 * `category` - Category slug
 * `provider` - Provider slug
+* `docsUrl` - URL for documentation link (displays ? icon) *@since 3.0.36*
+* `actionUrl` - URL to navigate when row is clicked *@since 3.0.36*
 
 ### HealthStatus
 

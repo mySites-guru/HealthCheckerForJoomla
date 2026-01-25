@@ -62,6 +62,89 @@ final class ExampleCheck extends AbstractHealthCheck
 }
 ```
 
+## Documentation and Action URLs
+
+Health checks can provide two optional URLs to enhance the user experience:
+
+### Documentation URL (`getDocsUrl`)
+
+When implemented, displays a **(?)** icon next to the check title. Clicking the icon opens the documentation URL in a new browser tab.
+
+```php
+public function getDocsUrl(): ?string
+{
+    return 'https://docs.yoursite.com/checks/example-check';
+}
+```
+
+**Use cases**:
+
+* Link to detailed documentation explaining the check
+* Link to troubleshooting guides
+* Link to the source code on GitHub
+
+### Action URL (`getActionUrl`)
+
+When implemented, makes the entire result row clickable. Clicking the row navigates to the action URL in the same window.
+
+```php
+public function getActionUrl(): ?string
+{
+    return '/administrator/index.php?option=com_yourplugin&view=settings';
+}
+```
+
+**Use cases**:
+
+* Link to the configuration page where users can fix the issue
+* Link to the Joomla component that needs attention
+* Link to the relevant admin panel section
+
+**Example with both URLs**:
+
+```php
+final class ApiConfigCheck extends AbstractHealthCheck
+{
+    public function getSlug(): string
+    {
+        return 'yourplugin.api_config';
+    }
+
+    public function getCategory(): string
+    {
+        return 'extensions';
+    }
+
+    public function getProvider(): string
+    {
+        return 'yourplugin';
+    }
+
+    public function getDocsUrl(): ?string
+    {
+        return 'https://docs.yoursite.com/configuration/api-settings';
+    }
+
+    public function getActionUrl(): ?string
+    {
+        return '/administrator/index.php?option=com_yourplugin&view=config';
+    }
+
+    protected function performCheck(): HealthCheckResult
+    {
+        // Check logic here
+        return $this->good('API is configured correctly.');
+    }
+}
+```
+
+**Notes**:
+
+* Both methods return `?string` - return `null` (or don't override) to disable the feature
+* `getDocsUrl()` opens in a new tab, `getActionUrl()` opens in the same window
+* Action URLs should be relative administrator paths (starting with `/administrator/`)
+* Documentation URLs can be absolute URLs to external documentation
+
 ## Check Slug Format
 
 **Format**: `{provider}.{check_name}`
@@ -470,6 +553,26 @@ final class ApiConnectionCheck extends AbstractHealthCheck
     public function getProvider(): string
     {
         return 'yourplugin';
+    }
+
+    /**
+     * Link to documentation for this check.
+     *
+     * Displays a (?) icon that opens this URL in a new tab.
+     */
+    public function getDocsUrl(): ?string
+    {
+        return 'https://docs.yoursite.com/health-checks/api-connection';
+    }
+
+    /**
+     * Link to the settings page where users can fix issues.
+     *
+     * Makes the result row clickable, navigating to this URL.
+     */
+    public function getActionUrl(): ?string
+    {
+        return '/administrator/index.php?option=com_yourplugin&view=settings';
     }
 
     protected function performCheck(): HealthCheckResult

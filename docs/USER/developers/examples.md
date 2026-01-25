@@ -147,6 +147,22 @@ final class SimpleCheck extends AbstractHealthCheck
         return 'minimal';
     }
 
+    /**
+     * Optional: Link to documentation (displays ? icon)
+     */
+    public function getDocsUrl(): ?string
+    {
+        return 'https://example.com/docs/simple-check';
+    }
+
+    /**
+     * Optional: Link to settings page (makes row clickable)
+     */
+    public function getActionUrl(): ?string
+    {
+        return '/administrator/index.php?option=com_minimal&view=settings';
+    }
+
     protected function performCheck(): HealthCheckResult
     {
         // Your check logic here
