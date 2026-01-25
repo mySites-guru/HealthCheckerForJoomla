@@ -56,9 +56,22 @@ class ActionLogsEnabledCheckTest extends TestCase
         $this->assertSame(HealthStatus::Warning, $result->healthStatus);
     }
 
-    public function testRunReturnsWarningWhenNoActionLogPluginsEnabled(): void
+    public function testRunReturnsWarningWhenSystemPluginDisabled(): void
     {
+        // System plugin returns enabled = 0 (disabled)
         $database = MockDatabaseFactory::createWithResult(0);
+        $this->check->setDatabase($database);
+
+        $result = $this->check->run();
+
+        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertStringContainsString('System - Action Logs plugin is disabled', $result->description);
+    }
+
+    public function testRunReturnsWarningWhenSystemPluginNotFound(): void
+    {
+        // System plugin not found (null result)
+        $database = MockDatabaseFactory::createWithResult(null);
         $this->check->setDatabase($database);
 
         $result = $this->check->run();
@@ -67,25 +80,15 @@ class ActionLogsEnabledCheckTest extends TestCase
         $this->assertStringContainsString('disabled', $result->description);
     }
 
-    public function testRunReturnsGoodWhenActionLogPluginsEnabled(): void
+    public function testRunReturnsGoodWhenSystemPluginEnabled(): void
     {
-        $database = MockDatabaseFactory::createWithResult(3);
-        $this->check->setDatabase($database);
-
-        $result = $this->check->run();
-
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('3 action log plugin(s) enabled', $result->description);
-    }
-
-    public function testRunReturnsGoodWithSinglePlugin(): void
-    {
+        // System plugin returns enabled = 1
         $database = MockDatabaseFactory::createWithResult(1);
         $this->check->setDatabase($database);
 
         $result = $this->check->run();
 
         $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('1 action log plugin(s) enabled', $result->description);
+        $this->assertStringContainsString('Action Logs system plugin is enabled', $result->description);
     }
 }

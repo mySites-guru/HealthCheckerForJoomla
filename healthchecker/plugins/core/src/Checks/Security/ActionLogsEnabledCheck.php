@@ -11,9 +11,10 @@ declare(strict_types=1);
 /**
  * Action Logs Health Check
  *
- * This check verifies that Joomla's Action Logs plugins are enabled. Action logs
- * record administrative activities such as content changes, user management,
- * configuration updates, and login attempts.
+ * This check verifies that Joomla's Action Logs system plugin is enabled. The system
+ * plugin (plg_system_actionlogs) is the core logging engine that records administrative
+ * activities such as content changes, user management, configuration updates, and
+ * login attempts.
  *
  * WHY THIS CHECK IS IMPORTANT:
  * Security auditing requires comprehensive logs of user activities. Action logs help
@@ -23,11 +24,11 @@ declare(strict_types=1);
  *
  * RESULT MEANINGS:
  *
- * GOOD: Action log plugins are enabled, recording administrative activities for
- *       security auditing. Review logs regularly in System > Action Logs.
+ * GOOD: The System - Action Logs plugin is enabled, recording administrative activities
+ *       for security auditing. Review logs regularly in System > Action Logs.
  *
- * WARNING: Action log plugins are disabled. Enable them in Plugins to track user
- *          activity. This is essential for security monitoring and compliance.
+ * WARNING: The System - Action Logs plugin is disabled. Enable it in System > Plugins
+ *          to track user activity. This is essential for security monitoring and compliance.
  *
  * CRITICAL: Not applicable for this check.
  */
@@ -64,28 +65,33 @@ final class ActionLogsEnabledCheck extends AbstractHealthCheck
     /**
      * Perform the Action Logs Enabled health check.
      *
+     * Checks if the core System - Action Logs plugin (plg_system_actionlogs) is enabled.
+     * This is the main logging engine that must be active for action logging to work.
+     *
      * @return HealthCheckResult The result of this health check
      */
     protected function performCheck(): HealthCheckResult
     {
         $database = $this->requireDatabase();
-        // Check if actionlog plugins are enabled
+
+        // Check if the core System - Action Logs plugin is enabled
+        // This plugin (folder: system, element: actionlogs) is the logging engine
         $query = $database->getQuery(true)
-            ->select('COUNT(*)')
+            ->select($database->quoteName('enabled'))
             ->from($database->quoteName('#__extensions'))
             ->where($database->quoteName('type') . ' = ' . $database->quote('plugin'))
-            ->where($database->quoteName('folder') . ' = ' . $database->quote('actionlog'))
-            ->where($database->quoteName('enabled') . ' = 1');
+            ->where($database->quoteName('folder') . ' = ' . $database->quote('system'))
+            ->where($database->quoteName('element') . ' = ' . $database->quote('actionlogs'));
 
-        $enabledPlugins = (int) $database->setQuery($query)
+        $systemPluginEnabled = (int) $database->setQuery($query)
             ->loadResult();
 
-        if ($enabledPlugins === 0) {
+        if ($systemPluginEnabled !== 1) {
             return $this->warning(
-                'Action log plugins are disabled. Enable them to track user activity for security auditing.',
+                'System - Action Logs plugin is disabled. Enable it to track user activity for security auditing.',
             );
         }
 
-        return $this->good(sprintf('%d action log plugin(s) enabled for security auditing.', $enabledPlugins));
+        return $this->good('Action Logs system plugin is enabled for security auditing.');
     }
 }
