@@ -343,7 +343,7 @@ export default defineConfig({
   },
 
   themeConfig: {
-    logo: '/logo.svg',
+    logo: { src: '/logo.svg', alt: 'Health Checker for Joomla' },
     siteTitle: 'Health Checker Docs',
     logoLink: 'https://www.joomlahealthchecker.com/',
     nav: [
