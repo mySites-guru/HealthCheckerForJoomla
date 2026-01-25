@@ -1,6 +1,6 @@
 # <img src="https://www.joomlahealthchecker.com/favicon.svg" width="32" height="32" alt="Logo" align="center"> Health Checker for Joomla
 
-A comprehensive health monitoring extension for Joomla 5+ with over 130 checks across 8+ categories and an extensible plugin architecture.
+A comprehensive health monitoring extension for Joomla 5+ with over 129 checks across 8+ categories and an extensible plugin architecture.
 
 **Website**: [https://www.joomlahealthchecker.com](https://www.joomlahealthchecker.com)
 
@@ -16,7 +16,7 @@ A comprehensive health monitoring extension for Joomla 5+ with over 130 checks a
 
 ## Features
 
-- **Over 130 Health Checks** across 8+ categories (System, Database, Security, Users, Extensions, Performance, SEO, Content)
+- **Over 129 Health Checks** across 8+ categories (System, Database, Security, Users, Extensions, Performance, SEO, Content)
 - **Event-Driven Architecture** - Third-party plugins can add custom checks and categories
 - **Dashboard Widget** - Quick site status overview
 - **AJAX API** - 5 endpoints for integration
@@ -86,7 +86,7 @@ composer phpstan      # Static analysis (Level 8)
 | Component | Status |
 |-----------|--------|
 | Core Infrastructure | ✅ Complete |
-| Core Checks (130+ files) | ✅ Complete |
+| Core Checks (129 files) | ✅ Complete |
 | Dashboard Module | ✅ Complete |
 | Example Plugin (SDK) | ✅ Complete |
 | MySites.guru Integration | ✅ Complete |
@@ -100,7 +100,7 @@ composer phpstan      # Static analysis (Level 8)
 ```
 Health Checker Architecture
 ├── Component (com_healthchecker)           - Admin UI, event dispatcher, services
-├── Core Plugin (plg_healthchecker_core)    - Over 130 built-in checks
+├── Core Plugin (plg_healthchecker_core)    - 129 built-in checks
 ├── Module (mod_healthchecker)              - Dashboard widget
 └── Optional Integrations
     ├── Akeeba Backup plugin                - Backup monitoring

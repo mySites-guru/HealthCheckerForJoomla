@@ -19,7 +19,7 @@ This page provides a complete reference of all health checks included in Health 
 - [System & Hosting](#system-hosting) (33 checks)
 - [Users](#users) (12 checks)
 
-**Note:** The core plugin provides **130 checks** across these 8+ categories. Additional plugins may add more checks.
+**Note:** The core plugin provides **129 checks** across these 8+ categories. Additional plugins may add more checks.
 
 ---
 

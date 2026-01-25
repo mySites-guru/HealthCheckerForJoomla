@@ -18,7 +18,7 @@ This guide explains how to set up a local development environment for working on
 │   ├── component/          # com_healthchecker
 │   ├── module/             # mod_healthchecker
 │   └── plugins/            # All plugins
-│       ├── core/           # 130 check files
+│       ├── core/           # 129 check files
 │       ├── example/        # SDK reference
 │       ├── mysitesguru/    # mySites.guru integration
 │       ├── akeebabackup/   # Akeeba Backup monitoring

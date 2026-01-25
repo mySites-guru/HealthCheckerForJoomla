@@ -55,7 +55,7 @@ build/dist/
 ├── pkg_healthchecker-{VERSION}.zip              ← Install this
 ├── com_healthchecker-{VERSION}.zip
 ├── mod_healthchecker-{VERSION}.zip
-├── plg_healthchecker_core-{VERSION}.zip         ← Largest (130 checks)
+├── plg_healthchecker_core-{VERSION}.zip         ← Largest (129 checks)
 ├── plg_healthchecker_example-{VERSION}.zip
 ├── plg_healthchecker_mysitesguru-{VERSION}.zip
 ├── plg_healthchecker_akeebabackup-{VERSION}.zip
@@ -241,7 +241,7 @@ Before building a release:
 - Layouts
 
 ### Core Plugin Package (Largest)
-- 130 check files
+- 129 check files
 - Category definitions
 - Auto-discovery logic
 - Language file with 130+ keys

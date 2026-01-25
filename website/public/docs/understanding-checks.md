@@ -113,7 +113,7 @@ Health checks can come from different providers:
 
 ### Core Provider
 
-The built-in provider that ships with Health Checker. Includes 130 checks across the 8+ categories.
+The built-in provider that ships with Health Checker. Includes 129 checks across the 8+ categories.
 
 ### Third-Party Providers
 

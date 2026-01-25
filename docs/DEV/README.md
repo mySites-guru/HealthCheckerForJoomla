@@ -23,7 +23,7 @@ This DEV folder contains:
 - **[DEVELOPMENT.md](DEVELOPMENT.md)** - Local development setup with symlinks
 - **[BUILD.md](BUILD.md)** - Build process for creating distribution packages
 - **[IMPLEMENTATION.md](IMPLEMENTATION.md)** - Technical architecture and implementation plan
-- **[CHECKS.md](CHECKS.md)** - Canonical list of all 130 health checks
+- **[CHECKS.md](CHECKS.md)** - Canonical list of all 129 health checks
 - **[AKEEBA.md](AKEEBA.md)** - Akeeba integration plugin details
 
 ## 🎯 Quick Links
@@ -74,7 +74,7 @@ open http://yourjoomla.local/administrator
 Health Checker for Joomla
 ├── Component (com_healthchecker)           - Infrastructure, events, AJAX API
 ├── Module (mod_healthchecker)              - Dashboard widget
-├── Core Plugin (plg_healthchecker_core)    - 130 check files
+├── Core Plugin (plg_healthchecker_core)    - 129 check files
 └── Optional Integrations
     ├── Example Plugin                      - SDK reference
     ├── MySites.guru Plugin                 - API integration
@@ -98,7 +98,7 @@ Health Checker for Joomla
 │   ├── component/                  # com_healthchecker
 │   ├── module/                     # mod_healthchecker
 │   └── plugins/
-│       ├── core/                   # 130 check files
+│       ├── core/                   # 129 check files
 │       ├── example/                # SDK reference
 │       ├── mysitesguru/            # Integration
 │       ├── akeebabackup/           # Backup monitoring
@@ -125,7 +125,7 @@ Health Checker for Joomla
 | Component | Status | Details |
 |-----------|--------|---------|
 | Core Infrastructure | ✅ Complete | Component, events, runner, caching, AJAX API |
-| Core Checks | ✅ Complete | 130 checks across 8+ categories |
+| Core Checks | ✅ Complete | 129 checks across 8+ categories |
 | Dashboard Module | ✅ Complete | AJAX-driven admin widget |
 | Example Plugin | ✅ Complete | SDK reference for developers |
 | MySites.guru Plugin | ✅ Complete | API integration with branding |

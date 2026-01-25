@@ -2,7 +2,7 @@
 
 ## Overview
 
-Build a Joomla 5+ component (`com_healthchecker`) with 130 health checks using event-driven auto-discovery architecture. Each check is an isolated file that can be added/removed without code changes elsewhere.
+Build a Joomla 5+ component (`com_healthchecker`) with 129 health checks using event-driven auto-discovery architecture. Each check is an isolated file that can be added/removed without code changes elsewhere.
 
 ---
 
@@ -10,7 +10,7 @@ Build a Joomla 5+ component (`com_healthchecker`) with 130 health checks using e
 
 ```
 com_healthchecker (Component)     - Admin UI, models, controllers, events
-plg_healthchecker_core (Plugin)   - 130 built-in checks, auto-discovered
+plg_healthchecker_core (Plugin)   - 129 built-in checks, auto-discovered
 mod_healthchecker (Module)        - Dashboard widget
 ```
 
@@ -28,7 +28,7 @@ mod_healthchecker (Module)        - Dashboard widget
 - **Build in `healthchecker/`** for development (symlinked to `joomla/` for testing)
 - **Build script** extracts files to create installable ZIP
 - **Full UI from start** - collapsible categories, filters, export
-- **Single core plugin** - all 130 checks in `plg_healthchecker_core`
+- **Single core plugin** - all 129 checks in `plg_healthchecker_core`
 
 ---
 
@@ -649,7 +649,7 @@ This validates the full architecture and UI before implementing remaining 118 ch
 
 ## Phase 2: Check Implementation (Workstreams 4-11)
 
-Implement all 130 checks in parallel across 8 category workstreams. Each workstream is independent after the interfaces exist.
+Implement all 129 checks in parallel across 8 category workstreams. Each workstream is independent after the interfaces exist.
 
 ---
 
@@ -676,7 +676,7 @@ Implement all 130 checks in parallel across 8 category workstreams. Each workstr
 1. **Install package** in the Docker Joomla instance
 2. **Enable plugin** `plg_healthchecker_core`
 3. **Navigate** to Components > Health Checker
-4. **Click "Run Health Check"** - verify all 130 checks execute
+4. **Click "Run Health Check"** - verify all 129 checks execute
 5. **Test filters** - filter by status, filter by category, combined
 6. **Test exports** - download JSON, download HTML
 7. **Dashboard widget** - add to admin dashboard, verify summary shows

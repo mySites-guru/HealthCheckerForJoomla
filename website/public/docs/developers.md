@@ -153,5 +153,5 @@ Ready to build your first health check plugin? Continue to [Quick Start](/develo
 For complete working examples, see:
 
 * **Example Plugin** - `plugins/healthchecker/example/` (included with Health Checker)
-* **Core Plugin** - `plugins/healthchecker/core/` (130 production examples)
+* **Core Plugin** - `plugins/healthchecker/core/` (129 production examples)
 * **Akeeba Integrations** - `plugins/healthchecker/akeebabackup/` and `akeebaadmintools/`

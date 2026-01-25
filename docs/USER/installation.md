@@ -70,7 +70,7 @@ The main component provides:
 **Location**: `administrator/components/com_healthchecker/`
 
 ### Core Plugin (plg_healthchecker_core)
-Contains 130 health checks organized in 8+ categories.
+Contains 129 health checks organized in 8+ categories.
 
 **Location**: `plugins/healthchecker/core/`
 

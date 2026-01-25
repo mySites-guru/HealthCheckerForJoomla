@@ -76,7 +76,7 @@ The main component provides:
 
 ### Core Plugin (plg\_healthchecker\_core)
 
-Contains 130 health checks organized in 8+ categories.
+Contains 129 health checks organized in 8+ categories.
 
 **Location**: `plugins/healthchecker/core/`
 

@@ -2,7 +2,7 @@
 
 This is the **canonical source** for all health checks. Any changes to checks should be made here first.
 
-**Total: 130 checks across 8+ categories**
+**Total: 129 checks across 8+ categories**
 
 > **Note**: No SSL/certificate checks - these are infrastructure-level concerns handled by hosting.
 
@@ -81,7 +81,7 @@ This is the **canonical source** for all health checks. Any changes to checks sh
 
 ---
 
-## Security (21 checks)
+## Security (20 checks)
 
 ### Security Headers
 - X-Frame-Options (Deprecated - use CSP frame-ancestors)
@@ -105,7 +105,6 @@ This is the **canonical source** for all health checks. Any changes to checks sh
 - Two-Factor Authentication Available
 - Password Policy Configured
 - Admin Username Check
-- User Actions Log
 
 ### Privacy & API
 - Privacy Dashboard
@@ -234,10 +233,10 @@ This is the **canonical source** for all health checks. Any changes to checks sh
 |----------|--------|
 | System & Hosting | 33 |
 | Database | 18 |
-| Security | 21 |
+| Security | 20 |
 | Users | 12 |
 | Extensions | 13 |
 | Performance | 10 |
 | SEO | 12 |
 | Content Quality | 11 |
-| **Total** | **130** |
+| **Total** | **129** |

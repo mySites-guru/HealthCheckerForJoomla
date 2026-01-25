@@ -59,7 +59,7 @@ To disable all checks in a category:
 **All checks are enabled by default** when you first install Health Checker. You must explicitly disable checks you don't want to run.
 
 If you haven't configured any checks:
-- All 130 core checks will run
+- All 129 core checks will run
 - This is the recommended starting point for most sites
 - You can disable checks as needed after reviewing initial results
 
@@ -109,7 +109,7 @@ Disabled checks are **completely skipped** during execution:
 
 This improves performance, especially if you disable many checks.
 
-**Example:** If you disable 20 checks out of 130, the health check will execute faster because those 20 checks are never instantiated or executed.
+**Example:** If you disable 20 checks out of 129, the health check will execute faster because those 20 checks are never instantiated or executed.
 
 ## Dashboard Module
 

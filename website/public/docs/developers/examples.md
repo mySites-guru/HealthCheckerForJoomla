@@ -191,7 +191,7 @@ This demonstrates:
 
 ### Core Plugin
 
-The core plugin at `plugins/healthchecker/core/` contains 130 production-ready checks showing:
+The core plugin at `plugins/healthchecker/core/` contains 129 production-ready checks showing:
 
 * All check patterns
 * Best practices
