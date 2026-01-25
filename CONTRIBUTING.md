@@ -243,6 +243,5 @@ By contributing, you agree that your contributions will be licensed under the GN
 
 - **Documentation**: https://joomlahealthchecker.com/docs
 - **Issues**: https://github.com/mySites-guru/HealthCheckerForJoomla/issues
-- **Discussions**: https://github.com/mySites-guru/HealthCheckerForJoomla/discussions
 
 Thank you for contributing to Health Checker for Joomla!
