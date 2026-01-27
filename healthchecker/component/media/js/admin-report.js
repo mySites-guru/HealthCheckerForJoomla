@@ -33,6 +33,7 @@
 
             let checksCompleted = 0;
             let checksTotal = 0;
+            const cacheBuster = Date.now();
 
             function saveFilters() {
                 const filters = {
@@ -117,7 +118,7 @@
                 try {
                     // First, fetch metadata (categories, providers, check list)
                     progressEl.textContent = translations.loading || 'Loading...';
-                    const metaResponse = await fetch(metadataUrl, {
+                    const metaResponse = await fetch(metadataUrl + '&_=' + cacheBuster, {
                         method: 'GET',
                         headers: {
                             'Accept': 'application/json',
@@ -177,7 +178,7 @@
                     const formData = new FormData();
                     formData.append('category', categorySlug);
 
-                    const response = await fetch(categoryUrl, {
+                    const response = await fetch(categoryUrl + '&_=' + cacheBuster, {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
@@ -203,7 +204,7 @@
 
             async function runSingleCheck(slug, progressEl) {
                 try {
-                    const response = await fetch(`${checkUrl}&slug=${encodeURIComponent(slug)}`, {
+                    const response = await fetch(`${checkUrl}&slug=${encodeURIComponent(slug)}&_=${cacheBuster}`, {
                         method: 'GET',
                         headers: {
                             'Accept': 'application/json',
