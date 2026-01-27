@@ -10,6 +10,7 @@
     <version>3.0.37</version>
     <description>COM_HEALTHCHECKER_XML_DESCRIPTION</description>
     <namespace path="src">MySitesGuru\HealthChecker\Component</namespace>
+    <scriptfile>script.php</scriptfile>
 
     <administration>
         <menu link="option=com_healthchecker&amp;view=report" img="class:heartbeat">COM_HEALTHCHECKER</menu>

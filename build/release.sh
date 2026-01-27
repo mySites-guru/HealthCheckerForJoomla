@@ -354,6 +354,8 @@ class Pkg_HealthcheckerInstallerScript
 
     public function postflight(string $type, InstallerAdapter $parent): void
     {
+        $this->removeObsoleteFiles();
+
         $this->enablePlugin('healthchecker', 'core');
         $this->enablePlugin('healthchecker', 'example');
         $this->enablePlugin('healthchecker', 'mysitesguru');
@@ -395,6 +397,22 @@ class Pkg_HealthcheckerInstallerScript
             ->where($db->quoteName('element') . ' = ' . $db->quote($element))
             ->where($db->quoteName('enabled') . ' = 1');
         return (int) $db->setQuery($query)->loadResult() > 0;
+    }
+
+    private function removeObsoleteFiles(): void
+    {
+        $files = [
+            // Removed in 3.0.38: BackupAgeCheck replaced by akeeba_backup.last_backup
+            JPATH_PLUGINS . '/healthchecker/core/src/Checks/Database/BackupAgeCheck.php',
+            // Removed in 3.0.36: Phantom check for non-existent plg_user_userlog
+            JPATH_PLUGINS . '/healthchecker/core/src/Checks/Security/UserActionsLogCheck.php',
+        ];
+
+        foreach ($files as $file) {
+            if (file_exists($file)) {
+                @unlink($file);
+            }
+        }
     }
 
     private function publishModule(string $module, string $position = 'cpanel'): void

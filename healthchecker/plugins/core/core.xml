@@ -10,6 +10,7 @@
     <version>3.0.37</version>
     <description>PLG_HEALTHCHECKER_CORE_XML_DESCRIPTION</description>
     <namespace path="src">MySitesGuru\HealthChecker\Plugin\Core</namespace>
+    <scriptfile>script.php</scriptfile>
 
     <files>
         <folder plugin="core">services</folder>
