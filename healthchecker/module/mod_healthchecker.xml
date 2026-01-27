@@ -7,7 +7,7 @@
     <creationDate>2026-01</creationDate>
     <copyright>(C) 2026 mySites.guru / Phil E. Taylor</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-    <version>3.0.39</version>
+    <version>3.0.40</version>
     <description>MOD_HEALTHCHECKER_XML_DESCRIPTION</description>
     <namespace path="src">MySitesGuru\HealthChecker\Module</namespace>
 
