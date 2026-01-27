@@ -79,9 +79,26 @@ LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 if [ -z "$LAST_TAG" ]; then
     echo -e "${BLUE}No previous tags found. This appears to be the first release.${NC}"
     GIT_LOG=""
+    CLOSED_ISSUES=""
 else
     echo -e "${BLUE}Last release: ${LAST_TAG}${NC}"
     GIT_LOG=$(git log --pretty=format:"%h %s" --no-merges "${LAST_TAG}..HEAD")
+
+    # Fetch closed issues and merged PRs since last tag
+    LAST_TAG_DATE=$(git log -1 --format=%aI "$LAST_TAG" 2>/dev/null || echo "")
+    if [ -n "$LAST_TAG_DATE" ]; then
+        echo -e "${BLUE}Fetching closed issues/PRs since ${LAST_TAG_DATE}...${NC}"
+        CLOSED_ISSUES=$(gh issue list --state closed --search "closed:>=${LAST_TAG_DATE}" --json number,title,labels --template '{{range .}}#{{.number}} {{.title}}{{range .labels}} [{{.name}}]{{end}}
+{{end}}' 2>/dev/null || echo "")
+        MERGED_PRS=$(gh pr list --state merged --search "merged:>=${LAST_TAG_DATE}" --json number,title,labels --template '{{range .}}PR #{{.number}} {{.title}}{{range .labels}} [{{.name}}]{{end}}
+{{end}}' 2>/dev/null || echo "")
+        if [ -n "$MERGED_PRS" ]; then
+            CLOSED_ISSUES="${CLOSED_ISSUES}
+${MERGED_PRS}"
+        fi
+    else
+        CLOSED_ISSUES=""
+    fi
 fi
 
 # Use Claude to determine appropriate version bump
@@ -161,11 +178,20 @@ There are no commits since ${LAST_TAG}. This is a maintenance release.
 Output ONLY one bullet point:
 - [Release] Maintenance release with no functional changes"
 else
+    ISSUES_CONTEXT=""
+    if [ -n "$CLOSED_ISSUES" ]; then
+        ISSUES_CONTEXT="
+
+Closed issues and merged PRs since ${LAST_TAG}:
+${CLOSED_ISSUES}
+"
+    fi
+
     CLAUDE_PROMPT="Generate release notes for Health Checker for Joomla version ${NEW_VERSION}.
 
 Git commits since ${LAST_TAG}:
 ${GIT_LOG}
-
+${ISSUES_CONTEXT}
 Create concise, user-focused release notes. Only include:
 - New features (with brief description)
 - Bug fixes (important ones only)
@@ -178,10 +204,13 @@ CRITICAL FORMATTING RULES:
 3. DO NOT include commit hashes.
 4. DO NOT use emoji characters.
 5. Use prefixes: [Feature], [Fix], [Security], [Performance], [Internal]
+6. If a bullet point relates to a closed GitHub issue or merged PR, append the reference as a markdown link at the end of the line.
+   Format: ([#N](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/N))
+   Match commits to issues/PRs by comparing their descriptions.
 
 Example:
+- [Fix] Fixed missing translation key for brute force protection check ([#2](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/2))
 - [Feature] Added backup status monitoring
-- [Fix] Fixed dashboard widget refresh issue
 - [Internal] Updated build tooling"
 fi
 
@@ -644,6 +673,26 @@ gh release create "v${NEW_VERSION}" \
 
 rm -f "$RELEASE_NOTES_FILE"
 echo -e "${GREEN}✓ GitHub release created${NC}"
+
+# Comment on referenced issues and PRs
+if [ -n "$CLOSED_ISSUES" ]; then
+    echo ""
+    echo -e "${YELLOW}Commenting on referenced issues and PRs...${NC}"
+    RELEASE_URL="https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v${NEW_VERSION}"
+    COMMENT_BODY="Thanks. This change has just been released in [v${NEW_VERSION}](${RELEASE_URL})."
+
+    echo "$CLOSED_ISSUES" | grep -oE '#[0-9]+' | sort -t'#' -k2 -n -u | while read -r ref; do
+        num="${ref#\#}"
+        if gh issue comment "$num" --body "$COMMENT_BODY" 2>/dev/null; then
+            echo -e "  ${GREEN}✓ Commented on issue #${num}${NC}"
+        elif gh pr comment "$num" --body "$COMMENT_BODY" 2>/dev/null; then
+            echo -e "  ${GREEN}✓ Commented on PR #${num}${NC}"
+        else
+            echo -e "  ${YELLOW}⚠ Could not comment on #${num}${NC}"
+        fi
+    done
+    echo -e "${GREEN}✓ Issue/PR comments posted${NC}"
+fi
 
 # Build and deploy website
 echo ""
