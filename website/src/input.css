@@ -211,57 +211,6 @@
     background-image: linear-gradient(to bottom right, var(--tw-gradient-from, rgb(17 24 39)), var(--tw-gradient-to, rgb(31 41 55)));
   }
 
-  /* Fix waitlist popup background */
-  .dark #waitlist-popover,
-  .dark [id*="waitlist"] {
-    background-color: rgb(31 41 55) !important; /* gray-800 */
-  }
-
-  /* Fix waitlist popup header background in dark mode */
-  .dark #waitlist-popover .popover-header {
-    background: rgb(31 41 55) !important; /* gray-800 to match popup body */
-  }
-
-  /* Fix waitlist popup - ensure form inputs are consistently styled */
-  .dark #waitlist-popover input[type="text"],
-  .dark #waitlist-popover input[type="email"],
-  .dark [id*="waitlist"] input[type="text"],
-  .dark [id*="waitlist"] input[type="email"] {
-    background-color: rgb(55 65 81) !important; /* gray-700 */
-    border-color: rgb(75 85 99) !important; /* gray-600 */
-    color: rgb(243 244 246) !important; /* gray-100 */
-  }
-
-  .dark #waitlist-popover input[type="text"]::placeholder,
-  .dark #waitlist-popover input[type="email"]::placeholder,
-  .dark [id*="waitlist"] input[type="text"]::placeholder,
-  .dark [id*="waitlist"] input[type="email"]::placeholder {
-    color: rgb(156 163 175) !important; /* gray-400 */
-  }
-
-  .dark #waitlist-popover input[type="text"]:focus,
-  .dark #waitlist-popover input[type="email"]:focus,
-  .dark [id*="waitlist"] input[type="text"]:focus,
-  .dark [id*="waitlist"] input[type="email"]:focus {
-    border-color: rgb(59 130 246) !important; /* blue-500 */
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-
-  /* Fix waitlist button styling for consistency */
-  .dark #waitlist-popover button,
-  .dark [id*="waitlist"] button {
-    background-color: rgb(37 99 235) !important; /* blue-600 */
-    color: rgb(255 255 255) !important; /* white */
-    border-color: rgb(37 99 235) !important;
-  }
-
-  .dark #waitlist-popover button:hover,
-  .dark [id*="waitlist"] button:hover {
-    background-color: rgb(29 78 216) !important; /* blue-700 */
-    border-color: rgb(29 78 216) !important;
-  }
-
   /* Fix search popup modal */
   .dark #search-modal,
   .dark [role="dialog"],

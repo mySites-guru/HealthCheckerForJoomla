@@ -33,13 +33,3 @@ custom_domain = true
 [[routes]]
 pattern = "www.myjoomlahealthcheck.com"
 custom_domain = true
-
-# D1 Database for waitlist
-[[d1_databases]]
-binding = "DB"
-database_name = "healthchecker-waitlist"
-database_id = "28539e7d-6d04-4025-bab0-b0af71b4fe55"
-
-# Email sending
-[[send_email]]
-name = "SEND_EMAIL"
