@@ -2,7 +2,7 @@
 
 This is the **canonical source** for all health checks. Any changes to checks should be made here first.
 
-**Total: 129 checks across 8+ categories**
+**Total: 128 checks across 8+ categories**
 
 > **Note**: No SSL/certificate checks - these are infrastructure-level concerns handled by hosting.
 
@@ -53,7 +53,7 @@ This is the **canonical source** for all health checks. Any changes to checks sh
 
 ---
 
-## Database (18 checks)
+## Database (17 checks)
 
 ### Connection & Server
 - Database Connection
@@ -76,7 +76,6 @@ This is the **canonical source** for all health checks. Any changes to checks sh
 - Table Prefix Set
 - Database Size
 - Slow Query Log
-- Backup Age (Akeeba integration)
 - Transaction Isolation Level
 
 ---

@@ -435,17 +435,6 @@
                 </field>
 
                 <field
-                    name="check_database_backup_age"
-                    type="radio"
-                    label="PLG_HEALTHCHECKER_CORE_CHECK_DATABASE_BACKUP_AGE_TITLE"
-                    class="btn-group btn-group-yesno"
-                    default="1"
-                >
-                    <option value="1">JENABLED</option>
-                    <option value="0">JDISABLED</option>
-                </field>
-
-                <field
                     name="check_database_connection_charset"
                     type="radio"
                     label="PLG_HEALTHCHECKER_CORE_CHECK_DATABASE_CONNECTION_CHARSET_TITLE"
