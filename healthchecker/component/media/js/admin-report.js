@@ -280,7 +280,7 @@
                     </td>
                     <td>${escapeHtml(result.title)}</td>
                     <td>${providerBadge}</td>
-                    <td>${escapeHtml(result.description)}</td>
+                    <td class="healthchecker-description">${result.description}</td>
                     <td>${docsHtml}</td>
                 `;
 
@@ -494,7 +494,7 @@
                                     </td>
                                     <td>${escapeHtml(result.title)}</td>
                                     <td>${providerBadge}</td>
-                                    <td>${escapeHtml(result.description)}</td>
+                                    <td class="healthchecker-description">${result.description}</td>
                                     <td>${docsHtml}</td>
                                 </tr>
                             `;

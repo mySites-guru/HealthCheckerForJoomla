@@ -128,9 +128,18 @@ final class CustomConfigCheck extends AbstractHealthCheck
      * BEST PRACTICES:
      * - Use requireDatabase() to get a non-null database instance
      * - Use helper methods: $this->good(), $this->warning(), $this->critical()
-     * - Include helpful descriptions in results
+     * - Include helpful descriptions in results with HTML formatting
      * - Keep checks fast (< 1 second if possible)
      * - Extract complex logic to private methods for readability
+     *
+     * DESCRIPTION HTML FORMATTING:
+     * Descriptions support safe HTML tags for better readability:
+     * - <br>, <p> - Line breaks and paragraphs
+     * - <strong>, <b>, <em>, <i>, <u> - Text formatting
+     * - <code>, <pre> - Code formatting
+     * - <ul>, <ol>, <li> - Lists
+     *
+     * Dangerous tags (<script>, <a>, etc.) are automatically stripped.
      *
      * @return HealthCheckResult Result object with status and description
      *
@@ -147,22 +156,34 @@ final class CustomConfigCheck extends AbstractHealthCheck
         // In a real plugin, you'd check your extension's actual configuration
         $extensionCount = $this->countExtensions();
 
-        // PATTERN: Use meaningful thresholds and provide actionable messages
+        // PATTERN: Use meaningful thresholds and provide actionable messages with HTML formatting
         if ($extensionCount > 100) {
             return $this->warning(
-                sprintf(
-                    '[EXAMPLE CHECK] You have %d extensions installed. This is a demonstration warning from the Example Provider plugin. To hide this, disable the "Health Checker - Example Provider" plugin in Extensions → Plugins.',
-                    $extensionCount,
-                ),
+                '<p><strong>[EXAMPLE CHECK]</strong> You have <code>' . $extensionCount . '</code> extensions installed.</p>' .
+                '<p>This is a <em>demonstration warning</em> from the Example Provider plugin showing HTML formatting:</p>' .
+                '<ul>' .
+                '<li>Bold text with <code>&lt;strong&gt;</code></li>' .
+                '<li>Inline code with <code>&lt;code&gt;</code></li>' .
+                '<li>Lists with <code>&lt;ul&gt;</code> and <code>&lt;li&gt;</code></li>' .
+                '</ul>' .
+                '<p>Code blocks with <code>&lt;pre&gt;</code>:</p>' .
+                '<pre>php bin/console extension:list</pre>' .
+                '<p>To hide this, disable the <strong>Health Checker - Example Provider</strong> plugin in Extensions → Plugins.</p>',
             );
         }
 
-        // PATTERN: Good status should confirm what was checked
+        // PATTERN: Good status should confirm what was checked, with formatted output
         return $this->good(
-            sprintf(
-                '[EXAMPLE CHECK] %d extensions installed. This is a demonstration from the Example Provider plugin. To hide this, disable the "Health Checker - Example Provider" plugin in Extensions → Plugins.',
-                $extensionCount,
-            ),
+            '<p><strong>[EXAMPLE CHECK]</strong> <code>' . $extensionCount . '</code> extensions installed.</p>' .
+            '<p>This is a <em>demonstration</em> from the Example Provider plugin showing HTML formatting support:</p>' .
+            '<ul>' .
+            '<li><strong>Bold</strong> and <em>italic</em> text</li>' .
+            '<li>Inline <code>code</code> formatting</li>' .
+            '<li>Lists for multiple items</li>' .
+            '</ul>' .
+            '<p>Code blocks with <code>&lt;pre&gt;</code>:</p>' .
+            '<pre>php bin/console cache:clear</pre>' .
+            '<p>To hide this, disable the <strong>Health Checker - Example Provider</strong> plugin.</p>',
         );
     }
 

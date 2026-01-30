@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace MySitesGuru\HealthChecker\Component\Administrator\Check;
 
+use MySitesGuru\HealthChecker\Component\Administrator\Service\DescriptionSanitizer;
+
 \defined('_JEXEC') || die;
 
 /**
@@ -132,7 +134,8 @@ final class HealthCheckResult
      *
      * This is used for JSON encoding, session storage, and passing data to
      * JavaScript in the frontend. The health status enum is converted to its
-     * string value.
+     * string value. The title has all HTML stripped for security, while the
+     * description is sanitized to allow only safe HTML formatting tags.
      *
      * @return array{status: string, title: string, description: string, slug: string, category: string, provider: string, docsUrl: string|null, actionUrl: string|null}
      *               Array representation of the result
@@ -141,16 +144,41 @@ final class HealthCheckResult
      */
     public function toArray(): array
     {
+        $descriptionSanitizer = new DescriptionSanitizer();
+
         return [
             'status' => $this->healthStatus->value,
-            'title' => $this->title,
-            'description' => $this->description,
+            'title' => $this->stripAllHtml($this->title),
+            'description' => $descriptionSanitizer->sanitize($this->description),
             'slug' => $this->slug,
             'category' => $this->category,
             'provider' => $this->provider,
             'docsUrl' => $this->docsUrl,
             'actionUrl' => $this->actionUrl,
         ];
+    }
+
+    /**
+     * Strip all HTML from a string, including the content of script/style tags.
+     *
+     * This is more aggressive than strip_tags() because it removes the content
+     * of dangerous tags like <script>, <style>, and <iframe>, not just the tags.
+     *
+     * @param string $text The text to clean
+     *
+     * @return string The text with all HTML removed
+     *
+     * @since 3.1.0
+     */
+    private function stripAllHtml(string $text): string
+    {
+        // First remove dangerous tag content entirely
+        $text = (string) preg_replace('/<script\b[^>]*>[\s\S]*?<\/script>/i', '', $text);
+        $text = (string) preg_replace('/<style\b[^>]*>[\s\S]*?<\/style>/i', '', $text);
+        $text = (string) preg_replace('/<iframe\b[^>]*>[\s\S]*?<\/iframe>/i', '', $text);
+
+        // Then strip all remaining tags
+        return strip_tags($text);
     }
 
     /**
