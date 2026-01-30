@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace MySitesGuru\HealthChecker\Plugin\MySitesGuru\Extension;
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Uri\Uri;
@@ -188,6 +189,12 @@ final class MySitesGuruPlugin extends CMSPlugin implements SubscriberInterface
      */
     public function onBeforeReportDisplay(BeforeReportDisplayEvent $event): void
     {
+        // Defensive permission check - ensure user has access to the component
+        $user = Factory::getApplication()->getIdentity();
+        if ($user === null || ! $user->authorise('core.manage', 'com_healthchecker')) {
+            return;
+        }
+
         $logoUrl = Uri::root() . 'media/plg_healthchecker_mysitesguru/logo.png';
         $bannerText = Text::_('PLG_HEALTHCHECKER_MYSITESGURU_BANNER_TEXT');
         $bannerLink = Text::_('PLG_HEALTHCHECKER_MYSITESGURU_BANNER_LINK');
@@ -263,6 +270,12 @@ JS;
      */
     public function onAfterToolbarBuild(AfterToolbarBuildEvent $event): void
     {
+        // Defensive permission check - ensure user has access to the component
+        $user = Factory::getApplication()->getIdentity();
+        if ($user === null || ! $user->authorise('core.manage', 'com_healthchecker')) {
+            return;
+        }
+
         $toolbar = $event->getToolbar();
 
         $toolbar->linkButton('mysitesguru')

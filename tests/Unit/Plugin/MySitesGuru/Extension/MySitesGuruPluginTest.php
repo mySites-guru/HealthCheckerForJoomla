@@ -10,7 +10,10 @@ declare(strict_types=1);
 
 namespace HealthChecker\Tests\Unit\Plugin\MySitesGuru\Extension;
 
+use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Toolbar\Toolbar;
+use Joomla\CMS\User\User;
 use MySitesGuru\HealthChecker\Component\Administrator\Category\HealthCategory;
 use MySitesGuru\HealthChecker\Component\Administrator\Event\AfterToolbarBuildEvent;
 use MySitesGuru\HealthChecker\Component\Administrator\Event\BeforeReportDisplayEvent;
@@ -27,6 +30,36 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MySitesGuruPlugin::class)]
 class MySitesGuruPluginTest extends TestCase
 {
+    private ?CMSApplication $cmsApplication = null;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Store original app if set
+        try {
+            $this->cmsApplication = Factory::getApplication();
+        } catch (\Exception) {
+            $this->cmsApplication = null;
+        }
+
+        // Set up a mock application with authorized user
+        $cmsApplication = new CMSApplication();
+        $user = new User(42);
+        $user->setAuthorisation('core.manage', 'com_healthchecker', true);
+        $cmsApplication->setIdentity($user);
+        Factory::setApplication($cmsApplication);
+    }
+
+    protected function tearDown(): void
+    {
+        // Restore original application
+        Factory::setApplication($this->cmsApplication);
+        Toolbar::clearInstances();
+
+        parent::tearDown();
+    }
+
     public function testGetSubscribedEventsReturnsCorrectMapping(): void
     {
         $events = MySitesGuruPlugin::getSubscribedEvents();
@@ -302,5 +335,83 @@ class MySitesGuruPluginTest extends TestCase
         $this->assertSame('onHealthCheckerCollectProviders', HealthCheckerEvents::COLLECT_PROVIDERS->value);
         $this->assertSame('onHealthCheckerBeforeReportDisplay', HealthCheckerEvents::BEFORE_REPORT_DISPLAY->value);
         $this->assertSame('onHealthCheckerAfterToolbarBuild', HealthCheckerEvents::AFTER_TOOLBAR_BUILD->value);
+    }
+
+    public function testOnBeforeReportDisplayDoesNothingWithoutPermission(): void
+    {
+        // Set up user without permission
+        $cmsApplication = new CMSApplication();
+        $user = new User(42);
+        // No authorization set - user cannot manage com_healthchecker
+        $cmsApplication->setIdentity($user);
+        Factory::setApplication($cmsApplication);
+
+        $plugin = new MySitesGuruPlugin(new \stdClass());
+        $event = new BeforeReportDisplayEvent();
+
+        $plugin->onBeforeReportDisplay($event);
+
+        $html = $event->getHtmlContent();
+        // Should be empty - no content added without permission
+        $this->assertSame('', $html);
+    }
+
+    public function testOnAfterToolbarBuildDoesNothingWithoutPermission(): void
+    {
+        // Set up user without permission
+        $cmsApplication = new CMSApplication();
+        $user = new User(42);
+        // No authorization set - user cannot manage com_healthchecker
+        $cmsApplication->setIdentity($user);
+        Factory::setApplication($cmsApplication);
+
+        Toolbar::clearInstances();
+
+        $plugin = new MySitesGuruPlugin(new \stdClass());
+        $toolbar = Toolbar::getInstance();
+        $event = new AfterToolbarBuildEvent($toolbar);
+
+        $plugin->onAfterToolbarBuild($event);
+
+        $buttons = $toolbar->getButtons();
+        // Should be empty - no button added without permission
+        $this->assertEmpty($buttons);
+    }
+
+    public function testOnBeforeReportDisplayDoesNothingWithNullUser(): void
+    {
+        // Set up application with no user
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->setIdentity(null);
+        Factory::setApplication($cmsApplication);
+
+        $plugin = new MySitesGuruPlugin(new \stdClass());
+        $event = new BeforeReportDisplayEvent();
+
+        $plugin->onBeforeReportDisplay($event);
+
+        $html = $event->getHtmlContent();
+        // Should be empty - no content added without user
+        $this->assertSame('', $html);
+    }
+
+    public function testOnAfterToolbarBuildDoesNothingWithNullUser(): void
+    {
+        // Set up application with no user
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->setIdentity(null);
+        Factory::setApplication($cmsApplication);
+
+        Toolbar::clearInstances();
+
+        $plugin = new MySitesGuruPlugin(new \stdClass());
+        $toolbar = Toolbar::getInstance();
+        $event = new AfterToolbarBuildEvent($toolbar);
+
+        $plugin->onAfterToolbarBuild($event);
+
+        $buttons = $toolbar->getButtons();
+        // Should be empty - no button added without user
+        $this->assertEmpty($buttons);
     }
 }
