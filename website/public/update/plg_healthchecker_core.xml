@@ -7,12 +7,12 @@
         <type>plugin</type>
         <client>site</client>
         <folder>healthchecker</folder>
-        <version>3.1.0</version>
+        <version>3.1.1</version>
         <infourl title="Health Checker">https://github.com/mySites-guru/HealthCheckerForJoomla</infourl>
         <downloads>
-            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/plg_healthchecker_core-3.1.0.zip</downloadurl>
+            <downloadurl type="full" format="zip">https://www.joomlahealthchecker.com/downloads/plg_healthchecker_core-3.1.1.zip</downloadurl>
         </downloads>
-        <sha512>5647b6ff7eb4bdb12e9f67bfc9cb3d3b2630702d266605eec6e7d0da46fcdee73d9ed26a8f35dbaa3b059c7fe1b26f547b3350d4ace8ee38cbd619312f45d703</sha512>
+        <sha512>dfcf1d54e9d39b7ddec6b63809577e14e69bd1865e4852a0eb8d08082db9dd9ab24ac079697881221dcd60f3737dca39b5ab3044c843956415afef7d40b8fb23</sha512>
         <tags>
             <tag>stable</tag>
         </tags>
