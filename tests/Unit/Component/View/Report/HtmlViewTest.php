@@ -20,7 +20,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(HtmlView::class)]
 class HtmlViewTest extends TestCase
 {
-    private ?CMSApplication $originalApp = null;
+    private ?CMSApplication $cmsApplication = null;
 
     protected function setUp(): void
     {
@@ -31,20 +31,20 @@ class HtmlViewTest extends TestCase
 
         // Store original app if set
         try {
-            $this->originalApp = Factory::getApplication();
+            $this->cmsApplication = Factory::getApplication();
         } catch (\Exception) {
-            $this->originalApp = null;
+            $this->cmsApplication = null;
         }
 
         // Set up a mock application
-        $app = new CMSApplication();
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        Factory::setApplication($cmsApplication);
     }
 
     protected function tearDown(): void
     {
         // Restore original application
-        Factory::setApplication($this->originalApp);
+        Factory::setApplication($this->cmsApplication);
         Toolbar::clearInstances();
 
         parent::tearDown();
@@ -52,39 +52,39 @@ class HtmlViewTest extends TestCase
 
     public function testViewCanBeInstantiated(): void
     {
-        $view = new HtmlView();
+        $htmlView = new HtmlView();
 
-        $this->assertInstanceOf(HtmlView::class, $view);
+        $this->assertInstanceOf(HtmlView::class, $htmlView);
     }
 
     public function testViewExtendsBaseHtmlView(): void
     {
-        $view = new HtmlView();
+        $htmlView = new HtmlView();
 
-        $this->assertInstanceOf(\Joomla\CMS\MVC\View\HtmlView::class, $view);
+        $this->assertInstanceOf(\Joomla\CMS\MVC\View\HtmlView::class, $htmlView);
     }
 
     public function testBeforeReportHtmlDefaultsToEmptyString(): void
     {
-        $view = new HtmlView();
+        $htmlView = new HtmlView();
 
-        $this->assertSame('', $view->beforeReportHtml);
+        $this->assertSame('', $htmlView->beforeReportHtml);
     }
 
     public function testBeforeReportHtmlIsPublic(): void
     {
-        $reflection = new \ReflectionClass(HtmlView::class);
-        $property = $reflection->getProperty('beforeReportHtml');
+        $reflectionClass = new \ReflectionClass(HtmlView::class);
+        $reflectionProperty = $reflectionClass->getProperty('beforeReportHtml');
 
-        $this->assertTrue($property->isPublic());
+        $this->assertTrue($reflectionProperty->isPublic());
     }
 
     public function testBeforeReportHtmlCanBeModified(): void
     {
-        $view = new HtmlView();
-        $view->beforeReportHtml = '<div>Custom content</div>';
+        $htmlView = new HtmlView();
+        $htmlView->beforeReportHtml = '<div>Custom content</div>';
 
-        $this->assertSame('<div>Custom content</div>', $view->beforeReportHtml);
+        $this->assertSame('<div>Custom content</div>', $htmlView->beforeReportHtml);
     }
 
     public function testDisplayMethodExists(): void
@@ -94,8 +94,8 @@ class HtmlViewTest extends TestCase
 
     public function testDisplayMethodAcceptsNullTemplate(): void
     {
-        $reflection = new \ReflectionMethod(HtmlView::class, 'display');
-        $parameters = $reflection->getParameters();
+        $reflectionMethod = new \ReflectionMethod(HtmlView::class, 'display');
+        $parameters = $reflectionMethod->getParameters();
 
         $this->assertCount(1, $parameters);
         $this->assertSame('tpl', $parameters[0]->getName());
@@ -104,39 +104,39 @@ class HtmlViewTest extends TestCase
 
     public function testAddToolbarMethodExists(): void
     {
-        $reflection = new \ReflectionClass(HtmlView::class);
+        $reflectionClass = new \ReflectionClass(HtmlView::class);
 
-        $this->assertTrue($reflection->hasMethod('addToolbar'));
+        $this->assertTrue($reflectionClass->hasMethod('addToolbar'));
     }
 
     public function testAddToolbarMethodIsProtected(): void
     {
-        $reflection = new \ReflectionMethod(HtmlView::class, 'addToolbar');
+        $reflectionMethod = new \ReflectionMethod(HtmlView::class, 'addToolbar');
 
-        $this->assertTrue($reflection->isProtected());
+        $this->assertTrue($reflectionMethod->isProtected());
     }
 
     public function testViewHasCorrectNamespace(): void
     {
-        $reflection = new \ReflectionClass(HtmlView::class);
+        $reflectionClass = new \ReflectionClass(HtmlView::class);
 
         $this->assertSame(
             'MySitesGuru\HealthChecker\Component\Administrator\View\Report',
-            $reflection->getNamespaceName(),
+            $reflectionClass->getNamespaceName(),
         );
     }
 
     public function testViewIsNotAbstract(): void
     {
-        $reflection = new \ReflectionClass(HtmlView::class);
+        $reflectionClass = new \ReflectionClass(HtmlView::class);
 
-        $this->assertFalse($reflection->isAbstract());
+        $this->assertFalse($reflectionClass->isAbstract());
     }
 
     public function testViewIsNotFinal(): void
     {
-        $reflection = new \ReflectionClass(HtmlView::class);
+        $reflectionClass = new \ReflectionClass(HtmlView::class);
 
-        $this->assertFalse($reflection->isFinal());
+        $this->assertFalse($reflectionClass->isFinal());
     }
 }

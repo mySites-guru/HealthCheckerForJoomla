@@ -1227,6 +1227,124 @@ abstract class AbstractModuleDispatcher
     }
 }
 
+namespace Joomla\Filter;
+
+/**
+ * InputFilter stub for testing HTML sanitization.
+ *
+ * This implements a basic version of Joomla's InputFilter that strips
+ * HTML tags not in the allowed list.
+ */
+class InputFilter
+{
+    public const ONLY_ALLOW_DEFINED_TAGS = 0;
+
+    public const ONLY_BLOCK_DEFINED_TAGS = 1;
+
+    public const ONLY_ALLOW_DEFINED_ATTRIBUTES = 0;
+
+    public const ONLY_BLOCK_DEFINED_ATTRIBUTES = 1;
+
+    /**
+     * @var string[]
+     */
+    private array $tagsArray;
+
+    /**
+     * @var string[]
+     */
+    private array $attrArray;
+
+    private int $tagsMethod;
+
+    private int $attrMethod;
+
+    private int $xssAuto;
+
+    /**
+     * @param string[] $tagsArray
+     * @param string[] $attrArray
+     */
+    public function __construct(
+        array $tagsArray = [],
+        array $attrArray = [],
+        int $tagsMethod = self::ONLY_ALLOW_DEFINED_TAGS,
+        int $attrMethod = self::ONLY_ALLOW_DEFINED_ATTRIBUTES,
+        int $xssAuto = 1,
+    ) {
+        $this->tagsArray = array_map('strtolower', $tagsArray);
+        $this->attrArray = array_map('strtolower', $attrArray);
+        $this->tagsMethod = $tagsMethod;
+        $this->attrMethod = $attrMethod;
+        $this->xssAuto = $xssAuto;
+    }
+
+    /**
+     * Clean input based on type.
+     */
+    public function clean(mixed $source, string $type = 'string'): mixed
+    {
+        if (! is_string($source)) {
+            return $source;
+        }
+
+        if ($type === 'html') {
+            return $this->cleanHtml($source);
+        }
+
+        return $source;
+    }
+
+    /**
+     * Clean HTML, allowing only whitelisted tags and no attributes.
+     *
+     * This stub mimics Joomla's InputFilter behavior where dangerous tags
+     * like <script>, <style>, and <iframe> have their content completely removed,
+     * not just the tags themselves.
+     */
+    private function cleanHtml(string $source): string
+    {
+        // First strip any script, style, and iframe content entirely (including content)
+        // These are greedy patterns that consume everything between opening and closing tags
+        $source = (string) preg_replace('/<script\b[^>]*>[\s\S]*?<\/script>/i', '', $source);
+        $source = (string) preg_replace('/<style\b[^>]*>[\s\S]*?<\/style>/i', '', $source);
+        $source = (string) preg_replace('/<iframe\b[^>]*>[\s\S]*?<\/iframe>/i', '', $source);
+
+        // Remove event handlers (onclick, onerror, onload, etc.)
+        $source = (string) preg_replace('/\s+on\w+\s*=\s*["\'][^"\']*["\']/i', '', $source);
+        $source = (string) preg_replace('/\s+on\w+\s*=\s*[^\s>]*/i', '', $source);
+
+        // Remove javascript: and data: URLs
+        $source = (string) preg_replace('/javascript\s*:/i', '', $source);
+        $source = (string) preg_replace('/data\s*:/i', '', $source);
+
+        // Remove all attributes from tags (we don't allow any)
+        if ($this->attrMethod === self::ONLY_ALLOW_DEFINED_ATTRIBUTES && $this->attrArray === []) {
+            $source = (string) preg_replace_callback(
+                '/<(\w+)([^>]*)>/i',
+                function (array $matches): string {
+                    // Keep only the tag name, strip all attributes
+                    return '<' . $matches[1] . '>';
+                },
+                $source,
+            );
+        }
+
+        // Strip tags not in whitelist
+        if ($this->tagsMethod === self::ONLY_ALLOW_DEFINED_TAGS) {
+            // Build allowed tags string for strip_tags
+            $allowedTagsStr = '';
+            foreach ($this->tagsArray as $tag) {
+                $allowedTagsStr .= '<' . $tag . '>';
+            }
+
+            $source = strip_tags($source, $allowedTagsStr);
+        }
+
+        return $source;
+    }
+}
+
 namespace Joomla\CMS\Helper;
 
 interface HelperFactoryAwareInterface

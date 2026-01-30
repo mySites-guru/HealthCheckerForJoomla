@@ -12,10 +12,12 @@ namespace HealthChecker\Tests\Unit\Component\Check;
 
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
+use MySitesGuru\HealthChecker\Component\Administrator\Service\DescriptionSanitizer;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(HealthCheckResult::class)]
+#[CoversClass(DescriptionSanitizer::class)]
 class HealthCheckResultTest extends TestCase
 {
     public function testConstructorSetsAllProperties(): void
@@ -450,5 +452,88 @@ class HealthCheckResultTest extends TestCase
 
         $this->assertSame($original->docsUrl, $reconstructed->docsUrl);
         $this->assertSame($original->actionUrl, $reconstructed->actionUrl);
+    }
+
+    public function testToArrayStripsHtmlFromTitle(): void
+    {
+        $healthCheckResult = new HealthCheckResult(
+            healthStatus: HealthStatus::Good,
+            title: '<script>alert(1)</script>PHP Version Check',
+            description: 'Test description',
+            slug: 'test.check',
+            category: 'system',
+        );
+
+        $array = $healthCheckResult->toArray();
+
+        $this->assertSame('PHP Version Check', $array['title']);
+        $this->assertStringNotContainsString('<script>', $array['title']);
+    }
+
+    public function testToArrayStripsAllHtmlTagsFromTitle(): void
+    {
+        $healthCheckResult = new HealthCheckResult(
+            healthStatus: HealthStatus::Good,
+            title: '<strong>Bold</strong> and <em>italic</em> title',
+            description: 'Test description',
+            slug: 'test.check',
+            category: 'system',
+        );
+
+        $array = $healthCheckResult->toArray();
+
+        $this->assertSame('Bold and italic title', $array['title']);
+        $this->assertStringNotContainsString('<strong>', $array['title']);
+        $this->assertStringNotContainsString('<em>', $array['title']);
+    }
+
+    public function testToArraySanitizesDescriptionAllowingSafeTags(): void
+    {
+        $healthCheckResult = new HealthCheckResult(
+            healthStatus: HealthStatus::Good,
+            title: 'Test',
+            description: '<p>This is <strong>important</strong></p>',
+            slug: 'test.check',
+            category: 'system',
+        );
+
+        $array = $healthCheckResult->toArray();
+
+        $this->assertStringContainsString('<p>', $array['description']);
+        $this->assertStringContainsString('<strong>', $array['description']);
+    }
+
+    public function testToArraySanitizesDescriptionStrippingDangerousTags(): void
+    {
+        $healthCheckResult = new HealthCheckResult(
+            healthStatus: HealthStatus::Good,
+            title: 'Test',
+            description: '<p>Safe</p><script>alert(1)</script>',
+            slug: 'test.check',
+            category: 'system',
+        );
+
+        $array = $healthCheckResult->toArray();
+
+        $this->assertStringContainsString('<p>', $array['description']);
+        $this->assertStringNotContainsString('<script>', $array['description']);
+        $this->assertStringNotContainsString('alert', $array['description']);
+    }
+
+    public function testToArraySanitizesDescriptionStrippingAnchorTags(): void
+    {
+        $healthCheckResult = new HealthCheckResult(
+            healthStatus: HealthStatus::Good,
+            title: 'Test',
+            description: 'Click <a href="https://evil.com">here</a> for more info.',
+            slug: 'test.check',
+            category: 'system',
+        );
+
+        $array = $healthCheckResult->toArray();
+
+        $this->assertStringNotContainsString('<a ', $array['description']);
+        $this->assertStringNotContainsString('href=', $array['description']);
+        $this->assertStringContainsString('here', $array['description']);
     }
 }

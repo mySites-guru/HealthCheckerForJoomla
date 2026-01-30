@@ -120,3 +120,51 @@
 .healthchecker-docs-link::after {
     display: none !important;
 }
+
+/* Description formatting styles */
+.healthchecker-description code {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 0.125rem 0.25rem;
+    border-radius: 3px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.875em;
+}
+
+.healthchecker-description pre {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+    overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.875em;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.healthchecker-description pre code {
+    background-color: transparent;
+    padding: 0;
+}
+
+.healthchecker-description ul,
+.healthchecker-description ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.healthchecker-description li {
+    margin-bottom: 0.25rem;
+}
+
+.healthchecker-description p {
+    margin: 0.5rem 0;
+}
+
+.healthchecker-description p:first-child {
+    margin-top: 0;
+}
+
+.healthchecker-description p:last-child {
+    margin-bottom: 0;
+}

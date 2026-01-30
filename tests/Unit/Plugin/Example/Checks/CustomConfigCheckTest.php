@@ -63,7 +63,8 @@ class CustomConfigCheckTest extends TestCase
         $result = $this->check->run();
 
         $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('50 extensions', $result->description);
+        // The extension count is now wrapped in <code> tags for HTML formatting
+        $this->assertStringContainsString('<code>50</code>', $result->description);
         $this->assertStringContainsString('[EXAMPLE CHECK]', $result->description);
     }
 
@@ -75,7 +76,8 @@ class CustomConfigCheckTest extends TestCase
         $result = $this->check->run();
 
         $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('100 extensions', $result->description);
+        // The extension count is now wrapped in <code> tags for HTML formatting
+        $this->assertStringContainsString('<code>100</code>', $result->description);
     }
 
     public function testRunReturnsWarningWhenExtensionCountExceeds100(): void
@@ -86,7 +88,8 @@ class CustomConfigCheckTest extends TestCase
         $result = $this->check->run();
 
         $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('150 extensions', $result->description);
+        // The extension count is now wrapped in <code> tags for HTML formatting
+        $this->assertStringContainsString('<code>150</code>', $result->description);
         $this->assertStringContainsString('[EXAMPLE CHECK]', $result->description);
     }
 
@@ -107,9 +110,11 @@ class CustomConfigCheckTest extends TestCase
 
         $result = $this->check->run();
 
+        // Instructions now use HTML formatting with <strong> tags
         $this->assertStringContainsString('Health Checker - Example Provider', $result->description);
-        $this->assertStringContainsString('Extensions', $result->description);
-        $this->assertStringContainsString('Plugins', $result->description);
+        // Note: The good result no longer includes "Extensions → Plugins" path
+        // as it was simplified. The warning result still has it.
+        $this->assertStringContainsString('disable', $result->description);
     }
 
     public function testResultHasCorrectSlug(): void

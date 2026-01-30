@@ -421,14 +421,47 @@ protected function performCheck(): HealthCheckResult
 **Target**: Each check should complete in under 1 second.
 
 ### 2. Clear Descriptions
+
+Health check descriptions support safe HTML formatting for better readability.
+
+**Allowed HTML Tags:**
+- `<br>` - Line breaks
+- `<p>` - Paragraphs
+- `<strong>`, `<b>` - Bold text
+- `<em>`, `<i>` - Italic/emphasis
+- `<u>` - Underline
+- `<code>`, `<pre>` - Code formatting
+- `<ul>`, `<ol>`, `<li>` - Lists
+
+**NOT Allowed (automatically stripped):**
+- `<a>` - Links (phishing risk)
+- `<script>`, `<style>`, `<iframe>` - Script execution
+- Event handlers (`onclick`, `onerror`, etc.)
+- `style` attributes
+
 ```php
 // ❌ Vague
 return $this->warning('Something is wrong.');
 
-// ✅ Specific
+// ✅ Specific with formatting
 return $this->warning(
-    'API key is configured but has not been tested. ' .
-    'Visit Components → Your Extension → Settings to test the connection.'
+    '<p>API key is configured but has not been tested.</p>' .
+    '<p>Visit <strong>Components → Your Extension → Settings</strong> to test the connection.</p>'
+);
+
+// ✅ Using lists for multiple issues
+return $this->warning(
+    '<p>The following issues were found:</p>' .
+    '<ul>' .
+    '<li>Cache directory is not writable</li>' .
+    '<li>Temporary files older than 30 days exist</li>' .
+    '</ul>'
+);
+
+// ✅ Using code formatting for commands
+return $this->critical(
+    '<p>Database connection failed.</p>' .
+    '<p>Run: <code>php bin/console doctrine:database:create</code></p>'
 );
 ```
 
@@ -437,9 +470,10 @@ return $this->warning(
 // ❌ Not actionable
 return $this->critical('Cache is broken.');
 
-// ✅ Actionable
+// ✅ Actionable with code formatting
 return $this->critical(
-    'Cache directory is not writable. Run: chmod 755 cache/'
+    '<p>Cache directory is not writable.</p>' .
+    '<pre>chmod 755 cache/</pre>'
 );
 ```
 
