@@ -2,12 +2,12 @@
 <extension type="plugin" group="healthchecker" method="upgrade">
     <name>plg_healthchecker_core</name>
     <author>Phil E. Taylor</author>
-    <creationDate>2026-01-30</creationDate>
+    <creationDate>2026-02-04</creationDate>
     <copyright>(C) 2026 mySites.guru / Phil E. Taylor</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>phil@phil-taylor.com</authorEmail>
     <authorUrl>https://mySites.guru</authorUrl>
-    <version>3.1.1</version>
+    <version>3.1.2</version>
     <description>PLG_HEALTHCHECKER_CORE_XML_DESCRIPTION</description>
     <namespace path="src">MySitesGuru\HealthChecker\Plugin\Core</namespace>
     <scriptfile>script.php</scriptfile>
