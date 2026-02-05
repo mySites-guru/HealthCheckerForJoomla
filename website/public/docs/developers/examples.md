@@ -135,6 +135,7 @@ namespace MyCompany\Plugin\HealthChecker\Minimal\Checks;
 
 use MySitesGuru\HealthChecker\Component\Administrator\Check\AbstractHealthCheck;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult;
+use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
 
 defined('_JEXEC') or die;
 
@@ -156,7 +157,7 @@ final class SimpleCheck extends AbstractHealthCheck
     }
 
     /**
-     * Optional: Link to documentation (displays ? icon)
+     * Optional: Link to documentation (displays "Docs" button)
      */
     public function getDocsUrl(): ?string
     {
@@ -164,10 +165,14 @@ final class SimpleCheck extends AbstractHealthCheck
     }
 
     /**
-     * Optional: Link to settings page (makes row clickable)
+     * Optional: Link to settings page (displays "Explore" button)
+     * Only show when there's an issue to fix
      */
-    public function getActionUrl(): ?string
+    public function getActionUrl(?HealthStatus $status = null): ?string
     {
+        if ($status === HealthStatus::Good) {
+            return null;
+        }
         return '/administrator/index.php?option=com_minimal&view=settings';
     }
 
