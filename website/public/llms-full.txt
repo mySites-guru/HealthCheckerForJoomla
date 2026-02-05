@@ -258,20 +258,6 @@ interface HealthCheckInterface
      * Should be fast (< 1 second target)
      */
     public function run(): HealthCheckResult;
-
-    /**
-     * Get documentation URL for this check (optional)
-     * When set, displays (?) icon that opens URL in new tab
-     * @since 3.0.36
-     */
-    public function getDocsUrl(): ?string;
-
-    /**
-     * Get action URL for this check (optional)
-     * When set, makes result row clickable (navigates same window)
-     * @since 3.0.36
-     */
-    public function getActionUrl(): ?string;
 }
 ```
 
