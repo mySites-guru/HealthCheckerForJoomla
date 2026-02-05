@@ -206,14 +206,21 @@ abstract class AbstractHealthCheck implements HealthCheckInterface
      * to this URL (in the same window) when clicked. Useful for linking to
      * the relevant configuration page for the check.
      *
+     * The optional $status parameter allows checks to conditionally return
+     * an action URL based on the result status. For example, a check might
+     * only return an action URL when the status is Critical or Warning,
+     * returning null for Good status since no action is needed.
+     *
      * Default implementation returns null (row not clickable).
      * Override this method to make the result row link to an action page.
+     *
+     * @param HealthStatus|null $status The result status (Critical/Warning/Good), or null for backwards compatibility
      *
      * @return string|null The action URL or null if not clickable
      *
      * @since 3.0.36
      */
-    public function getActionUrl(): ?string
+    public function getActionUrl(?HealthStatus $status = null): ?string
     {
         return null;
     }
@@ -301,7 +308,7 @@ abstract class AbstractHealthCheck implements HealthCheckInterface
             category: $this->getCategory(),
             provider: $this->getProvider(),
             docsUrl: $this->getDocsUrl(),
-            actionUrl: $this->getActionUrl(),
+            actionUrl: $this->getActionUrl(HealthStatus::Critical),
         );
     }
 
@@ -328,7 +335,7 @@ abstract class AbstractHealthCheck implements HealthCheckInterface
             category: $this->getCategory(),
             provider: $this->getProvider(),
             docsUrl: $this->getDocsUrl(),
-            actionUrl: $this->getActionUrl(),
+            actionUrl: $this->getActionUrl(HealthStatus::Warning),
         );
     }
 
@@ -354,7 +361,7 @@ abstract class AbstractHealthCheck implements HealthCheckInterface
             category: $this->getCategory(),
             provider: $this->getProvider(),
             docsUrl: $this->getDocsUrl(),
-            actionUrl: $this->getActionUrl(),
+            actionUrl: $this->getActionUrl(HealthStatus::Good),
         );
     }
 }

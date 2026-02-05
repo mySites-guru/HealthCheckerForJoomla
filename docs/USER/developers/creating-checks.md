@@ -60,11 +60,11 @@ final class ExampleCheck extends AbstractHealthCheck
 
 ## Documentation and Action URLs
 
-Health checks can provide two optional URLs to enhance the user experience:
+Health checks can provide two optional URLs that display as buttons on the right side of each result row:
 
 ### Documentation URL (`getDocsUrl`)
 
-When implemented, displays a **(?)** icon next to the check title. Clicking the icon opens the documentation URL in a new browser tab.
+When implemented, displays a **"Docs"** button on the right side of the result row. Clicking the button opens the documentation URL in a new browser tab.
 
 ```php
 public function getDocsUrl(): ?string
@@ -80,11 +80,31 @@ public function getDocsUrl(): ?string
 
 ### Action URL (`getActionUrl`)
 
-When implemented, makes the entire result row clickable. Clicking the row navigates to the action URL in the same window.
+When implemented, displays an **"Explore"** button on the right side of the result row. Clicking the button navigates to the action URL in the same window.
+
+The method receives an optional `HealthStatus` parameter, allowing you to conditionally show the action button based on the check result. This is useful when an action is only needed for failed checks.
 
 ```php
-public function getActionUrl(): ?string
+use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
+
+public function getActionUrl(?HealthStatus $status = null): ?string
 {
+    return '/administrator/index.php?option=com_yourplugin&view=settings';
+}
+```
+
+**Conditional Action URLs**:
+
+You can return different URLs (or `null`) based on the check status:
+
+```php
+public function getActionUrl(?HealthStatus $status = null): ?string
+{
+    // Only show action button for failed checks, not for Good status
+    if ($status === HealthStatus::Good) {
+        return null;
+    }
+
     return '/administrator/index.php?option=com_yourplugin&view=settings';
 }
 ```
@@ -93,10 +113,13 @@ public function getActionUrl(): ?string
 - Link to the configuration page where users can fix the issue
 - Link to the Joomla component that needs attention
 - Link to the relevant admin panel section
+- Hide the action button when no action is needed (Good status)
 
 **Example with both URLs**:
 
 ```php
+use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
+
 final class ApiConfigCheck extends AbstractHealthCheck
 {
     public function getSlug(): string
@@ -119,8 +142,13 @@ final class ApiConfigCheck extends AbstractHealthCheck
         return 'https://docs.yoursite.com/configuration/api-settings';
     }
 
-    public function getActionUrl(): ?string
+    public function getActionUrl(?HealthStatus $status = null): ?string
     {
+        // Only show Explore button when there's an issue to fix
+        if ($status === HealthStatus::Good) {
+            return null;
+        }
+
         return '/administrator/index.php?option=com_yourplugin&view=config';
     }
 
@@ -133,10 +161,11 @@ final class ApiConfigCheck extends AbstractHealthCheck
 ```
 
 **Notes**:
-- Both methods return `?string` - return `null` (or don't override) to disable the feature
+- Both methods return `?string` - return `null` (or don't override) to hide the button
 - `getDocsUrl()` opens in a new tab, `getActionUrl()` opens in the same window
 - Action URLs should be relative administrator paths (starting with `/administrator/`)
 - Documentation URLs can be absolute URLs to external documentation
+- The `$status` parameter is optional for backwards compatibility - existing checks without it will continue to work
 
 ## Check Slug Format
 
@@ -528,6 +557,7 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Http\HttpFactory;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\AbstractHealthCheck;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult;
+use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
 
 defined('_JEXEC') or die;
 
@@ -571,7 +601,7 @@ final class ApiConnectionCheck extends AbstractHealthCheck
     /**
      * Link to documentation for this check.
      *
-     * Displays a (?) icon that opens this URL in a new tab.
+     * Displays a "Docs" button that opens this URL in a new tab.
      */
     public function getDocsUrl(): ?string
     {
@@ -581,10 +611,16 @@ final class ApiConnectionCheck extends AbstractHealthCheck
     /**
      * Link to the settings page where users can fix issues.
      *
-     * Makes the result row clickable, navigating to this URL.
+     * Displays an "Explore" button that navigates to this URL.
+     * Only shown when check fails (Critical or Warning status).
      */
-    public function getActionUrl(): ?string
+    public function getActionUrl(?HealthStatus $status = null): ?string
     {
+        // No action needed when everything is working
+        if ($status === HealthStatus::Good) {
+            return null;
+        }
+
         return '/administrator/index.php?option=com_yourplugin&view=settings';
     }
 

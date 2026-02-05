@@ -288,7 +288,7 @@ class AbstractHealthCheckTest extends TestCase
                 return 'system';
             }
 
-            public function getActionUrl(): ?string
+            public function getActionUrl(?HealthStatus $status = null): ?string
             {
                 return '/administrator/index.php?option=com_custom';
             }
@@ -303,6 +303,62 @@ class AbstractHealthCheckTest extends TestCase
 
         $result = $check->run();
         $this->assertSame('/administrator/index.php?option=com_custom', $result->actionUrl);
+    }
+
+    public function testConditionalActionUrlBasedOnStatus(): void
+    {
+        $check = new class extends AbstractHealthCheck {
+            public function getSlug(): string
+            {
+                return 'custom.conditional_action';
+            }
+
+            public function getCategory(): string
+            {
+                return 'system';
+            }
+
+            public function getActionUrl(?HealthStatus $status = null): ?string
+            {
+                // Only show action URL for failed checks, not for Good status
+                if ($status === HealthStatus::Good) {
+                    return null;
+                }
+                return '/administrator/index.php?option=com_fix';
+            }
+
+            public function exposeCritical(string $description): HealthCheckResult
+            {
+                return $this->critical($description);
+            }
+
+            public function exposeWarning(string $description): HealthCheckResult
+            {
+                return $this->warning($description);
+            }
+
+            public function exposeGood(string $description): HealthCheckResult
+            {
+                return $this->good($description);
+            }
+
+            protected function performCheck(): HealthCheckResult
+            {
+                return $this->good('OK');
+            }
+        };
+
+        // Action URL should be present for Critical status
+        $criticalResult = $check->exposeCritical('Critical issue');
+        $this->assertSame('/administrator/index.php?option=com_fix', $criticalResult->actionUrl);
+
+        // Action URL should be present for Warning status
+        $warningResult = $check->exposeWarning('Warning issue');
+        $this->assertSame('/administrator/index.php?option=com_fix', $warningResult->actionUrl);
+
+        // Action URL should be null for Good status
+        $goodResult = $check->exposeGood('All good');
+        $this->assertNull($goodResult->actionUrl);
     }
 
     public function testHelperMethodsIncludeUrls(): void
@@ -323,7 +379,7 @@ class AbstractHealthCheckTest extends TestCase
                 return 'https://docs.test.com';
             }
 
-            public function getActionUrl(): ?string
+            public function getActionUrl(?HealthStatus $status = null): ?string
             {
                 return '/admin/test';
             }

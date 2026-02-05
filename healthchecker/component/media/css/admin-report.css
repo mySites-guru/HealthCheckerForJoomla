@@ -90,8 +90,12 @@
     }
 }
 
-/* Hide the external link icon on toolbar buttons with this class */
-.healthchecker-no-external-icon::before {
+/* Hide the external link icon on buttons with this class */
+.healthchecker-no-external-icon::before,
+.healthchecker-no-external-icon::after,
+.healthchecker-no-external-icon .icon-out-2,
+.healthchecker-no-external-icon .fa-external-link,
+.healthchecker-no-external-icon .fa-external-link-alt {
     display: none !important;
 }
 

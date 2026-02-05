@@ -265,10 +265,13 @@
                     providerBadge = `<span class="badge bg-secondary hasTooltip" title="${escapeHtml(provider.name + (provider.version ? ' v' + provider.version : ''))}">${escapeHtml(provider.name)}</span>`;
                 }
 
-                // Build docs link if docsUrl exists
-                let docsHtml = '';
+                // Build action buttons (action + docs) for the right side
+                let actionButtonsHtml = '';
+                if (result.actionUrl) {
+                    actionButtonsHtml += `<a href="${escapeHtml(result.actionUrl)}" class="btn btn-sm btn-outline-primary">${translations.explore || 'Explore'}</a>`;
+                }
                 if (result.docsUrl) {
-                    docsHtml = `<a href="${escapeHtml(result.docsUrl)}" target="_blank" rel="noopener" class="btn btn-sm btn-link healthchecker-docs-link" title="${translations.viewDocs || 'View Documentation'}"><span class="fa fa-question-circle"></span></a>`;
+                    actionButtonsHtml += `<a href="${escapeHtml(result.docsUrl)}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary ms-1 healthchecker-no-external-icon">${translations.docs || 'Docs'}</a>`;
                 }
 
                 row.innerHTML = `
@@ -281,19 +284,8 @@
                     <td>${escapeHtml(result.title)}</td>
                     <td>${providerBadge}</td>
                     <td class="healthchecker-description">${result.description}</td>
-                    <td>${docsHtml}</td>
+                    <td class="text-end text-nowrap">${actionButtonsHtml}</td>
                 `;
-
-                // Add click handler for actionUrl
-                if (result.actionUrl) {
-                    row.classList.add('healthchecker-action-row');
-                    row.style.cursor = 'pointer';
-                    row.onclick = () => window.location.href = result.actionUrl;
-                } else {
-                    row.classList.remove('healthchecker-action-row');
-                    row.style.cursor = '';
-                    row.onclick = null;
-                }
 
                 // Update card border based on results
                 updateCategoryCardBorder(result.category);
@@ -473,19 +465,17 @@
                                 providerBadge = `<span class="badge bg-secondary hasTooltip" title="${escapeHtml(provider.name + (provider.version ? ' v' + provider.version : ''))}">${escapeHtml(provider.name)}</span>`;
                             }
 
-                            // Build docs link if docsUrl exists
-                            let docsHtml = '';
+                            // Build action buttons (action + docs) for the right side
+                            let actionButtonsHtml = '';
+                            if (result.actionUrl) {
+                                actionButtonsHtml += `<a href="${escapeHtml(result.actionUrl)}" class="btn btn-sm btn-outline-primary">${translations.explore || 'Explore'}</a>`;
+                            }
                             if (result.docsUrl) {
-                                docsHtml = `<a href="${escapeHtml(result.docsUrl)}" target="_blank" rel="noopener" class="btn btn-sm btn-link healthchecker-docs-link" title="${translations.viewDocs || 'View Documentation'}"><span class="fa fa-question-circle"></span></a>`;
+                                actionButtonsHtml += `<a href="${escapeHtml(result.docsUrl)}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary ms-1 healthchecker-no-external-icon">${translations.docs || 'Docs'}</a>`;
                             }
 
-                            // Build row classes and attributes for actionUrl
-                            let rowClass = result.actionUrl ? 'healthchecker-action-row' : '';
-                            let rowStyle = result.actionUrl ? 'cursor: pointer;' : '';
-                            let rowOnclick = result.actionUrl ? `onclick="window.location.href='${escapeHtml(result.actionUrl)}'"` : '';
-
                             rowsHtml += `
-                                <tr id="${rowId}" class="${rowClass}" style="${rowStyle}" ${rowOnclick}>
+                                <tr id="${rowId}">
                                     <td>
                                         <span class="badge ${statusInfo.badgeClass}">
                                             <span class="fa ${statusInfo.icon}" aria-hidden="true"></span>
@@ -495,7 +485,7 @@
                                     <td>${escapeHtml(result.title)}</td>
                                     <td>${providerBadge}</td>
                                     <td class="healthchecker-description">${result.description}</td>
-                                    <td>${docsHtml}</td>
+                                    <td class="text-end text-nowrap">${actionButtonsHtml}</td>
                                 </tr>
                             `;
                         } else {
@@ -554,7 +544,7 @@
                                             <col style="width: 300px;">
                                             <col style="width: 150px;">
                                             <col>
-                                            <col style="width: 40px;">
+                                            <col style="width: 140px;">
                                         </colgroup>
                                         <tbody>${rowsHtml}</tbody>
                                     </table>

@@ -35,6 +35,7 @@ namespace MySitesGuru\HealthChecker\Plugin\MySitesGuru\Checks;
 
 use MySitesGuru\HealthChecker\Component\Administrator\Check\AbstractHealthCheck;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult;
+use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
 
 \defined('_JEXEC') || die();
 
@@ -121,7 +122,7 @@ final class MySitesGuruConnectionCheck extends AbstractHealthCheck
         return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/mysitesguru/src/Checks/MySitesGuruConnectionCheck.php';
     }
 
-    public function getActionUrl(): string
+    public function getActionUrl(?HealthStatus $status = null): string
     {
         return 'https://mysites.guru';
     }

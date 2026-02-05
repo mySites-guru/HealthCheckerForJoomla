@@ -30,6 +30,13 @@ Each health check result includes:
 - **Provider**: Who provides this check (usually "Core")
 - **Description**: Details about what was found
 
+### Action Buttons
+
+Each check row may display action buttons on the right side:
+
+- **Explore**: Takes you to the relevant admin page where you can fix the issue. Only appears when an action is available for that check.
+- **Docs**: Opens documentation for this check in a new tab. Provides detailed explanations, troubleshooting steps, and best practices.
+
 ## Understanding Status Levels
 
 ### Critical (🔴)

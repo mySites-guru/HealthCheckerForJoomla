@@ -79,8 +79,8 @@ abstract class AbstractHealthCheck implements HealthCheckInterface
     public function run(): HealthCheckResult;
 
     // Optional URL methods (return null by default)
-    public function getDocsUrl(): ?string;   // Override to add (?) docs link
-    public function getActionUrl(): ?string; // Override to make row clickable
+    public function getDocsUrl(): ?string;                        // Override to add "Docs" button
+    public function getActionUrl(?HealthStatus $status = null): ?string; // Override to add "Explore" button
 }
 ```
 
@@ -97,8 +97,8 @@ abstract class AbstractHealthCheck implements HealthCheckInterface
 - `getTitle()` - Loads from language file
 - `getProvider()` - Returns 'core' by default (override if needed)
 - `run()` - Wraps performCheck() with error handling
-- `getDocsUrl()` - Returns null by default (override to add docs link)
-- `getActionUrl()` - Returns null by default (override to make row clickable)
+- `getDocsUrl()` - Returns null by default (override to add "Docs" button)
+- `getActionUrl($status)` - Returns null by default (override to add "Explore" button, receives check status to allow conditional display)
 
 ### Error Handling
 
