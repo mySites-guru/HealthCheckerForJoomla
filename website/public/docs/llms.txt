@@ -48,6 +48,7 @@ Comprehensive health monitoring for your Joomla 5+ site
 
 - [Akeeba Backup Integration](/docs/integrations/akeeba-backup.md): Akeeba Backup integration for Health Checker. Monitor backup status, schedules, success rates, and storage configuration.
 - [Akeeba Admin Tools Integration](/docs/integrations/akeeba-admin-tools.md): Akeeba Admin Tools integration for Health Checker. Monitor WAF status, security configuration, and .htaccess protection.
+- [Community Plugins](/docs/integrations/community-plugins.md): Community-built plugins for Health Checker for Joomla. Discover third-party integrations or submit your own.
 
 ### About
 

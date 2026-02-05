@@ -29,6 +29,7 @@ A comprehensive health monitoring extension for Joomla 5+ with over 129 checks a
 - **[User Guide](https://www.joomlahealthchecker.com/docs/)** - Installation, usage, and check reference
 - **[Developer Guide](https://www.joomlahealthchecker.com/docs/developers/)** - Create third-party plugins to add custom checks
 - **[Core Development Docs](docs/DEV/)** - Architecture, implementation, build process (for core contributors)
+- **[Community Plugins](COMMUNITY_PLUGINS.md)** - Third-party plugins built by the community
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute to the project
 - **[CI/CD Setup](.github/workflows/README.md)** - Automated testing and quality checks
 

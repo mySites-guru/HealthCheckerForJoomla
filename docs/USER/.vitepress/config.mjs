@@ -404,7 +404,8 @@ export default defineConfig({
         text: 'Optional Integrations',
         items: [
           { text: 'Akeeba Backup', link: '/integrations/akeeba-backup' },
-          { text: 'Akeeba Admin Tools', link: '/integrations/akeeba-admin-tools' }
+          { text: 'Akeeba Admin Tools', link: '/integrations/akeeba-admin-tools' },
+          { text: 'Community Plugins', link: '/integrations/community-plugins' }
         ]
       },
       {
