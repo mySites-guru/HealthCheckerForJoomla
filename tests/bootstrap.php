@@ -17,12 +17,15 @@ if (! defined('_JEXEC')) {
 if (! defined('JPATH_ROOT')) {
     define('JPATH_ROOT', sys_get_temp_dir() . '/joomla-healthchecker-tests/' . getmypid());
 }
+
 if (! defined('JPATH_SITE')) {
     define('JPATH_SITE', JPATH_ROOT);
 }
+
 if (! defined('JPATH_ADMINISTRATOR')) {
     define('JPATH_ADMINISTRATOR', JPATH_ROOT . '/administrator');
 }
+
 if (! defined('JPATH_BASE')) {
     define('JPATH_BASE', JPATH_ROOT);
 }
