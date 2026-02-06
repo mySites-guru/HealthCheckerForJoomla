@@ -7,7 +7,7 @@
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <authorEmail>phil@phil-taylor.com</authorEmail>
     <authorUrl>https://mysites.guru</authorUrl>
-    <version>3.2.3</version>
+    <version>3.2.4</version>
     <description>PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_XML_DESCRIPTION</description>
     <namespace path="src">MySitesGuru\HealthChecker\Plugin\AkeebaAdminTools</namespace>
     <files>
