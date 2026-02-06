@@ -493,8 +493,9 @@
                             rowsHtml += `
                                 <tr id="${rowId}">
                                     <td>
-                                        <span class="badge bg-secondary">
-                                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                                        <span class="badge bg-secondary d-inline-flex align-items-center gap-1">
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            ${translations.checking || 'Checking...'}
                                         </span>
                                     </td>
                                     <td>${escapeHtml(check.title)}</td>
@@ -732,6 +733,7 @@
                 critical: form.dataset.textCritical || 'Critical',
                 warning: form.dataset.textWarning || 'Warning',
                 good: form.dataset.textGood || 'Good',
+                checking: form.dataset.textChecking || 'Checking...',
                 viewDocs: form.dataset.textViewDocs || 'View Documentation'
             }
         });

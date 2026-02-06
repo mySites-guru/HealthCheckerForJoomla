@@ -51,7 +51,8 @@ $categoryUrl = Route::_('index.php?option=com_healthchecker&task=ajax.category&f
       data-text-running-checks="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_RUNNING_CHECKS')); ?>"
       data-text-critical="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_CRITICAL')); ?>"
       data-text-warning="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_WARNING')); ?>"
-      data-text-good="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_GOOD')); ?>">
+      data-text-good="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_GOOD')); ?>"
+      data-text-checking="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_CHECKING')); ?>">
 
     <?php
     // Allow plugins to inject content (banners, notices) before the report.
