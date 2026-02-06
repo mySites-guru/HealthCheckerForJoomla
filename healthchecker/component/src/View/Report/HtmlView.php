@@ -129,6 +129,16 @@ class HtmlView extends BaseHtmlView
             ])
             ->buttonClass('btn btn-primary healthchecker-no-external-icon');
 
+        $toolbar->linkButton('community-plugins')
+            ->text('COM_HEALTHCHECKER_COMMUNITY_PLUGINS')
+            ->url('https://www.joomlahealthchecker.com/docs/integrations/community-plugins')
+            ->icon('icon-puzzle-piece')
+            ->attributes([
+                'target' => '_blank',
+                'style' => 'text-decoration:none',
+            ])
+            ->buttonClass('btn btn-primary healthchecker-no-external-icon');
+
         // Dispatch event to allow plugins to add toolbar buttons
         $cmsApplication = Factory::getApplication();
         $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
