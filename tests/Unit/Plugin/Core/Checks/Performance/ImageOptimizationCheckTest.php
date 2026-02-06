@@ -18,13 +18,13 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ImageOptimizationCheck::class)]
 class ImageOptimizationCheckTest extends TestCase
 {
-    private ImageOptimizationCheck $check;
+    private ImageOptimizationCheck $imageOptimizationCheck;
 
     private string $imagesPath;
 
     protected function setUp(): void
     {
-        $this->check = new ImageOptimizationCheck();
+        $this->imageOptimizationCheck = new ImageOptimizationCheck();
         $this->imagesPath = JPATH_ROOT . '/images';
 
         // Clean up and recreate the test directory
@@ -39,22 +39,22 @@ class ImageOptimizationCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('performance.image_optimization', $this->check->getSlug());
+        $this->assertSame('performance.image_optimization', $this->imageOptimizationCheck->getSlug());
     }
 
     public function testGetCategoryReturnsPerformance(): void
     {
-        $this->assertSame('performance', $this->check->getCategory());
+        $this->assertSame('performance', $this->imageOptimizationCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->imageOptimizationCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->imageOptimizationCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -63,10 +63,10 @@ class ImageOptimizationCheckTest extends TestCase
     public function testRunReturnsGoodWhenImagesDirectoryNotFound(): void
     {
         // No images directory exists
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('directory not found', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('directory not found', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenNoOversizedImages(): void
@@ -77,10 +77,10 @@ class ImageOptimizationCheckTest extends TestCase
         $this->createTestImage($this->imagesPath . '/small.jpg', 100 * 1024); // 100KB
         $this->createTestImage($this->imagesPath . '/tiny.png', 50 * 1024);   // 50KB
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No oversized images', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No oversized images', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenOversizedImagesFound(): void
@@ -90,11 +90,11 @@ class ImageOptimizationCheckTest extends TestCase
         // Create one large image (over 500KB)
         $this->createTestImage($this->imagesPath . '/large.jpg', 600 * 1024); // 600KB
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('1 image(s) larger than 500KB', $result->description);
-        $this->assertStringContainsString('large.jpg', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 image(s) larger than 500KB', $healthCheckResult->description);
+        $this->assertStringContainsString('large.jpg', $healthCheckResult->description);
     }
 
     public function testRunReportsMultipleOversizedImages(): void
@@ -106,10 +106,10 @@ class ImageOptimizationCheckTest extends TestCase
         $this->createTestImage($this->imagesPath . '/photo2.png', 700 * 1024);
         $this->createTestImage($this->imagesPath . '/photo3.gif', 550 * 1024);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('3 image(s) larger than 500KB', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('3 image(s) larger than 500KB', $healthCheckResult->description);
     }
 
     public function testRunReportsCountOnlyForManyOversizedImages(): void
@@ -118,16 +118,16 @@ class ImageOptimizationCheckTest extends TestCase
 
         // Create more than 10 large images
         for ($i = 1; $i <= 12; $i++) {
-            $this->createTestImage($this->imagesPath . "/large{$i}.jpg", 600 * 1024);
+            $this->createTestImage($this->imagesPath . sprintf('/large%d.jpg', $i), 600 * 1024);
         }
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('12 images larger than 500KB', $result->description);
-        $this->assertStringContainsString('Consider optimizing', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('12 images larger than 500KB', $healthCheckResult->description);
+        $this->assertStringContainsString('Consider optimizing', $healthCheckResult->description);
         // Should NOT list individual files when count > 10
-        $this->assertStringNotContainsString('large1.jpg', $result->description);
+        $this->assertStringNotContainsString('large1.jpg', $healthCheckResult->description);
     }
 
     public function testRunIgnoresNonImageFiles(): void
@@ -138,10 +138,10 @@ class ImageOptimizationCheckTest extends TestCase
         $this->createTestImage($this->imagesPath . '/document.pdf', 600 * 1024);
         $this->createTestImage($this->imagesPath . '/archive.zip', 700 * 1024);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No oversized images', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No oversized images', $healthCheckResult->description);
     }
 
     public function testRunHandlesSubdirectories(): void
@@ -151,10 +151,10 @@ class ImageOptimizationCheckTest extends TestCase
         // Create large image in subdirectory
         $this->createTestImage($this->imagesPath . '/subfolder/nested.jpg', 600 * 1024);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('1 image(s) larger than 500KB', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 image(s) larger than 500KB', $healthCheckResult->description);
     }
 
     public function testRunHandlesWebpFormat(): void
@@ -164,10 +164,10 @@ class ImageOptimizationCheckTest extends TestCase
         // Create large WebP image
         $this->createTestImage($this->imagesPath . '/modern.webp', 600 * 1024);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('modern.webp', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('modern.webp', $healthCheckResult->description);
     }
 
     public function testRunIsCaseInsensitiveForExtensions(): void
@@ -178,10 +178,10 @@ class ImageOptimizationCheckTest extends TestCase
         $this->createTestImage($this->imagesPath . '/photo.JPG', 600 * 1024);
         $this->createTestImage($this->imagesPath . '/image.PNG', 700 * 1024);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('2 image(s) larger than 500KB', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 image(s) larger than 500KB', $healthCheckResult->description);
     }
 
     public function testRunNeverReturnsCritical(): void
@@ -190,12 +190,12 @@ class ImageOptimizationCheckTest extends TestCase
 
         // Even with many large images, should only return warning
         for ($i = 1; $i <= 20; $i++) {
-            $this->createTestImage($this->imagesPath . "/huge{$i}.jpg", 2000 * 1024); // 2MB
+            $this->createTestImage($this->imagesPath . sprintf('/huge%d.jpg', $i), 2000 * 1024); // 2MB
         }
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesEmptyDirectory(): void
@@ -203,10 +203,10 @@ class ImageOptimizationCheckTest extends TestCase
         mkdir($this->imagesPath, 0777, true);
 
         // Empty images directory
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No oversized images', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No oversized images', $healthCheckResult->description);
     }
 
     public function testRunHandlesDeepNestedSubdirectories(): void
@@ -216,10 +216,10 @@ class ImageOptimizationCheckTest extends TestCase
         // Create large image in deeply nested directory
         $this->createTestImage($this->imagesPath . '/level1/level2/level3/deep.jpg', 600 * 1024);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('1 image(s)', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 image(s)', $healthCheckResult->description);
     }
 
     public function testRunHandlesJpegExtension(): void
@@ -229,10 +229,10 @@ class ImageOptimizationCheckTest extends TestCase
         // Test .jpeg extension (not just .jpg)
         $this->createTestImage($this->imagesPath . '/photo.jpeg', 600 * 1024);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('photo.jpeg', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('photo.jpeg', $healthCheckResult->description);
     }
 
     public function testRunHandlesGifFormat(): void
@@ -241,10 +241,10 @@ class ImageOptimizationCheckTest extends TestCase
 
         $this->createTestImage($this->imagesPath . '/animation.gif', 600 * 1024);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('animation.gif', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('animation.gif', $healthCheckResult->description);
     }
 
     public function testRunShowsUpToFiveFilenamesForFewImages(): void
@@ -253,15 +253,15 @@ class ImageOptimizationCheckTest extends TestCase
 
         // Create exactly 5 large images
         for ($i = 1; $i <= 5; $i++) {
-            $this->createTestImage($this->imagesPath . "/photo{$i}.jpg", 600 * 1024);
+            $this->createTestImage($this->imagesPath . sprintf('/photo%d.jpg', $i), 600 * 1024);
         }
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('5 image(s)', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('5 image(s)', $healthCheckResult->description);
         // Should list filenames for small counts
-        $this->assertStringContainsString('photo', $result->description);
+        $this->assertStringContainsString('photo', $healthCheckResult->description);
     }
 
     public function testRunHandlesImagesAtExactThreshold(): void
@@ -271,9 +271,9 @@ class ImageOptimizationCheckTest extends TestCase
         // Create image at exactly 500KB (should not be flagged)
         $this->createTestImage($this->imagesPath . '/exact.jpg', 500 * 1024);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesImagesJustOverThreshold(): void
@@ -283,9 +283,9 @@ class ImageOptimizationCheckTest extends TestCase
         // Create image just over 500KB threshold
         $this->createTestImage($this->imagesPath . '/justover.jpg', 500 * 1024 + 1);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesMixedSizedImages(): void
@@ -298,10 +298,10 @@ class ImageOptimizationCheckTest extends TestCase
         $this->createTestImage($this->imagesPath . '/small2.png', 200 * 1024);
         $this->createTestImage($this->imagesPath . '/large2.png', 700 * 1024);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('2 image(s)', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 image(s)', $healthCheckResult->description);
     }
 
     public function testRunReportsLimitReachedWithNoOversizedImages(): void
@@ -310,13 +310,13 @@ class ImageOptimizationCheckTest extends TestCase
 
         // Create more than 1000 small images to trigger the scan limit
         for ($i = 1; $i <= 1005; $i++) {
-            $this->createTestImage($this->imagesPath . "/small{$i}.jpg", 10 * 1024); // 10KB each
+            $this->createTestImage($this->imagesPath . sprintf('/small%d.jpg', $i), 10 * 1024); // 10KB each
         }
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('first 1000 files scanned', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('first 1000 files scanned', $healthCheckResult->description);
     }
 
     public function testRunReportsLimitReachedWithOversizedImages(): void
@@ -325,19 +325,19 @@ class ImageOptimizationCheckTest extends TestCase
 
         // Create some large images first, then many small ones to reach the limit
         for ($i = 1; $i <= 3; $i++) {
-            $this->createTestImage($this->imagesPath . "/large{$i}.jpg", 600 * 1024); // 600KB
+            $this->createTestImage($this->imagesPath . sprintf('/large%d.jpg', $i), 600 * 1024); // 600KB
         }
 
         // Create more files to exceed the 1000 limit
         for ($i = 1; $i <= 1000; $i++) {
-            $this->createTestImage($this->imagesPath . "/small{$i}.png", 10 * 1024); // 10KB each
+            $this->createTestImage($this->imagesPath . sprintf('/small%d.png', $i), 10 * 1024); // 10KB each
         }
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('scan limited to 1000 files', $result->description);
-        $this->assertStringContainsString('may have more oversized images', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('scan limited to 1000 files', $healthCheckResult->description);
+        $this->assertStringContainsString('may have more oversized images', $healthCheckResult->description);
     }
 
     public function testRunHandlesSymlinks(): void
@@ -356,11 +356,11 @@ class ImageOptimizationCheckTest extends TestCase
             $this->markTestSkipped('Symlinks not supported on this platform');
         }
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->imageOptimizationCheck->run();
 
         // Should still find the large image and report warning
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('1 image(s)', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 image(s)', $healthCheckResult->description);
     }
 
     /**
@@ -384,6 +384,7 @@ class ImageOptimizationCheckTest extends TestCase
                 fwrite($fp, str_repeat("\0", $chunk));
                 $remaining -= $chunk;
             }
+
             fclose($fp);
         }
     }

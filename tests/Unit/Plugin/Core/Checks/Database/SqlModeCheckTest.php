@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(SqlModeCheck::class)]
 class SqlModeCheckTest extends TestCase
 {
-    private SqlModeCheck $check;
+    private SqlModeCheck $sqlModeCheck;
 
     protected function setUp(): void
     {
-        $this->check = new SqlModeCheck();
+        $this->sqlModeCheck = new SqlModeCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.sql_mode', $this->check->getSlug());
+        $this->assertSame('database.sql_mode', $this->sqlModeCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->sqlModeCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->sqlModeCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->sqlModeCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,41 +51,41 @@ class SqlModeCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->sqlModeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenSqlModeEmpty(): void
     {
         $database = MockDatabaseFactory::createWithResult('');
-        $this->check->setDatabase($database);
+        $this->sqlModeCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sqlModeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('empty', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('empty', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenOnlyFullGroupByEnabled(): void
     {
         $database = MockDatabaseFactory::createWithResult('ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES');
-        $this->check->setDatabase($database);
+        $this->sqlModeCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sqlModeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('ONLY_FULL_GROUP_BY', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('ONLY_FULL_GROUP_BY', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenSafeModesEnabled(): void
     {
         $database = MockDatabaseFactory::createWithResult('TRADITIONAL');
-        $this->check->setDatabase($database);
+        $this->sqlModeCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sqlModeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('TRADITIONAL', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('TRADITIONAL', $healthCheckResult->description);
     }
 }

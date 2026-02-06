@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(JsonExtensionCheck::class)]
 class JsonExtensionCheckTest extends TestCase
 {
-    private JsonExtensionCheck $check;
+    private JsonExtensionCheck $jsonExtensionCheck;
 
     protected function setUp(): void
     {
-        $this->check = new JsonExtensionCheck();
+        $this->jsonExtensionCheck = new JsonExtensionCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.json_extension', $this->check->getSlug());
+        $this->assertSame('system.json_extension', $this->jsonExtensionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->jsonExtensionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->jsonExtensionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->jsonExtensionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,55 +51,55 @@ class JsonExtensionCheckTest extends TestCase
     public function testRunReturnsGoodWhenJsonLoaded(): void
     {
         // JSON is always loaded in PHP 8+
-        $result = $this->check->run();
+        $healthCheckResult = $this->jsonExtensionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('JSON', $result->description);
-        $this->assertStringContainsString('loaded', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('JSON', $healthCheckResult->description);
+        $this->assertStringContainsString('loaded', $healthCheckResult->description);
     }
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->jsonExtensionCheck->run();
 
-        $this->assertSame('system.json_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.json_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->jsonExtensionCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->jsonExtensionCheck->run();
 
-        $this->assertSame('system.json_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.json_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsWarning(): void
     {
         // JSON check returns Critical or Good, never Warning per documentation
-        $result = $this->check->run();
+        $healthCheckResult = $this->jsonExtensionCheck->run();
 
-        $this->assertNotSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->jsonExtensionCheck->run();
+        $result2 = $this->jsonExtensionCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     /**

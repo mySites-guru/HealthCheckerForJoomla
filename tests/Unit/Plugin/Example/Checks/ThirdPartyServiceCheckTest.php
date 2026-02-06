@@ -20,31 +20,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ThirdPartyServiceCheck::class)]
 class ThirdPartyServiceCheckTest extends TestCase
 {
-    private ThirdPartyServiceCheck $check;
+    private ThirdPartyServiceCheck $thirdPartyServiceCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ThirdPartyServiceCheck();
+        $this->thirdPartyServiceCheck = new ThirdPartyServiceCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('example.thirdparty_service', $this->check->getSlug());
+        $this->assertSame('example.thirdparty_service', $this->thirdPartyServiceCheck->getSlug());
     }
 
     public function testGetCategoryReturnsThirdparty(): void
     {
-        $this->assertSame('thirdparty', $this->check->getCategory());
+        $this->assertSame('thirdparty', $this->thirdPartyServiceCheck->getCategory());
     }
 
     public function testGetProviderReturnsExample(): void
     {
-        $this->assertSame('example', $this->check->getProvider());
+        $this->assertSame('example', $this->thirdPartyServiceCheck->getProvider());
     }
 
     public function testGetTitleReturnsNonEmptyString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->thirdPartyServiceCheck->getTitle();
 
         $this->assertNotEmpty($title);
     }
@@ -52,140 +52,140 @@ class ThirdPartyServiceCheckTest extends TestCase
     public function testRunReturnsGoodWhenServiceReachable(): void
     {
         $httpClient = MockHttpFactory::createWithHeadResponse(200);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('reachable', $result->description);
-        $this->assertStringContainsString('normally', $result->description);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('reachable', $healthCheckResult->description);
+        $this->assertStringContainsString('normally', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenServiceUnreachable(): void
     {
         $httpClient = MockHttpFactory::createThatThrows('Connection refused');
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('Cannot reach', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Cannot reach', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenHttpError(): void
     {
         $httpClient = MockHttpFactory::createWithHeadResponse(500);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('Cannot reach', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Cannot reach', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenResponseCodeZero(): void
     {
         $httpClient = MockHttpFactory::createWithHeadResponse(0);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testResultHasCorrectSlug(): void
     {
         $httpClient = MockHttpFactory::createWithHeadResponse(200);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertSame('example.thirdparty_service', $result->slug);
+        $this->assertSame('example.thirdparty_service', $healthCheckResult->slug);
     }
 
     public function testResultHasCorrectCategory(): void
     {
         $httpClient = MockHttpFactory::createWithHeadResponse(200);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertSame('thirdparty', $result->category);
+        $this->assertSame('thirdparty', $healthCheckResult->category);
     }
 
     public function testResultHasCorrectProvider(): void
     {
         $httpClient = MockHttpFactory::createWithHeadResponse(200);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertSame('example', $result->provider);
+        $this->assertSame('example', $healthCheckResult->provider);
     }
 
     public function testResultDescriptionContainsExampleCheckMarker(): void
     {
         $httpClient = MockHttpFactory::createWithHeadResponse(200);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertStringContainsString('[EXAMPLE CHECK]', $result->description);
+        $this->assertStringContainsString('[EXAMPLE CHECK]', $healthCheckResult->description);
     }
 
     public function testResultDescriptionContainsDisableInstructions(): void
     {
         $httpClient = MockHttpFactory::createWithHeadResponse(200);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertStringContainsString('Health Checker - Example Provider', $result->description);
-        $this->assertStringContainsString('Extensions', $result->description);
-        $this->assertStringContainsString('Plugins', $result->description);
+        $this->assertStringContainsString('Health Checker - Example Provider', $healthCheckResult->description);
+        $this->assertStringContainsString('Extensions', $healthCheckResult->description);
+        $this->assertStringContainsString('Plugins', $healthCheckResult->description);
     }
 
     public function testResultDescriptionMentionsJoomlaApi(): void
     {
         $httpClient = MockHttpFactory::createWithHeadResponse(200);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertStringContainsString('Joomla API', $result->description);
+        $this->assertStringContainsString('Joomla API', $healthCheckResult->description);
     }
 
     public function testRunReturnsCorrectStatusForClientError(): void
     {
         $httpClient = MockHttpFactory::createWithHeadResponse(404);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodFor3xxRedirect(): void
     {
         // 3xx responses are still successful - server responded
         $httpClient = MockHttpFactory::createWithHeadResponse(301);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenResponseIsSlow(): void
     {
         // Create HTTP client that simulates slow response (>3 seconds threshold)
         $httpClient = MockHttpFactory::createWithSlowHeadResponse(200, 3.5);
-        $this->check->setHttpClient($httpClient);
+        $this->thirdPartyServiceCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->thirdPartyServiceCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('slowly', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('slowly', $healthCheckResult->description);
     }
 }

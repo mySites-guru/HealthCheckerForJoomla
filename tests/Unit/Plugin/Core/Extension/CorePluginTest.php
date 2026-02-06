@@ -25,18 +25,18 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(CorePlugin::class)]
 class CorePluginTest extends TestCase
 {
-    private CorePlugin $plugin;
+    private CorePlugin $corePlugin;
 
     protected function setUp(): void
     {
-        $this->plugin = new CorePlugin(new \stdClass());
+        $this->corePlugin = new CorePlugin(new \stdClass());
 
         // Set up params as a Registry object (required for ->get() method)
-        $this->plugin->params = new Registry();
+        $this->corePlugin->params = new Registry();
 
         // Set up database
         $database = $this->createMockDatabase();
-        $this->plugin->setDatabase($database);
+        $this->corePlugin->setDatabase($database);
     }
 
     public function testGetSubscribedEventsReturnsExpectedEvents(): void
@@ -66,32 +66,32 @@ class CorePluginTest extends TestCase
 
     public function testOnCollectCategoriesRegisters8CoreCategories(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->corePlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertCount(8, $categories);
     }
 
     public function testOnCollectCategoriesReturnsHealthCategoryInstances(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->corePlugin->onCollectCategories($collectCategoriesEvent);
 
-        foreach ($event->getCategories() as $category) {
-            $this->assertInstanceOf(HealthCategory::class, $category);
+        foreach ($collectCategoriesEvent->getCategories() as $healthCategory) {
+            $this->assertInstanceOf(HealthCategory::class, $healthCategory);
         }
     }
 
     public function testOnCollectCategoriesRegistersSystemCategory(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->corePlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $systemCategory = $this->findCategoryBySlug($categories, 'system');
 
         $this->assertNotNull($systemCategory);
@@ -102,11 +102,11 @@ class CorePluginTest extends TestCase
 
     public function testOnCollectCategoriesRegistersDatabaseCategory(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->corePlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $databaseCategory = $this->findCategoryBySlug($categories, 'database');
 
         $this->assertNotNull($databaseCategory);
@@ -117,11 +117,11 @@ class CorePluginTest extends TestCase
 
     public function testOnCollectCategoriesRegistersSecurityCategory(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->corePlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $securityCategory = $this->findCategoryBySlug($categories, 'security');
 
         $this->assertNotNull($securityCategory);
@@ -132,11 +132,11 @@ class CorePluginTest extends TestCase
 
     public function testOnCollectCategoriesRegistersUsersCategory(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->corePlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $usersCategory = $this->findCategoryBySlug($categories, 'users');
 
         $this->assertNotNull($usersCategory);
@@ -147,11 +147,11 @@ class CorePluginTest extends TestCase
 
     public function testOnCollectCategoriesRegistersExtensionsCategory(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->corePlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $extensionsCategory = $this->findCategoryBySlug($categories, 'extensions');
 
         $this->assertNotNull($extensionsCategory);
@@ -162,11 +162,11 @@ class CorePluginTest extends TestCase
 
     public function testOnCollectCategoriesRegistersPerformanceCategory(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->corePlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $performanceCategory = $this->findCategoryBySlug($categories, 'performance');
 
         $this->assertNotNull($performanceCategory);
@@ -177,11 +177,11 @@ class CorePluginTest extends TestCase
 
     public function testOnCollectCategoriesRegistersSeoCategory(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->corePlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $seoCategory = $this->findCategoryBySlug($categories, 'seo');
 
         $this->assertNotNull($seoCategory);
@@ -192,11 +192,11 @@ class CorePluginTest extends TestCase
 
     public function testOnCollectCategoriesRegistersContentCategory(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->corePlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $contentCategory = $this->findCategoryBySlug($categories, 'content');
 
         $this->assertNotNull($contentCategory);
@@ -207,12 +207,12 @@ class CorePluginTest extends TestCase
 
     public function testOnCollectCategoriesRegistersCorrectSlugs(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->corePlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
-        $slugs = array_map(static fn(HealthCategory $cat) => $cat->slug, $categories);
+        $categories = $collectCategoriesEvent->getCategories();
+        $slugs = array_map(static fn(HealthCategory $healthCategory): string => $healthCategory->slug, $categories);
 
         $expectedSlugs = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
         foreach ($expectedSlugs as $expectedSlug) {
@@ -222,11 +222,11 @@ class CorePluginTest extends TestCase
 
     public function testAllChecksImplementHealthCheckInterface(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->corePlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
         foreach ($checks as $check) {
             $this->assertInstanceOf(HealthCheckInterface::class, $check);
         }
@@ -234,43 +234,47 @@ class CorePluginTest extends TestCase
 
     public function testAllChecksHaveValidProvider(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->corePlugin->onCollectChecks($collectChecksEvent);
 
-        foreach ($event->getChecks() as $check) {
-            $provider = $check->getProvider();
-            $this->assertSame('core', $provider, "Check {$check->getSlug()} has unexpected provider '{$provider}'");
+        foreach ($collectChecksEvent->getChecks() as $healthCheck) {
+            $provider = $healthCheck->getProvider();
+            $this->assertSame(
+                'core',
+                $provider,
+                sprintf("Check %s has unexpected provider '%s'", $healthCheck->getSlug(), $provider),
+            );
         }
     }
 
     public function testAllChecksHaveValidCategory(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectCategories(new CollectCategoriesEvent());
-        $this->plugin->onCollectChecks($event);
+        $this->corePlugin->onCollectCategories(new CollectCategoriesEvent());
+        $this->corePlugin->onCollectChecks($collectChecksEvent);
 
         $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
 
-        foreach ($event->getChecks() as $check) {
-            $category = $check->getCategory();
+        foreach ($collectChecksEvent->getChecks() as $healthCheck) {
+            $category = $healthCheck->getCategory();
             $this->assertContains(
                 $category,
                 $validCategories,
-                "Check {$check->getSlug()} has invalid category '{$category}'",
+                sprintf("Check %s has invalid category '%s'", $healthCheck->getSlug(), $category),
             );
         }
     }
 
     public function testAllChecksHaveUniqueSlugs(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->corePlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
-        $slugs = array_map(static fn(HealthCheckInterface $check) => $check->getSlug(), $checks);
+        $checks = $collectChecksEvent->getChecks();
+        $slugs = array_map(static fn(HealthCheckInterface $healthCheck): string => $healthCheck->getSlug(), $checks);
         $uniqueSlugs = array_unique($slugs);
 
         $this->assertSame(count($slugs), count($uniqueSlugs), 'Not all check slugs are unique');
@@ -278,29 +282,37 @@ class CorePluginTest extends TestCase
 
     public function testAllChecksHaveTitles(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->corePlugin->onCollectChecks($collectChecksEvent);
 
-        foreach ($event->getChecks() as $check) {
-            $title = $check->getTitle();
+        foreach ($collectChecksEvent->getChecks() as $healthCheck) {
+            $title = $healthCheck->getTitle();
             $this->assertIsString($title);
-            $this->assertNotEmpty($title, "Check {$check->getSlug()} has empty title");
+            $this->assertNotEmpty($title, sprintf('Check %s has empty title', $healthCheck->getSlug()));
         }
     }
 
     public function testCheckSlugsFollowCategoryDotNameFormat(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->corePlugin->onCollectChecks($collectChecksEvent);
 
-        foreach ($event->getChecks() as $check) {
-            $slug = $check->getSlug();
+        foreach ($collectChecksEvent->getChecks() as $healthCheck) {
+            $slug = $healthCheck->getSlug();
             // Slug should be in format {category}.{check_name}
-            $this->assertStringContainsString('.', $slug, "Check slug '{$slug}' should contain a dot separator");
+            $this->assertStringContainsString(
+                '.',
+                $slug,
+                sprintf("Check slug '%s' should contain a dot separator", $slug),
+            );
             $parts = explode('.', $slug);
-            $this->assertCount(2, $parts, "Check slug '{$slug}' should have exactly 2 parts separated by dot");
+            $this->assertCount(
+                2,
+                $parts,
+                sprintf("Check slug '%s' should have exactly 2 parts separated by dot", $slug),
+            );
         }
     }
 
@@ -310,13 +322,14 @@ class CorePluginTest extends TestCase
         // Slug is 'system.php_version' so param is 'check_system_php_version'
         $params = new Registry();
         $params->set('check_system_php_version', 0);
-        $this->plugin->params = $params;
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $this->corePlugin->params = $params;
 
-        $checks = $event->getChecks();
-        $slugs = array_map(static fn(HealthCheckInterface $check) => $check->getSlug(), $checks);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->corePlugin->onCollectChecks($collectChecksEvent);
+
+        $checks = $collectChecksEvent->getChecks();
+        $slugs = array_map(static fn(HealthCheckInterface $healthCheck): string => $healthCheck->getSlug(), $checks);
 
         $this->assertNotContains('system.php_version', $slugs);
     }
@@ -327,13 +340,14 @@ class CorePluginTest extends TestCase
         // Slug is 'system.php_version' so param is 'check_system_php_version'
         $params = new Registry();
         $params->set('check_system_php_version', 1);
-        $this->plugin->params = $params;
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $this->corePlugin->params = $params;
 
-        $checks = $event->getChecks();
-        $slugs = array_map(static fn(HealthCheckInterface $check) => $check->getSlug(), $checks);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->corePlugin->onCollectChecks($collectChecksEvent);
+
+        $checks = $collectChecksEvent->getChecks();
+        $slugs = array_map(static fn(HealthCheckInterface $healthCheck): string => $healthCheck->getSlug(), $checks);
 
         $this->assertContains('system.php_version', $slugs);
     }
@@ -342,12 +356,12 @@ class CorePluginTest extends TestCase
     {
         // Empty params means all checks should be enabled by default
         $params = new Registry();
-        $this->plugin->params = $params;
+        $this->corePlugin->params = $params;
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->corePlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
 
         // We should have checks registered
         $this->assertNotEmpty($checks, 'Checks should be enabled by default');
@@ -431,14 +445,14 @@ class CorePluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string

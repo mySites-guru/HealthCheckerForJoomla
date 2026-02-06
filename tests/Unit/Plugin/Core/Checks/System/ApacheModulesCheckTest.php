@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ApacheModulesCheck::class)]
 class ApacheModulesCheckTest extends TestCase
 {
-    private ApacheModulesCheck $check;
+    private ApacheModulesCheck $apacheModulesCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ApacheModulesCheck();
+        $this->apacheModulesCheck = new ApacheModulesCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.apache_modules', $this->check->getSlug());
+        $this->assertSame('system.apache_modules', $this->apacheModulesCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->apacheModulesCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->apacheModulesCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->apacheModulesCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,46 +50,46 @@ class ApacheModulesCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->apacheModulesCheck->run();
 
-        $this->assertSame('system.apache_modules', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.apache_modules', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->apacheModulesCheck->run();
 
         // When not on Apache or function unavailable, returns Good
         // On Apache, returns Good (all modules) or Warning (missing mod_rewrite)
-        $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+        $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
     }
 
     public function testRunDescriptionContainsRelevantInfo(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->apacheModulesCheck->run();
 
         // Description should mention Apache or modules
         $this->assertTrue(
-            str_contains(strtolower($result->description), 'apache') ||
-            str_contains(strtolower($result->description), 'module'),
+            str_contains(strtolower($healthCheckResult->description), 'apache') ||
+            str_contains(strtolower($healthCheckResult->description), 'module'),
         );
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
         // This check should never return Critical status
-        $result = $this->check->run();
+        $healthCheckResult = $this->apacheModulesCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->apacheModulesCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testApacheGetModulesFunctionCheck(): void
@@ -97,34 +97,34 @@ class ApacheModulesCheckTest extends TestCase
         // Test that the check correctly detects if apache_get_modules exists
         $functionExists = \function_exists('apache_get_modules');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->apacheModulesCheck->run();
 
         // If function doesn't exist, must return Good with "Not running on Apache"
         if (! $functionExists) {
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
-            $this->assertStringContainsString('Not running on Apache', $result->description);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+            $this->assertStringContainsString('Not running on Apache', $healthCheckResult->description);
         } else {
             // If function exists, we're on Apache - check should test modules
-            $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+            $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
         }
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->apacheModulesCheck->run();
 
-        $this->assertSame('system.apache_modules', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.apache_modules', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testDescriptionMentionsModulesOrApache(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->apacheModulesCheck->run();
 
-        $descLower = strtolower($result->description);
+        $descLower = strtolower($healthCheckResult->description);
 
         // Description should mention Apache, modules, or running status
         $this->assertTrue(
@@ -137,11 +137,11 @@ class ApacheModulesCheckTest extends TestCase
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->apacheModulesCheck->run();
+        $result2 = $this->apacheModulesCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     /**
@@ -159,15 +159,15 @@ class ApacheModulesCheckTest extends TestCase
     {
         // In CLI/FPM environment, apache_get_modules() doesn't exist
         // This test documents that we're covering the first branch of performCheck()
-        $result = $this->check->run();
+        $healthCheckResult = $this->apacheModulesCheck->run();
 
         if (! \function_exists('apache_get_modules')) {
             // We're in non-Apache environment - covers line 87-88
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
-            $this->assertStringContainsString('Not running on Apache', $result->description);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+            $this->assertStringContainsString('Not running on Apache', $healthCheckResult->description);
         } else {
             // We're on Apache - will test module checks
-            $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+            $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
         }
     }
 

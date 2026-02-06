@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(CurlExtensionCheck::class)]
 class CurlExtensionCheckTest extends TestCase
 {
-    private CurlExtensionCheck $check;
+    private CurlExtensionCheck $curlExtensionCheck;
 
     protected function setUp(): void
     {
-        $this->check = new CurlExtensionCheck();
+        $this->curlExtensionCheck = new CurlExtensionCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.curl_extension', $this->check->getSlug());
+        $this->assertSame('system.curl_extension', $this->curlExtensionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->curlExtensionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->curlExtensionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->curlExtensionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,46 +50,46 @@ class CurlExtensionCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->curlExtensionCheck->run();
 
-        $this->assertSame('system.curl_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.curl_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->curlExtensionCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->curlExtensionCheck->run();
 
-        $this->assertSame('system.curl_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.curl_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
         // cURL check should never return Critical status per documentation
-        $result = $this->check->run();
+        $healthCheckResult = $this->curlExtensionCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->curlExtensionCheck->run();
+        $result2 = $this->curlExtensionCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     /**

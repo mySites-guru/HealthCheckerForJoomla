@@ -23,94 +23,94 @@ class TrashedContentCheckTest extends TestCase
 {
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $check = new TrashedContentCheck();
-        $this->assertSame('content.trashed_content', $check->getSlug());
+        $trashedContentCheck = new TrashedContentCheck();
+        $this->assertSame('content.trashed_content', $trashedContentCheck->getSlug());
     }
 
     public function testGetCategoryReturnsContent(): void
     {
-        $check = new TrashedContentCheck();
-        $this->assertSame('content', $check->getCategory());
+        $trashedContentCheck = new TrashedContentCheck();
+        $this->assertSame('content', $trashedContentCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $check = new TrashedContentCheck();
-        $this->assertSame('core', $check->getProvider());
+        $trashedContentCheck = new TrashedContentCheck();
+        $this->assertSame('core', $trashedContentCheck->getProvider());
     }
 
     public function testRunWithZeroTrashedItemsReturnsGood(): void
     {
-        $check = new TrashedContentCheck();
-        $db = $this->createDatabaseMock(0);
-        $check->setDatabase($db);
+        $trashedContentCheck = new TrashedContentCheck();
+        $database = $this->createDatabaseMock(0);
+        $trashedContentCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $trashedContentCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('0', $result->description);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('0', $healthCheckResult->description);
     }
 
     public function testRunWithFiftyTrashedItemsReturnsGood(): void
     {
-        $check = new TrashedContentCheck();
-        $db = $this->createDatabaseMock(50);
-        $check->setDatabase($db);
+        $trashedContentCheck = new TrashedContentCheck();
+        $database = $this->createDatabaseMock(50);
+        $trashedContentCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $trashedContentCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('50', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('50', $healthCheckResult->description);
     }
 
     public function testRunWithFiftyOneTrashedItemsReturnsWarning(): void
     {
-        $check = new TrashedContentCheck();
-        $db = $this->createDatabaseMock(51);
-        $check->setDatabase($db);
+        $trashedContentCheck = new TrashedContentCheck();
+        $database = $this->createDatabaseMock(51);
+        $trashedContentCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $trashedContentCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('51', $result->description);
-        $this->assertStringContainsString('emptying the trash', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('51', $healthCheckResult->description);
+        $this->assertStringContainsString('emptying the trash', $healthCheckResult->description);
     }
 
     public function testRunWithManyTrashedItemsReturnsWarning(): void
     {
-        $check = new TrashedContentCheck();
-        $db = $this->createDatabaseMock(500);
-        $check->setDatabase($db);
+        $trashedContentCheck = new TrashedContentCheck();
+        $database = $this->createDatabaseMock(500);
+        $trashedContentCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $trashedContentCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('500', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('500', $healthCheckResult->description);
     }
 
     public function testResultContainsCorrectMetadata(): void
     {
-        $check = new TrashedContentCheck();
-        $db = $this->createDatabaseMock(10);
-        $check->setDatabase($db);
+        $trashedContentCheck = new TrashedContentCheck();
+        $database = $this->createDatabaseMock(10);
+        $trashedContentCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $trashedContentCheck->run();
 
-        $this->assertSame('content.trashed_content', $result->slug);
-        $this->assertSame('content', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('content.trashed_content', $healthCheckResult->slug);
+        $this->assertSame('content', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $check = new TrashedContentCheck();
+        $trashedContentCheck = new TrashedContentCheck();
 
         // Don't inject a database - should return warning about missing database
-        $result = $check->run();
+        $healthCheckResult = $trashedContentCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     /**
@@ -130,7 +130,7 @@ class TrashedContentCheckTest extends TestCase
         $db->method('getQuery')
             ->willReturn($query);
         $db->method('quoteName')
-            ->willReturnCallback(fn($name) => "`{$name}`");
+            ->willReturnCallback(fn(string $name): string => sprintf('`%s`', $name));
         $db->method('setQuery')
             ->willReturnSelf();
         $db->method('loadResult')

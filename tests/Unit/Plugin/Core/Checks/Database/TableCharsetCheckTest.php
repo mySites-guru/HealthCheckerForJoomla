@@ -21,17 +21,17 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TableCharsetCheck::class)]
 class TableCharsetCheckTest extends TestCase
 {
-    private TableCharsetCheck $check;
+    private TableCharsetCheck $tableCharsetCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        $this->app->set('dbprefix', 'test_');
-        $this->app->set('db', 'test_database');
-        Factory::setApplication($this->app);
-        $this->check = new TableCharsetCheck();
+        $this->cmsApplication = new CMSApplication();
+        $this->cmsApplication->set('dbprefix', 'test_');
+        $this->cmsApplication->set('db', 'test_database');
+        Factory::setApplication($this->cmsApplication);
+        $this->tableCharsetCheck = new TableCharsetCheck();
     }
 
     protected function tearDown(): void
@@ -41,22 +41,22 @@ class TableCharsetCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.table_charset', $this->check->getSlug());
+        $this->assertSame('database.table_charset', $this->tableCharsetCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->tableCharsetCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->tableCharsetCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->tableCharsetCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -64,21 +64,21 @@ class TableCharsetCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tableCharsetCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenAllTablesUseUtf8mb4(): void
     {
         // Empty array means no tables with non-utf8mb4 collation
         $database = MockDatabaseFactory::createWithObjectList([]);
-        $this->check->setDatabase($database);
+        $this->tableCharsetCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tableCharsetCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('utf8mb4', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('utf8mb4', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenTablesUseOldCollation(): void
@@ -92,11 +92,11 @@ class TableCharsetCheckTest extends TestCase
         $table2->TABLE_COLLATION = 'latin1_swedish_ci';
 
         $database = MockDatabaseFactory::createWithObjectList([$table1, $table2]);
-        $this->check->setDatabase($database);
+        $this->tableCharsetCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tableCharsetCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('2 table(s)', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 table(s)', $healthCheckResult->description);
     }
 }

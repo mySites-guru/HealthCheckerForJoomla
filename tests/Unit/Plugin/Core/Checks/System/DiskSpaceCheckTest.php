@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(DiskSpaceCheck::class)]
 class DiskSpaceCheckTest extends TestCase
 {
-    private DiskSpaceCheck $check;
+    private DiskSpaceCheck $diskSpaceCheck;
 
     protected function setUp(): void
     {
-        $this->check = new DiskSpaceCheck();
+        $this->diskSpaceCheck = new DiskSpaceCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.disk_space', $this->check->getSlug());
+        $this->assertSame('system.disk_space', $this->diskSpaceCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->diskSpaceCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->diskSpaceCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->diskSpaceCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,57 +50,57 @@ class DiskSpaceCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->diskSpaceCheck->run();
 
-        $this->assertSame('system.disk_space', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.disk_space', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testRunResultHasDescription(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->diskSpaceCheck->run();
 
-        $this->assertIsString($result->description);
-        $this->assertNotEmpty($result->description);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->diskSpaceCheck->run();
 
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->diskSpaceCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->diskSpaceCheck->run();
 
-        $this->assertSame('system.disk_space', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.disk_space', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testMultipleRunsReturnConsistentStatus(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->diskSpaceCheck->run();
+        $result2 = $this->diskSpaceCheck->run();
 
         // Status should be consistent between runs (disk space shouldn't change drastically)
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
     }
 
     public function testCriticalThresholdIs100MB(): void
@@ -214,10 +214,10 @@ class DiskSpaceCheckTest extends TestCase
 
     public function testDescriptionContainsFreeSpaceInfo(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->diskSpaceCheck->run();
 
         // Description should contain "free" or information about disk space
-        $descLower = strtolower($result->description);
+        $descLower = strtolower($healthCheckResult->description);
         $this->assertTrue(
             str_contains($descLower, 'free') ||
             str_contains($descLower, 'disk') ||
@@ -228,19 +228,19 @@ class DiskSpaceCheckTest extends TestCase
 
     public function testGoodStatusMentionsFreeSpace(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->diskSpaceCheck->run();
 
-        if ($result->healthStatus === HealthStatus::Good) {
-            $this->assertStringContainsString('free', $result->description);
+        if ($healthCheckResult->healthStatus === HealthStatus::Good) {
+            $this->assertStringContainsString('free', $healthCheckResult->description);
         }
     }
 
     public function testWarningStatusMentionsLowSpace(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->diskSpaceCheck->run();
 
-        if ($result->healthStatus === HealthStatus::Warning) {
-            $descLower = strtolower($result->description);
+        if ($healthCheckResult->healthStatus === HealthStatus::Warning) {
+            $descLower = strtolower($healthCheckResult->description);
             $this->assertTrue(
                 str_contains($descLower, 'low') ||
                 str_contains($descLower, 'running') ||
@@ -248,20 +248,20 @@ class DiskSpaceCheckTest extends TestCase
             );
         } else {
             // If not warning, verify it's a valid status
-            $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Critical]);
+            $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Critical]);
         }
     }
 
     public function testCriticalStatusMentionsCriticallyLow(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->diskSpaceCheck->run();
 
-        if ($result->healthStatus === HealthStatus::Critical) {
-            $descLower = strtolower($result->description);
+        if ($healthCheckResult->healthStatus === HealthStatus::Critical) {
+            $descLower = strtolower($healthCheckResult->description);
             $this->assertTrue(str_contains($descLower, 'critical') || str_contains($descLower, 'low'));
         } else {
             // If not critical, verify it's a valid status
-            $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+            $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
         }
     }
 
@@ -288,11 +288,11 @@ class DiskSpaceCheckTest extends TestCase
 
     public function testDescriptionIncludesSizeUnit(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->diskSpaceCheck->run();
 
         // Description should include size unit (B, KB, MB, GB, TB) or mention inability to determine
-        $hasUnit = preg_match('/\d+(\.\d+)?\s*(B|KB|MB|GB|TB)/i', $result->description);
-        $unableToDetermine = str_contains(strtolower($result->description), 'unable');
+        $hasUnit = preg_match('/\d+(\.\d+)?\s*(B|KB|MB|GB|TB)/i', $healthCheckResult->description);
+        $unableToDetermine = str_contains(strtolower($healthCheckResult->description), 'unable');
 
         $this->assertTrue($hasUnit === 1 || $unableToDetermine);
     }

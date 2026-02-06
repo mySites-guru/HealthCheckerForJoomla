@@ -183,15 +183,15 @@ final class MySitesGuruPlugin extends CMSPlugin implements SubscriberInterface
      * The dismiss logic is handled by the Health Checker component's JavaScript
      * (admin-report.js) which stores the dismissal timestamp in localStorage.
      *
-     * @param BeforeReportDisplayEvent $event Event object for injecting HTML content
+     * @param BeforeReportDisplayEvent $beforeReportDisplayEvent Event object for injecting HTML content
      *
      * @since 1.0.0
      */
-    public function onBeforeReportDisplay(BeforeReportDisplayEvent $event): void
+    public function onBeforeReportDisplay(BeforeReportDisplayEvent $beforeReportDisplayEvent): void
     {
         // Defensive permission check - ensure user has access to the component
         $user = Factory::getApplication()->getIdentity();
-        if ($user === null || ! $user->authorise('core.manage', 'com_healthchecker')) {
+        if (! $user instanceof \Joomla\CMS\User\User || ! $user->authorise('core.manage', 'com_healthchecker')) {
             return;
         }
 
@@ -251,7 +251,7 @@ HTML;
 </script>
 JS;
 
-        $event->addHtmlContent($html . "\n" . $js);
+        $beforeReportDisplayEvent->addHtmlContent($html . "\n" . $js);
     }
 
     /**
@@ -264,19 +264,19 @@ JS;
      * The button appears after the component's built-in buttons (Run Again, Export,
      * GitHub) but before the Options button.
      *
-     * @param AfterToolbarBuildEvent $event Event object containing the toolbar
+     * @param AfterToolbarBuildEvent $afterToolbarBuildEvent Event object containing the toolbar
      *
      * @since 1.0.0
      */
-    public function onAfterToolbarBuild(AfterToolbarBuildEvent $event): void
+    public function onAfterToolbarBuild(AfterToolbarBuildEvent $afterToolbarBuildEvent): void
     {
         // Defensive permission check - ensure user has access to the component
         $user = Factory::getApplication()->getIdentity();
-        if ($user === null || ! $user->authorise('core.manage', 'com_healthchecker')) {
+        if (! $user instanceof \Joomla\CMS\User\User || ! $user->authorise('core.manage', 'com_healthchecker')) {
             return;
         }
 
-        $toolbar = $event->getToolbar();
+        $toolbar = $afterToolbarBuildEvent->getToolbar();
 
         $toolbar->linkButton('mysitesguru')
             ->text('mySites.guru')

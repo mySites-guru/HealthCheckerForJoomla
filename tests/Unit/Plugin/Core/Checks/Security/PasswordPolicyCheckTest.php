@@ -20,11 +20,11 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(PasswordPolicyCheck::class)]
 class PasswordPolicyCheckTest extends TestCase
 {
-    private PasswordPolicyCheck $check;
+    private PasswordPolicyCheck $passwordPolicyCheck;
 
     protected function setUp(): void
     {
-        $this->check = new PasswordPolicyCheck();
+        $this->passwordPolicyCheck = new PasswordPolicyCheck();
     }
 
     protected function tearDown(): void
@@ -34,22 +34,22 @@ class PasswordPolicyCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.password_policy', $this->check->getSlug());
+        $this->assertSame('security.password_policy', $this->passwordPolicyCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->passwordPolicyCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->passwordPolicyCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->passwordPolicyCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -57,59 +57,59 @@ class PasswordPolicyCheckTest extends TestCase
 
     public function testRunReturnsCriticalWhenPasswordLengthTooShort(): void
     {
-        $params = new Registry([
+        $registry = new Registry([
             'minimum_length' => 6,
         ]);
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordPolicyCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('6 characters', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('6 characters', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenPasswordLengthShort(): void
     {
-        $params = new Registry([
+        $registry = new Registry([
             'minimum_length' => 10,
         ]);
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordPolicyCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('10 characters', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('10 characters', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenNoComplexity(): void
     {
-        $params = new Registry([
+        $registry = new Registry([
             'minimum_length' => 12,
             'minimum_integers' => 0,
             'minimum_symbols' => 0,
             'minimum_uppercase' => 0,
             'minimum_lowercase' => 0,
         ]);
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordPolicyCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('no complexity', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('no complexity', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenPasswordPolicyStrong(): void
     {
-        $params = new Registry([
+        $registry = new Registry([
             'minimum_length' => 12,
             'minimum_integers' => 1,
         ]);
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordPolicyCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('12 characters', $result->description);
-        $this->assertStringContainsString('complexity', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('12 characters', $healthCheckResult->description);
+        $this->assertStringContainsString('complexity', $healthCheckResult->description);
     }
 }

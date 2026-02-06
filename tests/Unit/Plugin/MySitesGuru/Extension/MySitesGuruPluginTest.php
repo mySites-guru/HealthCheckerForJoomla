@@ -47,6 +47,7 @@ class MySitesGuruPluginTest extends TestCase
         $cmsApplication = new CMSApplication();
         $user = new User(42);
         $user->setAuthorisation('core.manage', 'com_healthchecker', true);
+
         $cmsApplication->setIdentity($user);
         Factory::setApplication($cmsApplication);
     }
@@ -84,125 +85,125 @@ class MySitesGuruPluginTest extends TestCase
 
     public function testOnCollectCategoriesAddsMySitesGuruCategory(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectCategoriesEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $plugin->onCollectCategories($event);
+        $mySitesGuruPlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertCount(1, $categories);
         $this->assertInstanceOf(HealthCategory::class, $categories[0]);
     }
 
     public function testOnCollectCategoriesRegistersCorrectSlug(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectCategoriesEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $plugin->onCollectCategories($event);
+        $mySitesGuruPlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertSame('mysitesguru', $categories[0]->slug);
     }
 
     public function testOnCollectCategoriesRegistersCorrectLabel(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectCategoriesEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $plugin->onCollectCategories($event);
+        $mySitesGuruPlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertSame('mySites.guru Integration', $categories[0]->label);
     }
 
     public function testOnCollectCategoriesRegistersCorrectIcon(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectCategoriesEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $plugin->onCollectCategories($event);
+        $mySitesGuruPlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertSame('fa-tachometer-alt', $categories[0]->icon);
     }
 
     public function testOnCollectCategoriesRegistersCorrectSortOrder(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectCategoriesEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $plugin->onCollectCategories($event);
+        $mySitesGuruPlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertSame(90, $categories[0]->sortOrder);
     }
 
     public function testOnCollectCategoriesRegistersLogoUrl(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectCategoriesEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $plugin->onCollectCategories($event);
+        $mySitesGuruPlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertSame('/media/plg_healthchecker_mysitesguru/logo.png', $categories[0]->logoUrl);
     }
 
     public function testOnCollectChecksAddsConnectionCheck(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectChecksEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $plugin->onCollectChecks($event);
+        $mySitesGuruPlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
         $this->assertCount(1, $checks);
         $this->assertInstanceOf(MySitesGuruConnectionCheck::class, $checks[0]);
     }
 
     public function testOnCollectProvidersAddsMySitesGuruProvider(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $mySitesGuruPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertCount(1, $providers);
         $this->assertInstanceOf(ProviderMetadata::class, $providers[0]);
     }
 
     public function testOnCollectProvidersRegistersCorrectSlug(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $mySitesGuruPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame('mysitesguru', $providers[0]->slug);
     }
 
     public function testOnCollectProvidersRegistersCorrectName(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $mySitesGuruPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame('mySites.guru', $providers[0]->name);
     }
 
     public function testOnCollectProvidersRegistersCorrectDescription(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $mySitesGuruPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame(
             'Joomla Monitoring Dashboard - Monitor unlimited sites from one place',
             $providers[0]->description,
@@ -211,80 +212,80 @@ class MySitesGuruPluginTest extends TestCase
 
     public function testOnCollectProvidersRegistersCorrectUrl(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $mySitesGuruPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame('https://mysites.guru', $providers[0]->url);
     }
 
     public function testOnCollectProvidersRegistersCorrectIcon(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $mySitesGuruPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame('fa-tachometer-alt', $providers[0]->icon);
     }
 
     public function testOnCollectProvidersRegistersCorrectLogoUrl(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $mySitesGuruPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame('/media/plg_healthchecker_mysitesguru/logo.png', $providers[0]->logoUrl);
     }
 
     public function testOnCollectProvidersRegistersCorrectVersion(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $mySitesGuruPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame('1.0.0', $providers[0]->version);
     }
 
     public function testOnBeforeReportDisplayAddsHtmlContent(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new BeforeReportDisplayEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
 
-        $plugin->onBeforeReportDisplay($event);
+        $mySitesGuruPlugin->onBeforeReportDisplay($beforeReportDisplayEvent);
 
-        $html = $event->getHtmlContent();
+        $html = $beforeReportDisplayEvent->getHtmlContent();
         // The plugin adds a promotional banner for mySites.guru
         $this->assertIsString($html);
     }
 
     public function testOnBeforeReportDisplayBannerContainsMySitesGuruLink(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new BeforeReportDisplayEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
 
-        $plugin->onBeforeReportDisplay($event);
+        $mySitesGuruPlugin->onBeforeReportDisplay($beforeReportDisplayEvent);
 
-        $html = $event->getHtmlContent();
+        $html = $beforeReportDisplayEvent->getHtmlContent();
         // The banner should link to mySites.guru
         $this->assertStringContainsString('mysites.guru', $html);
     }
 
     public function testOnBeforeReportDisplayBannerContainsBannerClass(): void
     {
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new BeforeReportDisplayEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
 
-        $plugin->onBeforeReportDisplay($event);
+        $mySitesGuruPlugin->onBeforeReportDisplay($beforeReportDisplayEvent);
 
-        $html = $event->getHtmlContent();
+        $html = $beforeReportDisplayEvent->getHtmlContent();
         // The banner should use mysitesguru-banner class
         $this->assertStringContainsString('mysitesguru-banner', $html);
     }
@@ -294,11 +295,11 @@ class MySitesGuruPluginTest extends TestCase
         // Clear any existing toolbar instances
         Toolbar::clearInstances();
 
-        $plugin = new MySitesGuruPlugin(new \stdClass());
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
         $toolbar = Toolbar::getInstance();
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
-        $plugin->onAfterToolbarBuild($event);
+        $mySitesGuruPlugin->onAfterToolbarBuild($afterToolbarBuildEvent);
 
         $buttons = $toolbar->getButtons();
         $this->assertNotEmpty($buttons);
@@ -309,11 +310,11 @@ class MySitesGuruPluginTest extends TestCase
         // Clear any existing toolbar instances
         Toolbar::clearInstances();
 
-        $plugin = new MySitesGuruPlugin(new \stdClass());
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
         $toolbar = Toolbar::getInstance();
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
-        $plugin->onAfterToolbarBuild($event);
+        $mySitesGuruPlugin->onAfterToolbarBuild($afterToolbarBuildEvent);
 
         $buttons = $toolbar->getButtons();
         // There should be a link button added
@@ -324,6 +325,7 @@ class MySitesGuruPluginTest extends TestCase
                 break;
             }
         }
+
         $this->assertTrue($hasLinkButton);
     }
 
@@ -346,12 +348,12 @@ class MySitesGuruPluginTest extends TestCase
         $cmsApplication->setIdentity($user);
         Factory::setApplication($cmsApplication);
 
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new BeforeReportDisplayEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
 
-        $plugin->onBeforeReportDisplay($event);
+        $mySitesGuruPlugin->onBeforeReportDisplay($beforeReportDisplayEvent);
 
-        $html = $event->getHtmlContent();
+        $html = $beforeReportDisplayEvent->getHtmlContent();
         // Should be empty - no content added without permission
         $this->assertSame('', $html);
     }
@@ -367,11 +369,11 @@ class MySitesGuruPluginTest extends TestCase
 
         Toolbar::clearInstances();
 
-        $plugin = new MySitesGuruPlugin(new \stdClass());
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
         $toolbar = Toolbar::getInstance();
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
-        $plugin->onAfterToolbarBuild($event);
+        $mySitesGuruPlugin->onAfterToolbarBuild($afterToolbarBuildEvent);
 
         $buttons = $toolbar->getButtons();
         // Should be empty - no button added without permission
@@ -385,12 +387,12 @@ class MySitesGuruPluginTest extends TestCase
         $cmsApplication->setIdentity(null);
         Factory::setApplication($cmsApplication);
 
-        $plugin = new MySitesGuruPlugin(new \stdClass());
-        $event = new BeforeReportDisplayEvent();
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
+        $beforeReportDisplayEvent = new BeforeReportDisplayEvent();
 
-        $plugin->onBeforeReportDisplay($event);
+        $mySitesGuruPlugin->onBeforeReportDisplay($beforeReportDisplayEvent);
 
-        $html = $event->getHtmlContent();
+        $html = $beforeReportDisplayEvent->getHtmlContent();
         // Should be empty - no content added without user
         $this->assertSame('', $html);
     }
@@ -404,11 +406,11 @@ class MySitesGuruPluginTest extends TestCase
 
         Toolbar::clearInstances();
 
-        $plugin = new MySitesGuruPlugin(new \stdClass());
+        $mySitesGuruPlugin = new MySitesGuruPlugin(new \stdClass());
         $toolbar = Toolbar::getInstance();
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
-        $plugin->onAfterToolbarBuild($event);
+        $mySitesGuruPlugin->onAfterToolbarBuild($afterToolbarBuildEvent);
 
         $buttons = $toolbar->getButtons();
         // Should be empty - no button added without user

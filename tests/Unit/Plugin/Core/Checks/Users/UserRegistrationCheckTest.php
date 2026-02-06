@@ -20,11 +20,11 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(UserRegistrationCheck::class)]
 class UserRegistrationCheckTest extends TestCase
 {
-    private UserRegistrationCheck $check;
+    private UserRegistrationCheck $userRegistrationCheck;
 
     protected function setUp(): void
     {
-        $this->check = new UserRegistrationCheck();
+        $this->userRegistrationCheck = new UserRegistrationCheck();
     }
 
     protected function tearDown(): void
@@ -34,22 +34,22 @@ class UserRegistrationCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('users.user_registration', $this->check->getSlug());
+        $this->assertSame('users.user_registration', $this->userRegistrationCheck->getSlug());
     }
 
     public function testGetCategoryReturnsUsers(): void
     {
-        $this->assertSame('users', $this->check->getCategory());
+        $this->assertSame('users', $this->userRegistrationCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->userRegistrationCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->userRegistrationCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -58,54 +58,54 @@ class UserRegistrationCheckTest extends TestCase
     public function testRunReturnsValidStatus(): void
     {
         // ComponentHelper::getParams returns null from stub which defaults to 0
-        $result = $this->check->run();
+        $healthCheckResult = $this->userRegistrationCheck->run();
 
         // With default stub (null params), registration defaults to disabled (0)
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenRegistrationDisabled(): void
     {
         // Set up com_users params with registration disabled (0)
-        $params = new Registry([
+        $registry = new Registry([
             'allowUserRegistration' => 0,
         ]);
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userRegistrationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenRegistrationEnabled(): void
     {
         // Set up com_users params with registration enabled (1)
-        $params = new Registry([
+        $registry = new Registry([
             'allowUserRegistration' => 1,
         ]);
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userRegistrationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('enabled', $result->description);
-        $this->assertStringContainsString('CAPTCHA', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled', $healthCheckResult->description);
+        $this->assertStringContainsString('CAPTCHA', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenRegistrationValueIsNotOne(): void
     {
         // Test that values other than 1 are treated as disabled
         // (e.g., 2 for admin activation required is still considered enabled in some Joomla versions)
-        $params = new Registry([
+        $registry = new Registry([
             'allowUserRegistration' => 2,
         ]);
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userRegistrationCheck->run();
 
         // Value is cast to int and compared with === 1, so 2 should return good
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 }

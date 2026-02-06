@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(InactiveUsersCheck::class)]
 class InactiveUsersCheckTest extends TestCase
 {
-    private InactiveUsersCheck $check;
+    private InactiveUsersCheck $inactiveUsersCheck;
 
     protected function setUp(): void
     {
-        $this->check = new InactiveUsersCheck();
+        $this->inactiveUsersCheck = new InactiveUsersCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('users.inactive_users', $this->check->getSlug());
+        $this->assertSame('users.inactive_users', $this->inactiveUsersCheck->getSlug());
     }
 
     public function testGetCategoryReturnsUsers(): void
     {
-        $this->assertSame('users', $this->check->getCategory());
+        $this->assertSame('users', $this->inactiveUsersCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->inactiveUsersCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->inactiveUsersCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,42 +51,42 @@ class InactiveUsersCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->inactiveUsersCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenNoInactiveUsers(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->inactiveUsersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->inactiveUsersCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('All active users', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('All active users', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenFewInactiveUsers(): void
     {
         $database = MockDatabaseFactory::createWithResult(50);
-        $this->check->setDatabase($database);
+        $this->inactiveUsersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->inactiveUsersCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('50 user(s) inactive', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('50 user(s) inactive', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenManyInactiveUsers(): void
     {
         $database = MockDatabaseFactory::createWithResult(150);
-        $this->check->setDatabase($database);
+        $this->inactiveUsersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->inactiveUsersCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('150 users', $result->description);
-        $this->assertStringContainsString('reviewing', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('150 users', $healthCheckResult->description);
+        $this->assertStringContainsString('reviewing', $healthCheckResult->description);
     }
 }

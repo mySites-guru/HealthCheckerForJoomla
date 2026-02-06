@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ConnectionCharsetCheck::class)]
 class ConnectionCharsetCheckTest extends TestCase
 {
-    private ConnectionCharsetCheck $check;
+    private ConnectionCharsetCheck $connectionCharsetCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ConnectionCharsetCheck();
+        $this->connectionCharsetCheck = new ConnectionCharsetCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.connection_charset', $this->check->getSlug());
+        $this->assertSame('database.connection_charset', $this->connectionCharsetCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->connectionCharsetCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->connectionCharsetCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->connectionCharsetCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,9 +51,9 @@ class ConnectionCharsetCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->connectionCharsetCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenCharsetIsUtf8mb4(): void
@@ -62,12 +62,12 @@ class ConnectionCharsetCheckTest extends TestCase
         $charsetObj->Value = 'utf8mb4';
 
         $database = MockDatabaseFactory::createWithObject($charsetObj);
-        $this->check->setDatabase($database);
+        $this->connectionCharsetCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->connectionCharsetCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('utf8mb4', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('utf8mb4', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenCharsetIsUtf8(): void
@@ -76,12 +76,12 @@ class ConnectionCharsetCheckTest extends TestCase
         $charsetObj->Value = 'utf8';
 
         $database = MockDatabaseFactory::createWithObject($charsetObj);
-        $this->check->setDatabase($database);
+        $this->connectionCharsetCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->connectionCharsetCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('utf8', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('utf8', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenCharsetIsLatin1(): void
@@ -90,22 +90,22 @@ class ConnectionCharsetCheckTest extends TestCase
         $charsetObj->Value = 'latin1';
 
         $database = MockDatabaseFactory::createWithObject($charsetObj);
-        $this->check->setDatabase($database);
+        $this->connectionCharsetCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->connectionCharsetCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('latin1', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('latin1', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenResultIsNull(): void
     {
         $database = MockDatabaseFactory::createWithObject(null);
-        $this->check->setDatabase($database);
+        $this->connectionCharsetCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->connectionCharsetCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('Unable to determine', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to determine', $healthCheckResult->description);
     }
 }

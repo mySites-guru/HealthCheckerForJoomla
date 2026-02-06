@@ -19,7 +19,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ReportModel::class)]
 class ReportModelTest extends TestCase
 {
-    private ?CMSApplication $originalApp = null;
+    private ?CMSApplication $cmsApplication = null;
 
     protected function setUp(): void
     {
@@ -27,36 +27,36 @@ class ReportModelTest extends TestCase
 
         // Store original app if set
         try {
-            $this->originalApp = Factory::getApplication();
+            $this->cmsApplication = Factory::getApplication();
         } catch (\Exception) {
-            $this->originalApp = null;
+            $this->cmsApplication = null;
         }
 
         // Set up a mock application
-        $app = new CMSApplication();
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        Factory::setApplication($cmsApplication);
     }
 
     protected function tearDown(): void
     {
         // Restore original application
-        Factory::setApplication($this->originalApp);
+        Factory::setApplication($this->cmsApplication);
 
         parent::tearDown();
     }
 
     public function testModelCanBeInstantiated(): void
     {
-        $model = new ReportModel();
+        $reportModel = new ReportModel();
 
-        $this->assertInstanceOf(ReportModel::class, $model);
+        $this->assertInstanceOf(ReportModel::class, $reportModel);
     }
 
     public function testModelExtendsBaseDatabaseModel(): void
     {
-        $model = new ReportModel();
+        $reportModel = new ReportModel();
 
-        $this->assertInstanceOf(\Joomla\CMS\MVC\Model\BaseDatabaseModel::class, $model);
+        $this->assertInstanceOf(\Joomla\CMS\MVC\Model\BaseDatabaseModel::class, $reportModel);
     }
 
     public function testRunChecksMethodExists(): void
@@ -66,8 +66,8 @@ class ReportModelTest extends TestCase
 
     public function testRunChecksMethodReturnsVoid(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'runChecks');
-        $returnType = $reflection->getReturnType();
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'runChecks');
+        $returnType = $reflectionMethod->getReturnType();
 
         $this->assertNotNull($returnType);
         $this->assertSame('void', $returnType->getName());
@@ -80,9 +80,9 @@ class ReportModelTest extends TestCase
 
     public function testGetRunnerMethodIsPublic(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'getRunner');
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'getRunner');
 
-        $this->assertTrue($reflection->isPublic());
+        $this->assertTrue($reflectionMethod->isPublic());
     }
 
     public function testGetResultsMethodExists(): void
@@ -92,8 +92,8 @@ class ReportModelTest extends TestCase
 
     public function testGetResultsReturnType(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'getResults');
-        $returnType = $reflection->getReturnType();
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'getResults');
+        $returnType = $reflectionMethod->getReturnType();
 
         $this->assertNotNull($returnType);
         $this->assertSame('array', $returnType->getName());
@@ -106,8 +106,8 @@ class ReportModelTest extends TestCase
 
     public function testGetResultsByCategoryReturnType(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'getResultsByCategory');
-        $returnType = $reflection->getReturnType();
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'getResultsByCategory');
+        $returnType = $reflectionMethod->getReturnType();
 
         $this->assertNotNull($returnType);
         $this->assertSame('array', $returnType->getName());
@@ -120,8 +120,8 @@ class ReportModelTest extends TestCase
 
     public function testGetFilteredResultsAcceptsNullParameters(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'getFilteredResults');
-        $parameters = $reflection->getParameters();
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'getFilteredResults');
+        $parameters = $reflectionMethod->getParameters();
 
         $this->assertCount(2, $parameters);
 
@@ -132,8 +132,8 @@ class ReportModelTest extends TestCase
 
     public function testGetFilteredResultsParameterNames(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'getFilteredResults');
-        $parameters = $reflection->getParameters();
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'getFilteredResults');
+        $parameters = $reflectionMethod->getParameters();
 
         $this->assertSame('statusFilter', $parameters[0]->getName());
         $this->assertSame('categoryFilter', $parameters[1]->getName());
@@ -146,8 +146,8 @@ class ReportModelTest extends TestCase
 
     public function testGetCriticalCountReturnType(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'getCriticalCount');
-        $returnType = $reflection->getReturnType();
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'getCriticalCount');
+        $returnType = $reflectionMethod->getReturnType();
 
         $this->assertNotNull($returnType);
         $this->assertSame('int', $returnType->getName());
@@ -160,8 +160,8 @@ class ReportModelTest extends TestCase
 
     public function testGetWarningCountReturnType(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'getWarningCount');
-        $returnType = $reflection->getReturnType();
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'getWarningCount');
+        $returnType = $reflectionMethod->getReturnType();
 
         $this->assertNotNull($returnType);
         $this->assertSame('int', $returnType->getName());
@@ -174,8 +174,8 @@ class ReportModelTest extends TestCase
 
     public function testGetGoodCountReturnType(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'getGoodCount');
-        $returnType = $reflection->getReturnType();
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'getGoodCount');
+        $returnType = $reflectionMethod->getReturnType();
 
         $this->assertNotNull($returnType);
         $this->assertSame('int', $returnType->getName());
@@ -188,8 +188,8 @@ class ReportModelTest extends TestCase
 
     public function testGetTotalCountReturnType(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'getTotalCount');
-        $returnType = $reflection->getReturnType();
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'getTotalCount');
+        $returnType = $reflectionMethod->getReturnType();
 
         $this->assertNotNull($returnType);
         $this->assertSame('int', $returnType->getName());
@@ -202,8 +202,8 @@ class ReportModelTest extends TestCase
 
     public function testGetLastRunReturnTypeAllowsNull(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'getLastRun');
-        $returnType = $reflection->getReturnType();
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'getLastRun');
+        $returnType = $reflectionMethod->getReturnType();
 
         $this->assertNotNull($returnType);
         $this->assertTrue($returnType->allowsNull());
@@ -216,8 +216,8 @@ class ReportModelTest extends TestCase
 
     public function testToJsonReturnType(): void
     {
-        $reflection = new \ReflectionMethod(ReportModel::class, 'toJson');
-        $returnType = $reflection->getReturnType();
+        $reflectionMethod = new \ReflectionMethod(ReportModel::class, 'toJson');
+        $returnType = $reflectionMethod->getReturnType();
 
         $this->assertNotNull($returnType);
         $this->assertSame('string', $returnType->getName());
@@ -225,46 +225,46 @@ class ReportModelTest extends TestCase
 
     public function testModelHasCorrectNamespace(): void
     {
-        $reflection = new \ReflectionClass(ReportModel::class);
+        $reflectionClass = new \ReflectionClass(ReportModel::class);
 
         $this->assertSame(
             'MySitesGuru\HealthChecker\Component\Administrator\Model',
-            $reflection->getNamespaceName(),
+            $reflectionClass->getNamespaceName(),
         );
     }
 
     public function testModelIsNotAbstract(): void
     {
-        $reflection = new \ReflectionClass(ReportModel::class);
+        $reflectionClass = new \ReflectionClass(ReportModel::class);
 
-        $this->assertFalse($reflection->isAbstract());
+        $this->assertFalse($reflectionClass->isAbstract());
     }
 
     public function testModelIsNotFinal(): void
     {
-        $reflection = new \ReflectionClass(ReportModel::class);
+        $reflectionClass = new \ReflectionClass(ReportModel::class);
 
-        $this->assertFalse($reflection->isFinal());
+        $this->assertFalse($reflectionClass->isFinal());
     }
 
     public function testHealthCheckRunnerPropertyExists(): void
     {
-        $reflection = new \ReflectionClass(ReportModel::class);
+        $reflectionClass = new \ReflectionClass(ReportModel::class);
 
-        $this->assertTrue($reflection->hasProperty('healthCheckRunner'));
+        $this->assertTrue($reflectionClass->hasProperty('healthCheckRunner'));
     }
 
     public function testHealthCheckRunnerPropertyIsPrivate(): void
     {
-        $reflection = new \ReflectionProperty(ReportModel::class, 'healthCheckRunner');
+        $reflectionProperty = new \ReflectionProperty(ReportModel::class, 'healthCheckRunner');
 
-        $this->assertTrue($reflection->isPrivate());
+        $this->assertTrue($reflectionProperty->isPrivate());
     }
 
     public function testHealthCheckRunnerPropertyAllowsNull(): void
     {
-        $reflection = new \ReflectionProperty(ReportModel::class, 'healthCheckRunner');
-        $type = $reflection->getType();
+        $reflectionProperty = new \ReflectionProperty(ReportModel::class, 'healthCheckRunner');
+        $type = $reflectionProperty->getType();
 
         $this->assertNotNull($type);
         $this->assertTrue($type->allowsNull());

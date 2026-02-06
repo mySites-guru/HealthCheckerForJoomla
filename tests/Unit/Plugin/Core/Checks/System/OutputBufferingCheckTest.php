@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(OutputBufferingCheck::class)]
 class OutputBufferingCheckTest extends TestCase
 {
-    private OutputBufferingCheck $check;
+    private OutputBufferingCheck $outputBufferingCheck;
 
     protected function setUp(): void
     {
-        $this->check = new OutputBufferingCheck();
+        $this->outputBufferingCheck = new OutputBufferingCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.output_buffering', $this->check->getSlug());
+        $this->assertSame('system.output_buffering', $this->outputBufferingCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->outputBufferingCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->outputBufferingCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->outputBufferingCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,27 +50,27 @@ class OutputBufferingCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->outputBufferingCheck->run();
 
-        $this->assertSame('system.output_buffering', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.output_buffering', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunAlwaysReturnsGood(): void
     {
         // This check is informational and always returns Good
-        $result = $this->check->run();
+        $healthCheckResult = $this->outputBufferingCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunDescriptionContainsOutputBufferingInfo(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->outputBufferingCheck->run();
 
         // Description should mention output buffering
-        $this->assertStringContainsString('Output buffering', $result->description);
+        $this->assertStringContainsString('Output buffering', $healthCheckResult->description);
     }
 
     public function testCurrentOutputBufferingIsDetectable(): void
@@ -84,58 +84,58 @@ class OutputBufferingCheckTest extends TestCase
     public function testDescriptionReflectsCurrentSetting(): void
     {
         $outputBuffering = ini_get('output_buffering');
-        $result = $this->check->run();
+        $healthCheckResult = $this->outputBufferingCheck->run();
 
         // Check that description reflects the actual setting
         if (in_array($outputBuffering, ['', '0', 'Off'], true)) {
-            $this->assertStringContainsString('disabled', $result->description);
+            $this->assertStringContainsString('disabled', $healthCheckResult->description);
         } elseif ($outputBuffering === '1' || $outputBuffering === 'On') {
-            $this->assertStringContainsString('enabled', $result->description);
+            $this->assertStringContainsString('enabled', $healthCheckResult->description);
         } else {
             // Numeric buffer size
-            $this->assertStringContainsString('bytes', $result->description);
+            $this->assertStringContainsString('bytes', $healthCheckResult->description);
         }
     }
 
     public function testCheckIsInformationalOnly(): void
     {
         // This check should never return Warning or Critical
-        $result = $this->check->run();
+        $healthCheckResult = $this->outputBufferingCheck->run();
 
-        $this->assertNotSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->outputBufferingCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->outputBufferingCheck->run();
+        $result2 = $this->outputBufferingCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->outputBufferingCheck->run();
 
-        $this->assertSame('system.output_buffering', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.output_buffering', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testSlugFormat(): void
     {
-        $slug = $this->check->getSlug();
+        $slug = $this->outputBufferingCheck->getSlug();
 
         // Slug should be lowercase with dot separator
         $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
@@ -143,7 +143,7 @@ class OutputBufferingCheckTest extends TestCase
 
     public function testCategoryIsValid(): void
     {
-        $category = $this->check->getCategory();
+        $category = $this->outputBufferingCheck->getCategory();
 
         // Should be a valid category
         $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
@@ -160,29 +160,29 @@ class OutputBufferingCheckTest extends TestCase
     public function testOutputBufferingValueParsing(): void
     {
         $outputBuffering = ini_get('output_buffering');
-        $result = $this->check->run();
+        $healthCheckResult = $this->outputBufferingCheck->run();
 
         // Verify the output buffering value is reflected in description
-        $this->assertStringContainsString('Output buffering', $result->description);
+        $this->assertStringContainsString('Output buffering', $healthCheckResult->description);
 
         if (in_array($outputBuffering, ['', '0', 'Off'], true)) {
-            $this->assertStringContainsString('disabled', $result->description);
+            $this->assertStringContainsString('disabled', $healthCheckResult->description);
         } elseif ($outputBuffering === '1' || $outputBuffering === 'On') {
-            $this->assertStringContainsString('enabled', $result->description);
+            $this->assertStringContainsString('enabled', $healthCheckResult->description);
         } elseif (is_numeric($outputBuffering) && (int) $outputBuffering > 1) {
             // Numeric buffer size
-            $this->assertStringContainsString('bytes', $result->description);
-            $this->assertStringContainsString($outputBuffering, $result->description);
+            $this->assertStringContainsString('bytes', $healthCheckResult->description);
+            $this->assertStringContainsString($outputBuffering, $healthCheckResult->description);
         }
     }
 
     public function testDisabledOutputBufferingMentionsRecommended(): void
     {
         $outputBuffering = ini_get('output_buffering');
-        $result = $this->check->run();
+        $healthCheckResult = $this->outputBufferingCheck->run();
 
         if (in_array($outputBuffering, ['', '0', 'Off'], true)) {
-            $this->assertStringContainsString('recommended', $result->description);
+            $this->assertStringContainsString('recommended', $healthCheckResult->description);
         }
     }
 }

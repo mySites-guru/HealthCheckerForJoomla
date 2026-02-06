@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MbstringExtensionCheck::class)]
 class MbstringExtensionCheckTest extends TestCase
 {
-    private MbstringExtensionCheck $check;
+    private MbstringExtensionCheck $mbstringExtensionCheck;
 
     protected function setUp(): void
     {
-        $this->check = new MbstringExtensionCheck();
+        $this->mbstringExtensionCheck = new MbstringExtensionCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.mbstring_extension', $this->check->getSlug());
+        $this->assertSame('system.mbstring_extension', $this->mbstringExtensionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->mbstringExtensionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->mbstringExtensionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->mbstringExtensionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,57 +50,57 @@ class MbstringExtensionCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->mbstringExtensionCheck->run();
 
-        $this->assertSame('system.mbstring_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.mbstring_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->mbstringExtensionCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->mbstringExtensionCheck->run();
 
-        $this->assertSame('system.mbstring_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.mbstring_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsWarning(): void
     {
         // Mbstring check returns Critical or Good, never Warning per documentation
-        $result = $this->check->run();
+        $healthCheckResult = $this->mbstringExtensionCheck->run();
 
-        $this->assertNotSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->mbstringExtensionCheck->run();
+        $result2 = $this->mbstringExtensionCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testRunReturnsValidStatusBasedOnExtensionAvailability(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->mbstringExtensionCheck->run();
 
         // Based on whether mbstring extension is loaded
         if (extension_loaded('mbstring')) {
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         } else {
-            $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+            $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
         }
     }
 

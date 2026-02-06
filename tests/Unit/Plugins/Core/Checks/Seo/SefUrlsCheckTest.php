@@ -21,41 +21,41 @@ class SefUrlsCheckTest extends TestCase
 {
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $check = new SefUrlsCheck();
-        $this->assertSame('seo.sef_urls', $check->getSlug());
+        $sefUrlsCheck = new SefUrlsCheck();
+        $this->assertSame('seo.sef_urls', $sefUrlsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $check = new SefUrlsCheck();
-        $this->assertSame('seo', $check->getCategory());
+        $sefUrlsCheck = new SefUrlsCheck();
+        $this->assertSame('seo', $sefUrlsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $check = new SefUrlsCheck();
-        $this->assertSame('core', $check->getProvider());
+        $sefUrlsCheck = new SefUrlsCheck();
+        $this->assertSame('core', $sefUrlsCheck->getProvider());
     }
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $check = new SefUrlsCheck();
-        $result = $check->run();
+        $sefUrlsCheck = new SefUrlsCheck();
+        $healthCheckResult = $sefUrlsCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame('seo.sef_urls', $result->slug);
-        $this->assertSame('seo', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame('seo.sef_urls', $healthCheckResult->slug);
+        $this->assertSame('seo', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsGoodOrWarningStatus(): void
     {
-        $check = new SefUrlsCheck();
-        $result = $check->run();
+        $sefUrlsCheck = new SefUrlsCheck();
+        $healthCheckResult = $sefUrlsCheck->run();
 
         // SEF URLs check only returns Good or Warning, never Critical
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning],
             'SEF URLs check should return Good or Warning status',
         );
@@ -63,55 +63,55 @@ class SefUrlsCheckTest extends TestCase
 
     public function testResultDescriptionIsNotEmpty(): void
     {
-        $check = new SefUrlsCheck();
-        $result = $check->run();
+        $sefUrlsCheck = new SefUrlsCheck();
+        $healthCheckResult = $sefUrlsCheck->run();
 
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testResultDescriptionMentionsSefOrUrls(): void
     {
-        $check = new SefUrlsCheck();
-        $result = $check->run();
+        $sefUrlsCheck = new SefUrlsCheck();
+        $healthCheckResult = $sefUrlsCheck->run();
 
         // Description mentions either "SEF" or "URLs" (Search Engine Friendly URLs)
         $this->assertTrue(
-            str_contains(strtolower($result->description), 'sef')
-            || str_contains(strtolower($result->description), 'url'),
+            str_contains(strtolower($healthCheckResult->description), 'sef')
+            || str_contains(strtolower($healthCheckResult->description), 'url'),
             'Description should mention SEF or URLs',
         );
     }
 
     public function testCheckDoesNotRequireDatabase(): void
     {
-        $check = new SefUrlsCheck();
+        $sefUrlsCheck = new SefUrlsCheck();
 
         // Database should be null (not injected)
-        $this->assertNull($check->getDatabase());
+        $this->assertNull($sefUrlsCheck->getDatabase());
 
         // Check should still work without database
-        $result = $check->run();
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
+        $healthCheckResult = $sefUrlsCheck->run();
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
     }
 
     public function testCheckIsConsistentOnMultipleRuns(): void
     {
-        $check = new SefUrlsCheck();
+        $sefUrlsCheck = new SefUrlsCheck();
 
-        $result1 = $check->run();
-        $result2 = $check->run();
+        $healthCheckResult = $sefUrlsCheck->run();
+        $result2 = $sefUrlsCheck->run();
 
         // Results should be the same since SEF config doesn't change during test
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testResultCanBeConvertedToArray(): void
     {
-        $check = new SefUrlsCheck();
-        $result = $check->run();
+        $sefUrlsCheck = new SefUrlsCheck();
+        $healthCheckResult = $sefUrlsCheck->run();
 
-        $array = $result->toArray();
+        $array = $healthCheckResult->toArray();
 
         $this->assertIsArray($array);
         $this->assertArrayHasKey('slug', $array);

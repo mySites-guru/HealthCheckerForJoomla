@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(DuplicateEmailsCheck::class)]
 class DuplicateEmailsCheckTest extends TestCase
 {
-    private DuplicateEmailsCheck $check;
+    private DuplicateEmailsCheck $duplicateEmailsCheck;
 
     protected function setUp(): void
     {
-        $this->check = new DuplicateEmailsCheck();
+        $this->duplicateEmailsCheck = new DuplicateEmailsCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('users.duplicate_emails', $this->check->getSlug());
+        $this->assertSame('users.duplicate_emails', $this->duplicateEmailsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsUsers(): void
     {
-        $this->assertSame('users', $this->check->getCategory());
+        $this->assertSame('users', $this->duplicateEmailsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->duplicateEmailsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->duplicateEmailsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,20 +51,20 @@ class DuplicateEmailsCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->duplicateEmailsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenNoDuplicates(): void
     {
         $database = MockDatabaseFactory::createWithObjectList([]);
-        $this->check->setDatabase($database);
+        $this->duplicateEmailsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->duplicateEmailsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No duplicate', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No duplicate', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenDuplicatesFound(): void
@@ -80,11 +80,11 @@ class DuplicateEmailsCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($duplicates);
-        $this->check->setDatabase($database);
+        $this->duplicateEmailsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->duplicateEmailsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('2 email address', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 email address', $healthCheckResult->description);
     }
 }

@@ -191,15 +191,15 @@ class HealthCheckResultTest extends TestCase
             'provider' => 'test_provider',
         ];
 
-        $result = HealthCheckResult::fromArray($data);
+        $healthCheckResult = HealthCheckResult::fromArray($data);
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertSame('Test Title', $result->title);
-        $this->assertSame('Test Description', $result->description);
-        $this->assertSame('test.from_array', $result->slug);
-        $this->assertSame('security', $result->category);
-        $this->assertSame('test_provider', $result->provider);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertSame('Test Title', $healthCheckResult->title);
+        $this->assertSame('Test Description', $healthCheckResult->description);
+        $this->assertSame('test.from_array', $healthCheckResult->slug);
+        $this->assertSame('security', $healthCheckResult->category);
+        $this->assertSame('test_provider', $healthCheckResult->provider);
     }
 
     public function testFromArrayWithWarningStatus(): void
@@ -213,9 +213,9 @@ class HealthCheckResultTest extends TestCase
             'provider' => 'core',
         ];
 
-        $result = HealthCheckResult::fromArray($data);
+        $healthCheckResult = HealthCheckResult::fromArray($data);
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testFromArrayWithGoodStatus(): void
@@ -229,9 +229,9 @@ class HealthCheckResultTest extends TestCase
             'provider' => 'core',
         ];
 
-        $result = HealthCheckResult::fromArray($data);
+        $healthCheckResult = HealthCheckResult::fromArray($data);
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testFromArrayDefaultsProviderToCore(): void
@@ -245,14 +245,14 @@ class HealthCheckResultTest extends TestCase
             // provider is missing
         ];
 
-        $result = HealthCheckResult::fromArray($data);
+        $healthCheckResult = HealthCheckResult::fromArray($data);
 
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testFromArrayRoundtripsCorrectly(): void
     {
-        $original = new HealthCheckResult(
+        $healthCheckResult = new HealthCheckResult(
             healthStatus: HealthStatus::Warning,
             title: 'Roundtrip Test',
             description: 'Testing roundtrip',
@@ -261,20 +261,20 @@ class HealthCheckResultTest extends TestCase
             provider: 'custom_plugin',
         );
 
-        $array = $original->toArray();
+        $array = $healthCheckResult->toArray();
         $reconstructed = HealthCheckResult::fromArray($array);
 
-        $this->assertSame($original->healthStatus, $reconstructed->healthStatus);
-        $this->assertSame($original->title, $reconstructed->title);
-        $this->assertSame($original->description, $reconstructed->description);
-        $this->assertSame($original->slug, $reconstructed->slug);
-        $this->assertSame($original->category, $reconstructed->category);
-        $this->assertSame($original->provider, $reconstructed->provider);
+        $this->assertSame($healthCheckResult->healthStatus, $reconstructed->healthStatus);
+        $this->assertSame($healthCheckResult->title, $reconstructed->title);
+        $this->assertSame($healthCheckResult->description, $reconstructed->description);
+        $this->assertSame($healthCheckResult->slug, $reconstructed->slug);
+        $this->assertSame($healthCheckResult->category, $reconstructed->category);
+        $this->assertSame($healthCheckResult->provider, $reconstructed->provider);
     }
 
     public function testFromArrayWithJsonEncodedData(): void
     {
-        $original = new HealthCheckResult(
+        $healthCheckResult = new HealthCheckResult(
             healthStatus: HealthStatus::Critical,
             title: 'JSON Test',
             description: 'Testing JSON round-trip',
@@ -284,16 +284,16 @@ class HealthCheckResultTest extends TestCase
         );
 
         // Simulate JSON serialization/deserialization (as happens in cache)
-        $json = json_encode($original->toArray());
+        $json = json_encode($healthCheckResult->toArray());
         $decoded = json_decode($json, true);
         $reconstructed = HealthCheckResult::fromArray($decoded);
 
-        $this->assertSame($original->healthStatus, $reconstructed->healthStatus);
-        $this->assertSame($original->title, $reconstructed->title);
-        $this->assertSame($original->description, $reconstructed->description);
-        $this->assertSame($original->slug, $reconstructed->slug);
-        $this->assertSame($original->category, $reconstructed->category);
-        $this->assertSame($original->provider, $reconstructed->provider);
+        $this->assertSame($healthCheckResult->healthStatus, $reconstructed->healthStatus);
+        $this->assertSame($healthCheckResult->title, $reconstructed->title);
+        $this->assertSame($healthCheckResult->description, $reconstructed->description);
+        $this->assertSame($healthCheckResult->slug, $reconstructed->slug);
+        $this->assertSame($healthCheckResult->category, $reconstructed->category);
+        $this->assertSame($healthCheckResult->provider, $reconstructed->provider);
     }
 
     public function testConstructorWithDocsUrl(): void
@@ -412,10 +412,10 @@ class HealthCheckResultTest extends TestCase
             'actionUrl' => '/admin/page',
         ];
 
-        $result = HealthCheckResult::fromArray($data);
+        $healthCheckResult = HealthCheckResult::fromArray($data);
 
-        $this->assertSame('https://example.com/docs', $result->docsUrl);
-        $this->assertSame('/admin/page', $result->actionUrl);
+        $this->assertSame('https://example.com/docs', $healthCheckResult->docsUrl);
+        $this->assertSame('/admin/page', $healthCheckResult->actionUrl);
     }
 
     public function testFromArrayDefaultsUrlsToNull(): void
@@ -428,15 +428,15 @@ class HealthCheckResultTest extends TestCase
             'category' => 'system',
         ];
 
-        $result = HealthCheckResult::fromArray($data);
+        $healthCheckResult = HealthCheckResult::fromArray($data);
 
-        $this->assertNull($result->docsUrl);
-        $this->assertNull($result->actionUrl);
+        $this->assertNull($healthCheckResult->docsUrl);
+        $this->assertNull($healthCheckResult->actionUrl);
     }
 
     public function testFromArrayRoundtripWithUrls(): void
     {
-        $original = new HealthCheckResult(
+        $healthCheckResult = new HealthCheckResult(
             healthStatus: HealthStatus::Warning,
             title: 'Roundtrip URL Test',
             description: 'Testing URL roundtrip',
@@ -447,11 +447,11 @@ class HealthCheckResultTest extends TestCase
             actionUrl: '/administrator/index.php?option=com_custom',
         );
 
-        $array = $original->toArray();
+        $array = $healthCheckResult->toArray();
         $reconstructed = HealthCheckResult::fromArray($array);
 
-        $this->assertSame($original->docsUrl, $reconstructed->docsUrl);
-        $this->assertSame($original->actionUrl, $reconstructed->actionUrl);
+        $this->assertSame($healthCheckResult->docsUrl, $reconstructed->docsUrl);
+        $this->assertSame($healthCheckResult->actionUrl, $reconstructed->actionUrl);
     }
 
     public function testToArrayStripsHtmlFromTitle(): void

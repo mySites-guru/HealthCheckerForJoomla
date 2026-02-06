@@ -20,15 +20,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ErrorReportingCheck::class)]
 class ErrorReportingCheckTest extends TestCase
 {
-    private ErrorReportingCheck $check;
+    private ErrorReportingCheck $errorReportingCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new ErrorReportingCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->errorReportingCheck = new ErrorReportingCheck();
     }
 
     protected function tearDown(): void
@@ -38,22 +38,22 @@ class ErrorReportingCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.error_reporting', $this->check->getSlug());
+        $this->assertSame('security.error_reporting', $this->errorReportingCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->errorReportingCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->errorReportingCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->errorReportingCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -62,48 +62,48 @@ class ErrorReportingCheckTest extends TestCase
     public function testRunWithDefaultSettingReturnsGood(): void
     {
         // Default is 'default' which returns good
-        $result = $this->check->run();
+        $healthCheckResult = $this->errorReportingCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertSame('security.error_reporting', $result->slug);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertSame('security.error_reporting', $healthCheckResult->slug);
     }
 
     public function testRunWithNoneSettingReturnsGood(): void
     {
-        $this->app->set('error_reporting', 'none');
+        $this->cmsApplication->set('error_reporting', 'none');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->errorReportingCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('appropriately configured', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('appropriately configured', $healthCheckResult->description);
     }
 
     public function testRunWithSimpleSettingReturnsGood(): void
     {
-        $this->app->set('error_reporting', 'simple');
+        $this->cmsApplication->set('error_reporting', 'simple');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->errorReportingCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithMaximumSettingReturnsWarning(): void
     {
-        $this->app->set('error_reporting', 'maximum');
+        $this->cmsApplication->set('error_reporting', 'maximum');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->errorReportingCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('maximum/development', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('maximum/development', $healthCheckResult->description);
     }
 
     public function testRunWithDevelopmentSettingReturnsWarning(): void
     {
-        $this->app->set('error_reporting', 'development');
+        $this->cmsApplication->set('error_reporting', 'development');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->errorReportingCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('sensitive information', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('sensitive information', $healthCheckResult->description);
     }
 }

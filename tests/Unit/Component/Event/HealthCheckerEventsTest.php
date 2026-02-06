@@ -62,7 +62,10 @@ class HealthCheckerEventsTest extends TestCase
 
     public function testEventNamesAreUnique(): void
     {
-        $values = array_map(fn($case) => $case->value, HealthCheckerEvents::cases());
+        $values = array_map(
+            fn(\MySitesGuru\HealthChecker\Component\Administrator\Event\HealthCheckerEvents $healthCheckerEvents) => $healthCheckerEvents->value,
+            HealthCheckerEvents::cases(),
+        );
         $uniqueValues = array_unique($values);
 
         $this->assertCount(count($values), $uniqueValues);
@@ -70,14 +73,14 @@ class HealthCheckerEventsTest extends TestCase
 
     public function testEventEnumIsBacked(): void
     {
-        $reflection = new \ReflectionEnum(HealthCheckerEvents::class);
-        $this->assertTrue($reflection->isBacked());
+        $reflectionEnum = new \ReflectionEnum(HealthCheckerEvents::class);
+        $this->assertTrue($reflectionEnum->isBacked());
     }
 
     public function testEventEnumBackingTypeIsString(): void
     {
-        $reflection = new \ReflectionEnum(HealthCheckerEvents::class);
-        $this->assertSame('string', $reflection->getBackingType()?->getName());
+        $reflectionEnum = new \ReflectionEnum(HealthCheckerEvents::class);
+        $this->assertSame('string', $reflectionEnum->getBackingType()?->getName());
     }
 
     public function testGetHandlerMethodForCollectProviders(): void

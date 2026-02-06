@@ -246,7 +246,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -344,7 +344,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -454,7 +454,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -560,7 +560,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -666,7 +666,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -773,7 +773,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -898,7 +898,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -1023,7 +1023,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -1134,7 +1134,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -1239,7 +1239,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -1355,7 +1355,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -1467,7 +1467,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -1575,7 +1575,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -1683,7 +1683,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }
@@ -1791,7 +1791,7 @@ final class AkeebaAdminToolsPlugin extends CMSPlugin implements SubscriberInterf
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebaadmintools/src/Extension/AkeebaAdminToolsPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_admintools';
             }

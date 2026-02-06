@@ -21,31 +21,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(DatabaseQueryCacheCheck::class)]
 class DatabaseQueryCacheCheckTest extends TestCase
 {
-    private DatabaseQueryCacheCheck $check;
+    private DatabaseQueryCacheCheck $databaseQueryCacheCheck;
 
     protected function setUp(): void
     {
-        $this->check = new DatabaseQueryCacheCheck();
+        $this->databaseQueryCacheCheck = new DatabaseQueryCacheCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('performance.database_query_cache', $this->check->getSlug());
+        $this->assertSame('performance.database_query_cache', $this->databaseQueryCacheCheck->getSlug());
     }
 
     public function testGetCategoryReturnsPerformance(): void
     {
-        $this->assertSame('performance', $this->check->getCategory());
+        $this->assertSame('performance', $this->databaseQueryCacheCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->databaseQueryCacheCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->databaseQueryCacheCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -53,88 +53,88 @@ class DatabaseQueryCacheCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->databaseQueryCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('database', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('database', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithMysql8ReturnsGoodQueryCacheNotAvailable(): void
     {
         $database = MockDatabaseFactory::createWithResult(null, '8.0.30');
-        $this->check->setDatabase($database);
+        $this->databaseQueryCacheCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->databaseQueryCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('MySQL 8.0+', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('MySQL 8.0+', $healthCheckResult->description);
     }
 
     public function testRunWithMariaDbAndCacheDisabledReturnsWarning(): void
     {
         $database = $this->createMariaDbWithCacheStatus('OFF', 0);
-        $this->check->setDatabase($database);
+        $this->databaseQueryCacheCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->databaseQueryCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('disabled', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithMariaDbAndCacheEnabledWithSizeReturnsGood(): void
     {
         $cacheSize = 16 * 1024 * 1024; // 16 MB
         $database = $this->createMariaDbWithCacheStatus('ON', $cacheSize);
-        $this->check->setDatabase($database);
+        $this->databaseQueryCacheCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->databaseQueryCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('16', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('16', $healthCheckResult->description);
     }
 
     public function testRunWithCacheTypeOnButSizeZeroReturnsWarning(): void
     {
         $database = $this->createMariaDbWithCacheStatus('ON', 0);
-        $this->check->setDatabase($database);
+        $this->databaseQueryCacheCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->databaseQueryCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('size is 0', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('size is 0', $healthCheckResult->description);
     }
 
     public function testRunWithMysql57AndCacheDisabledReturnsGood(): void
     {
         $database = $this->createMysqlWithCacheStatus('5.7.40', 'OFF', 0);
-        $this->check->setDatabase($database);
+        $this->databaseQueryCacheCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->databaseQueryCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('MySQL 5.7', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('MySQL 5.7', $healthCheckResult->description);
     }
 
     public function testRunWithEmptyVersionReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithResult(null, '');
-        $this->check->setDatabase($database);
+        $this->databaseQueryCacheCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->databaseQueryCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('version', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('version', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithEmptyQueryCacheVariablesReturnsGood(): void
     {
         $database = $this->createDatabaseWithEmptyCacheVariables('5.6.50');
-        $this->check->setDatabase($database);
+        $this->databaseQueryCacheCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->databaseQueryCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('not available', strtolower($result->description));
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not available', strtolower($healthCheckResult->description));
     }
 
     /**
@@ -201,14 +201,14 @@ class DatabaseQueryCacheCheckTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -348,14 +348,14 @@ class DatabaseQueryCacheCheckTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -490,14 +490,14 @@ class DatabaseQueryCacheCheckTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string

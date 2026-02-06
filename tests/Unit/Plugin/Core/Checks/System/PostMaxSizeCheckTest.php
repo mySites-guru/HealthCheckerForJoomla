@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(PostMaxSizeCheck::class)]
 class PostMaxSizeCheckTest extends TestCase
 {
-    private PostMaxSizeCheck $check;
+    private PostMaxSizeCheck $postMaxSizeCheck;
 
     protected function setUp(): void
     {
-        $this->check = new PostMaxSizeCheck();
+        $this->postMaxSizeCheck = new PostMaxSizeCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.post_max_size', $this->check->getSlug());
+        $this->assertSame('system.post_max_size', $this->postMaxSizeCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->postMaxSizeCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->postMaxSizeCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->postMaxSizeCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,30 +50,30 @@ class PostMaxSizeCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->postMaxSizeCheck->run();
 
-        $this->assertSame('system.post_max_size', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.post_max_size', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->postMaxSizeCheck->run();
 
         // Can return Good, Warning, or Critical depending on post_max_size value
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
 
     public function testRunDescriptionContainsPostMaxSizeInfo(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->postMaxSizeCheck->run();
 
         // Description should mention post_max_size
-        $this->assertStringContainsString('post_max_size', $result->description);
+        $this->assertStringContainsString('post_max_size', $healthCheckResult->description);
     }
 
     public function testCurrentPostMaxSizeIsDetectable(): void
@@ -92,40 +92,40 @@ class PostMaxSizeCheckTest extends TestCase
         // < 8M: Critical
         $postMaxSize = ini_get('post_max_size');
         $bytes = $this->convertToBytes($postMaxSize);
-        $result = $this->check->run();
+        $healthCheckResult = $this->postMaxSizeCheck->run();
 
         if ($bytes >= 32 * 1024 * 1024) {
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         } elseif ($bytes >= 8 * 1024 * 1024) {
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+            $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         } else {
-            $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+            $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
         }
     }
 
     public function testDescriptionIncludesCurrentValue(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->postMaxSizeCheck->run();
         $postMaxSize = ini_get('post_max_size');
 
         // Description should include the current value
-        $this->assertStringContainsString($postMaxSize, $result->description);
+        $this->assertStringContainsString($postMaxSize, $healthCheckResult->description);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->postMaxSizeCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->postMaxSizeCheck->run();
+        $result2 = $this->postMaxSizeCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testConvertToBytesWithEmptyString(): void
@@ -159,7 +159,7 @@ class PostMaxSizeCheckTest extends TestCase
         // Test lowercase suffixes
         $this->assertSame(32 * 1024 * 1024, $this->convertToBytes('32m'));
         $this->assertSame(512 * 1024, $this->convertToBytes('512k'));
-        $this->assertSame(1 * 1024 * 1024 * 1024, $this->convertToBytes('1g'));
+        $this->assertSame(1024 * 1024 * 1024, $this->convertToBytes('1g'));
     }
 
     public function testConvertToBytesWithUppercaseSuffix(): void
@@ -167,23 +167,23 @@ class PostMaxSizeCheckTest extends TestCase
         // Test uppercase suffixes
         $this->assertSame(32 * 1024 * 1024, $this->convertToBytes('32M'));
         $this->assertSame(512 * 1024, $this->convertToBytes('512K'));
-        $this->assertSame(1 * 1024 * 1024 * 1024, $this->convertToBytes('1G'));
+        $this->assertSame(1024 * 1024 * 1024, $this->convertToBytes('1G'));
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->postMaxSizeCheck->run();
 
-        $this->assertSame('system.post_max_size', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.post_max_size', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testSlugFormat(): void
     {
-        $slug = $this->check->getSlug();
+        $slug = $this->postMaxSizeCheck->getSlug();
 
         // Slug should be lowercase with dot separator
         $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
@@ -191,7 +191,7 @@ class PostMaxSizeCheckTest extends TestCase
 
     public function testCategoryIsValid(): void
     {
-        $category = $this->check->getCategory();
+        $category = $this->postMaxSizeCheck->getCategory();
 
         // Should be a valid category
         $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];

@@ -20,15 +20,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(DebugModeCheck::class)]
 class DebugModeCheckTest extends TestCase
 {
-    private DebugModeCheck $check;
+    private DebugModeCheck $debugModeCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new DebugModeCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->debugModeCheck = new DebugModeCheck();
     }
 
     protected function tearDown(): void
@@ -38,22 +38,22 @@ class DebugModeCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.debug_mode', $this->check->getSlug());
+        $this->assertSame('security.debug_mode', $this->debugModeCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->debugModeCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->debugModeCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->debugModeCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -61,39 +61,39 @@ class DebugModeCheckTest extends TestCase
 
     public function testRunWithDebugDisabledReturnsGood(): void
     {
-        $this->app->set('debug', false);
+        $this->cmsApplication->set('debug', false);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->debugModeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunWithDebugEnabledReturnsWarning(): void
     {
-        $this->app->set('debug', true);
+        $this->cmsApplication->set('debug', true);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->debugModeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('enabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled', $healthCheckResult->description);
     }
 
     public function testRunWithDebugOneReturnsWarning(): void
     {
-        $this->app->set('debug', 1);
+        $this->cmsApplication->set('debug', 1);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->debugModeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithDebugZeroReturnsGood(): void
     {
-        $this->app->set('debug', 0);
+        $this->cmsApplication->set('debug', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->debugModeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 }

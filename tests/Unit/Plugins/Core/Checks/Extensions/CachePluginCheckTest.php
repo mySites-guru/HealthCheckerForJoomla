@@ -21,41 +21,41 @@ class CachePluginCheckTest extends TestCase
 {
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $check = new CachePluginCheck();
-        $this->assertSame('extensions.cache_plugin', $check->getSlug());
+        $cachePluginCheck = new CachePluginCheck();
+        $this->assertSame('extensions.cache_plugin', $cachePluginCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $check = new CachePluginCheck();
-        $this->assertSame('extensions', $check->getCategory());
+        $cachePluginCheck = new CachePluginCheck();
+        $this->assertSame('extensions', $cachePluginCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $check = new CachePluginCheck();
-        $this->assertSame('core', $check->getProvider());
+        $cachePluginCheck = new CachePluginCheck();
+        $this->assertSame('core', $cachePluginCheck->getProvider());
     }
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $check = new CachePluginCheck();
-        $result = $check->run();
+        $cachePluginCheck = new CachePluginCheck();
+        $healthCheckResult = $cachePluginCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame('extensions.cache_plugin', $result->slug);
-        $this->assertSame('extensions', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame('extensions.cache_plugin', $healthCheckResult->slug);
+        $this->assertSame('extensions', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsGoodOrWarningStatus(): void
     {
-        $check = new CachePluginCheck();
-        $result = $check->run();
+        $cachePluginCheck = new CachePluginCheck();
+        $healthCheckResult = $cachePluginCheck->run();
 
         // Cache plugin check only returns Good or Warning, never Critical
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning],
             'Cache plugin check should return Good or Warning status',
         );
@@ -63,55 +63,55 @@ class CachePluginCheckTest extends TestCase
 
     public function testResultDescriptionIsNotEmpty(): void
     {
-        $check = new CachePluginCheck();
-        $result = $check->run();
+        $cachePluginCheck = new CachePluginCheck();
+        $healthCheckResult = $cachePluginCheck->run();
 
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testResultDescriptionMentionsCacheOrPlugin(): void
     {
-        $check = new CachePluginCheck();
-        $result = $check->run();
+        $cachePluginCheck = new CachePluginCheck();
+        $healthCheckResult = $cachePluginCheck->run();
 
         // Description should mention cache or plugin
         $this->assertTrue(
-            stripos($result->description, 'cache') !== false ||
-            stripos($result->description, 'plugin') !== false,
+            stripos($healthCheckResult->description, 'cache') !== false ||
+            stripos($healthCheckResult->description, 'plugin') !== false,
             'Description should mention cache or plugin',
         );
     }
 
     public function testCheckDoesNotRequireDatabase(): void
     {
-        $check = new CachePluginCheck();
+        $cachePluginCheck = new CachePluginCheck();
 
         // Database should be null (not injected)
-        $this->assertNull($check->getDatabase());
+        $this->assertNull($cachePluginCheck->getDatabase());
 
         // Check should still work without database
-        $result = $check->run();
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
+        $healthCheckResult = $cachePluginCheck->run();
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
     }
 
     public function testCheckIsConsistentOnMultipleRuns(): void
     {
-        $check = new CachePluginCheck();
+        $cachePluginCheck = new CachePluginCheck();
 
-        $result1 = $check->run();
-        $result2 = $check->run();
+        $healthCheckResult = $cachePluginCheck->run();
+        $result2 = $cachePluginCheck->run();
 
         // Results should be the same since config doesn't change during test
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testResultCanBeConvertedToArray(): void
     {
-        $check = new CachePluginCheck();
-        $result = $check->run();
+        $cachePluginCheck = new CachePluginCheck();
+        $healthCheckResult = $cachePluginCheck->run();
 
-        $array = $result->toArray();
+        $array = $healthCheckResult->toArray();
 
         $this->assertIsArray($array);
         $this->assertArrayHasKey('slug', $array);

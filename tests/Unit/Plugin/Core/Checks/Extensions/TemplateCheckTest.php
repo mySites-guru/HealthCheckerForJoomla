@@ -20,11 +20,11 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TemplateCheck::class)]
 class TemplateCheckTest extends TestCase
 {
-    private TemplateCheck $check;
+    private TemplateCheck $templateCheck;
 
     protected function setUp(): void
     {
-        $this->check = new TemplateCheck();
+        $this->templateCheck = new TemplateCheck();
         $this->cleanupTemplateDirectories();
     }
 
@@ -54,6 +54,7 @@ class TemplateCheckTest extends TestCase
                         unlink($file);
                     }
                 }
+
                 @rmdir($dir);
             }
         }
@@ -83,22 +84,22 @@ class TemplateCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('extensions.template', $this->check->getSlug());
+        $this->assertSame('extensions.template', $this->templateCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->templateCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->templateCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->templateCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -106,10 +107,10 @@ class TemplateCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->templateCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('database', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('database', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithValidTemplatesReturnsGood(): void
@@ -128,13 +129,13 @@ class TemplateCheckTest extends TestCase
                 'title' => 'Atum',
             ],
         );
-        $this->check->setDatabase($database);
+        $this->templateCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->templateCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('cassiopeia', $result->description);
-        $this->assertStringContainsString('atum', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('cassiopeia', $healthCheckResult->description);
+        $this->assertStringContainsString('atum', $healthCheckResult->description);
     }
 
     public function testRunWithNoSiteTemplateConfiguredReturnsCritical(): void
@@ -145,12 +146,12 @@ class TemplateCheckTest extends TestCase
             'template' => 'atum',
             'title' => 'Atum',
         ]);
-        $this->check->setDatabase($database);
+        $this->templateCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->templateCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('No default site template', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No default site template', $healthCheckResult->description);
     }
 
     public function testRunWithNoAdminTemplateConfiguredReturnsCritical(): void
@@ -164,12 +165,12 @@ class TemplateCheckTest extends TestCase
             ],
             null,
         );
-        $this->check->setDatabase($database);
+        $this->templateCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->templateCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('No default admin template', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No default admin template', $healthCheckResult->description);
     }
 
     public function testRunWithMissingSiteTemplateDirectoryReturnsCritical(): void
@@ -187,12 +188,12 @@ class TemplateCheckTest extends TestCase
                 'title' => 'Atum',
             ],
         );
-        $this->check->setDatabase($database);
+        $this->templateCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->templateCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('directory not found', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('directory not found', $healthCheckResult->description);
     }
 
     public function testRunWithMissingTemplateDetailsXmlReturnsCritical(): void
@@ -211,12 +212,12 @@ class TemplateCheckTest extends TestCase
                 'title' => 'Atum',
             ],
         );
-        $this->check->setDatabase($database);
+        $this->templateCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->templateCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('missing templateDetails.xml', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('missing templateDetails.xml', $healthCheckResult->description);
     }
 
     public function testRunWithInvalidXmlReturnsCritical(): void
@@ -235,12 +236,12 @@ class TemplateCheckTest extends TestCase
                 'title' => 'Atum',
             ],
         );
-        $this->check->setDatabase($database);
+        $this->templateCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->templateCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('invalid templateDetails.xml', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('invalid templateDetails.xml', $healthCheckResult->description);
     }
 
     public function testRunWithMissingIndexPhpReturnsCritical(): void
@@ -259,12 +260,12 @@ class TemplateCheckTest extends TestCase
                 'title' => 'Atum',
             ],
         );
-        $this->check->setDatabase($database);
+        $this->templateCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->templateCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('missing index.php', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('missing index.php', $healthCheckResult->description);
     }
 
     public function testCheckNeverReturnsWarningStatus(): void
@@ -283,12 +284,12 @@ class TemplateCheckTest extends TestCase
                 'title' => 'Atum',
             ],
         );
-        $this->check->setDatabase($database);
+        $this->templateCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->templateCheck->run();
 
         // When templates are valid, should return Good
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithAdminTemplateIssuesMergesWithSiteIssues(): void
@@ -308,14 +309,14 @@ class TemplateCheckTest extends TestCase
                 'title' => 'Admin Test',
             ],
         );
-        $this->check->setDatabase($database);
+        $this->templateCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->templateCheck->run();
 
         // Should return critical because admin template has invalid XML
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('invalid templateDetails.xml', $result->description);
-        $this->assertStringContainsString('Admin', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('invalid templateDetails.xml', $healthCheckResult->description);
+        $this->assertStringContainsString('Admin', $healthCheckResult->description);
     }
 
     public function testRunWithBothTemplatesHavingIssuesReportsBoth(): void
@@ -335,15 +336,15 @@ class TemplateCheckTest extends TestCase
                 'title' => 'Atum',
             ],
         );
-        $this->check->setDatabase($database);
+        $this->templateCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->templateCheck->run();
 
         // Should return critical with both issues merged
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
         // Should contain both site and admin issues
-        $this->assertStringContainsString('Site', $result->description);
-        $this->assertStringContainsString('Admin', $result->description);
+        $this->assertStringContainsString('Site', $healthCheckResult->description);
+        $this->assertStringContainsString('Admin', $healthCheckResult->description);
     }
 
     /**
@@ -413,14 +414,14 @@ class TemplateCheckTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "\"{$text}\"" : '';
+                return is_string($text) ? sprintf('"%s"', $text) : '';
             }
 
             public function getPrefix(): string

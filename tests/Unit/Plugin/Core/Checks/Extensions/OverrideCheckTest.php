@@ -20,31 +20,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(OverrideCheck::class)]
 class OverrideCheckTest extends TestCase
 {
-    private OverrideCheck $check;
+    private OverrideCheck $overrideCheck;
 
     protected function setUp(): void
     {
-        $this->check = new OverrideCheck();
+        $this->overrideCheck = new OverrideCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('extensions.overrides', $this->check->getSlug());
+        $this->assertSame('extensions.overrides', $this->overrideCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->overrideCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->overrideCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->overrideCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -52,32 +52,32 @@ class OverrideCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('database', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('database', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithNoOverridesTableReturnsGood(): void
     {
         $database = $this->createDatabaseWithoutOverridesTable();
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('not available', strtolower($result->description));
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not available', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithNoOutdatedOverridesReturnsGood(): void
     {
         $database = $this->createDatabaseWithOverrides([], 5);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('up to date', strtolower($result->description));
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('up to date', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithOutdatedOverridesReturnsWarning(): void
@@ -92,12 +92,12 @@ class OverrideCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithOverrides($outdatedOverrides, 10);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('cassiopeia', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('cassiopeia', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithMultipleOutdatedOverridesReturnsWarning(): void
@@ -119,12 +119,12 @@ class OverrideCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithOverrides($outdatedOverrides, 10);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('2', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2', $healthCheckResult->description);
     }
 
     public function testRunWithAdminTemplateOverridesShowsCorrectLabel(): void
@@ -139,19 +139,19 @@ class OverrideCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithOverrides($outdatedOverrides, 10);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('admin', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('admin', strtolower($healthCheckResult->description));
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testWarningMessageContainsInstructions(): void
@@ -166,11 +166,11 @@ class OverrideCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithOverrides($outdatedOverrides, 10);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertStringContainsString('templates', strtolower($result->description));
+        $this->assertStringContainsString('templates', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithSiteTemplateOverridesShowsSiteLabel(): void
@@ -185,12 +185,12 @@ class OverrideCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithOverrides($outdatedOverrides, 10);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('site', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('site', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithMoreThan10OverridesShowsTruncatedMessage(): void
@@ -201,21 +201,22 @@ class OverrideCheckTest extends TestCase
         for ($i = 1; $i <= 15; $i++) {
             $outdatedOverrides[] = (object) [
                 'template' => 'cassiopeia',
-                'hash_id' => base64_encode("mod_file{$i}/default.php"),
+                'hash_id' => base64_encode(sprintf('mod_file%d/default.php', $i)),
                 'action' => 'changed',
                 'modified_date' => '2025-01-01 12:00:00',
                 'client_id' => 0,
             ];
         }
+
         $database = $this->createDatabaseWithOverrides($outdatedOverrides, 20);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('15', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('15', $healthCheckResult->description);
         // Should show "and X more" for truncated output
-        $this->assertStringContainsString('and 5 more', $result->description);
+        $this->assertStringContainsString('and 5 more', $healthCheckResult->description);
     }
 
     public function testRunWithInvalidBase64HashIdSkipsEntry(): void
@@ -237,14 +238,14 @@ class OverrideCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithOverrides($outdatedOverrides, 10);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // Should still mention 2 overrides but only show 1 valid one in details
-        $this->assertStringContainsString('2 template override', $result->description);
-        $this->assertStringContainsString('valid/path.php', $result->description);
+        $this->assertStringContainsString('2 template override', $healthCheckResult->description);
+        $this->assertStringContainsString('valid/path.php', $healthCheckResult->description);
     }
 
     public function testRunWithMultipleTemplatesGroupsByTemplate(): void
@@ -273,15 +274,15 @@ class OverrideCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithOverrides($outdatedOverrides, 10);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('3', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('3', $healthCheckResult->description);
         // Check templates are mentioned
-        $this->assertStringContainsString('cassiopeia', strtolower($result->description));
-        $this->assertStringContainsString('atum', strtolower($result->description));
+        $this->assertStringContainsString('cassiopeia', strtolower($healthCheckResult->description));
+        $this->assertStringContainsString('atum', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithLeadingSlashInPathRemovesIt(): void
@@ -296,26 +297,26 @@ class OverrideCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithOverrides($outdatedOverrides, 10);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // Should show path without leading slash
-        $this->assertStringContainsString('com_content/article/default.php', $result->description);
+        $this->assertStringContainsString('com_content/article/default.php', $healthCheckResult->description);
         // Should NOT have double slashes
-        $this->assertStringNotContainsString('//com_content', $result->description);
+        $this->assertStringNotContainsString('//com_content', $healthCheckResult->description);
     }
 
     public function testRunWithZeroTotalOverridesReturnsGoodWithZeroCount(): void
     {
         $database = $this->createDatabaseWithOverrides([], 0);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('0 template override(s) tracked', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('0 template override(s) tracked', $healthCheckResult->description);
     }
 
     public function testRunWithMoreThan10TemplatesBreaksOuterLoop(): void
@@ -326,22 +327,23 @@ class OverrideCheckTest extends TestCase
 
         for ($i = 1; $i <= 15; $i++) {
             $outdatedOverrides[] = (object) [
-                'template' => "template{$i}",
-                'hash_id' => base64_encode("mod_file{$i}/default.php"),
+                'template' => 'template' . $i,
+                'hash_id' => base64_encode(sprintf('mod_file%d/default.php', $i)),
                 'action' => 'changed',
                 'modified_date' => '2025-01-01 12:00:00',
                 'client_id' => 0,
             ];
         }
+
         $database = $this->createDatabaseWithOverrides($outdatedOverrides, 20);
-        $this->check->setDatabase($database);
+        $this->overrideCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overrideCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('15', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('15', $healthCheckResult->description);
         // Should show "and 5 more" for truncated output
-        $this->assertStringContainsString('and 5 more', $result->description);
+        $this->assertStringContainsString('and 5 more', $healthCheckResult->description);
     }
 
     /**
@@ -400,14 +402,14 @@ class OverrideCheckTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -548,14 +550,14 @@ class OverrideCheckTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string

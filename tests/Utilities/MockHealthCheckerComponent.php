@@ -21,11 +21,11 @@ use Psr\Container\ContainerInterface;
  */
 class MockHealthCheckerComponent
 {
-    private ?MockHealthCheckRunner $runner = null;
+    private ?MockHealthCheckRunner $mockHealthCheckRunner = null;
 
-    public function setHealthCheckRunner(MockHealthCheckRunner $runner): void
+    public function setHealthCheckRunner(MockHealthCheckRunner $mockHealthCheckRunner): void
     {
-        $this->runner = $runner;
+        $this->mockHealthCheckRunner = $mockHealthCheckRunner;
     }
 
     /**
@@ -33,13 +33,13 @@ class MockHealthCheckerComponent
      *
      * Note: No return type hint to allow returning MockHealthCheckRunner
      */
-    public function getHealthCheckRunner()
+    public function getHealthCheckRunner(): \HealthChecker\Tests\Utilities\MockHealthCheckRunner
     {
-        if ($this->runner === null) {
+        if (! $this->mockHealthCheckRunner instanceof \HealthChecker\Tests\Utilities\MockHealthCheckRunner) {
             throw new \RuntimeException('Health check runner has not been initialized');
         }
 
-        return $this->runner;
+        return $this->mockHealthCheckRunner;
     }
 
     public function boot(ContainerInterface $container): void

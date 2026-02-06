@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(FacebookOpenGraphCheck::class)]
 class FacebookOpenGraphCheckTest extends TestCase
 {
-    private FacebookOpenGraphCheck $check;
+    private FacebookOpenGraphCheck $facebookOpenGraphCheck;
 
     protected function setUp(): void
     {
-        $this->check = new FacebookOpenGraphCheck();
+        $this->facebookOpenGraphCheck = new FacebookOpenGraphCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.facebook_open_graph', $this->check->getSlug());
+        $this->assertSame('seo.facebook_open_graph', $this->facebookOpenGraphCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->facebookOpenGraphCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->facebookOpenGraphCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->facebookOpenGraphCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -65,12 +65,12 @@ class FacebookOpenGraphCheckTest extends TestCase
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->facebookOpenGraphCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->facebookOpenGraphCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('All essential', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('All essential', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWithFacebookAppId(): void
@@ -90,12 +90,12 @@ HTML;
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->facebookOpenGraphCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->facebookOpenGraphCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Facebook App ID', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Facebook App ID', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenMissingOgTags(): void
@@ -111,12 +111,12 @@ HTML;
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->facebookOpenGraphCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->facebookOpenGraphCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Missing', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Missing', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSomeTtagsMissing(): void
@@ -133,35 +133,35 @@ HTML;
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->facebookOpenGraphCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->facebookOpenGraphCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('og:image', $result->description);
-        $this->assertStringContainsString('og:url', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('og:image', $healthCheckResult->description);
+        $this->assertStringContainsString('og:url', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenHttpError(): void
     {
         $httpClient = MockHttpFactory::createWithGetResponse(500, '');
-        $this->check->setHttpClient($httpClient);
+        $this->facebookOpenGraphCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->facebookOpenGraphCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('HTTP 500', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('HTTP 500', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenConnectionFails(): void
     {
         $httpClient = MockHttpFactory::createThatThrows('Connection refused');
-        $this->check->setHttpClient($httpClient);
+        $this->facebookOpenGraphCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->facebookOpenGraphCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Unable to check', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to check', $healthCheckResult->description);
     }
 
     public function testDetectsContentBeforePropertyOrder(): void
@@ -181,23 +181,23 @@ HTML;
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->facebookOpenGraphCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->facebookOpenGraphCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testResultMetadata(): void
     {
         $html = '<html><head></head><body></body></html>';
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->facebookOpenGraphCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->facebookOpenGraphCheck->run();
 
-        $this->assertSame('seo.facebook_open_graph', $result->slug);
-        $this->assertSame('seo', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('seo.facebook_open_graph', $healthCheckResult->slug);
+        $this->assertSame('seo', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 }

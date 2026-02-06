@@ -56,7 +56,7 @@ class CoreCategoriesTest extends TestCase
     public function testCategoriesHaveExpectedSlugs(): void
     {
         $categories = CoreCategories::getCategories();
-        $slugs = array_map(static fn(HealthCategory $cat) => $cat->slug, $categories);
+        $slugs = array_map(static fn(HealthCategory $healthCategory): string => $healthCategory->slug, $categories);
 
         $expectedSlugs = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
 
@@ -84,7 +84,7 @@ class CoreCategoriesTest extends TestCase
             $this->assertSame(
                 $expectedOrders[$category->slug],
                 $category->sortOrder,
-                "Category '{$category->slug}' has unexpected sort order",
+                sprintf("Category '%s' has unexpected sort order", $category->slug),
             );
         }
     }
@@ -94,7 +94,7 @@ class CoreCategoriesTest extends TestCase
         $categories = CoreCategories::getCategories();
 
         foreach ($categories as $category) {
-            $this->assertNotEmpty($category->icon, "Category '{$category->slug}' has no icon");
+            $this->assertNotEmpty($category->icon, sprintf("Category '%s' has no icon", $category->slug));
             $this->assertStringStartsWith('fa-', $category->icon);
         }
     }
@@ -104,7 +104,7 @@ class CoreCategoriesTest extends TestCase
         $categories = CoreCategories::getCategories();
 
         foreach ($categories as $category) {
-            $this->assertNotEmpty($category->label, "Category '{$category->slug}' has no label");
+            $this->assertNotEmpty($category->label, sprintf("Category '%s' has no label", $category->slug));
             $this->assertStringStartsWith('COM_HEALTHCHECKER_CATEGORY_', $category->label);
         }
     }
@@ -149,7 +149,7 @@ class CoreCategoriesTest extends TestCase
         foreach ($categories as $category) {
             $this->assertNull(
                 $category->logoUrl,
-                "Category '{$category->slug}' has a logo URL but core categories should only use icons",
+                sprintf("Category '%s' has a logo URL but core categories should only use icons", $category->slug),
             );
         }
     }

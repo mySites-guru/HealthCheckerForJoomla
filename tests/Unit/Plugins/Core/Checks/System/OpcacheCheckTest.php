@@ -21,41 +21,41 @@ class OpcacheCheckTest extends TestCase
 {
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $check = new OpcacheCheck();
-        $this->assertSame('system.opcache', $check->getSlug());
+        $opcacheCheck = new OpcacheCheck();
+        $this->assertSame('system.opcache', $opcacheCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $check = new OpcacheCheck();
-        $this->assertSame('system', $check->getCategory());
+        $opcacheCheck = new OpcacheCheck();
+        $this->assertSame('system', $opcacheCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $check = new OpcacheCheck();
-        $this->assertSame('core', $check->getProvider());
+        $opcacheCheck = new OpcacheCheck();
+        $this->assertSame('core', $opcacheCheck->getProvider());
     }
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $check = new OpcacheCheck();
-        $result = $check->run();
+        $opcacheCheck = new OpcacheCheck();
+        $healthCheckResult = $opcacheCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame('system.opcache', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame('system.opcache', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsGoodOrWarningStatus(): void
     {
-        $check = new OpcacheCheck();
-        $result = $check->run();
+        $opcacheCheck = new OpcacheCheck();
+        $healthCheckResult = $opcacheCheck->run();
 
         // OPcache check only returns Good or Warning, never Critical
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning],
             'OPcache check should return Good or Warning status',
         );
@@ -63,49 +63,49 @@ class OpcacheCheckTest extends TestCase
 
     public function testResultDescriptionIsNotEmpty(): void
     {
-        $check = new OpcacheCheck();
-        $result = $check->run();
+        $opcacheCheck = new OpcacheCheck();
+        $healthCheckResult = $opcacheCheck->run();
 
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testResultDescriptionMentionsOpcache(): void
     {
-        $check = new OpcacheCheck();
-        $result = $check->run();
+        $opcacheCheck = new OpcacheCheck();
+        $healthCheckResult = $opcacheCheck->run();
 
-        $this->assertStringContainsStringIgnoringCase('opcache', $result->description);
+        $this->assertStringContainsStringIgnoringCase('opcache', $healthCheckResult->description);
     }
 
     public function testCheckDoesNotRequireDatabase(): void
     {
-        $check = new OpcacheCheck();
+        $opcacheCheck = new OpcacheCheck();
 
         // Database should be null (not injected)
-        $this->assertNull($check->getDatabase());
+        $this->assertNull($opcacheCheck->getDatabase());
 
         // Check should still work without database
-        $result = $check->run();
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
+        $healthCheckResult = $opcacheCheck->run();
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
     }
 
     public function testCheckIsConsistentOnMultipleRuns(): void
     {
-        $check = new OpcacheCheck();
+        $opcacheCheck = new OpcacheCheck();
 
-        $result1 = $check->run();
-        $result2 = $check->run();
+        $healthCheckResult = $opcacheCheck->run();
+        $result2 = $opcacheCheck->run();
 
         // Results should be the same since OPcache config doesn't change during test
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
     }
 
     public function testResultCanBeConvertedToArray(): void
     {
-        $check = new OpcacheCheck();
-        $result = $check->run();
+        $opcacheCheck = new OpcacheCheck();
+        $healthCheckResult = $opcacheCheck->run();
 
-        $array = $result->toArray();
+        $array = $healthCheckResult->toArray();
 
         $this->assertIsArray($array);
         $this->assertArrayHasKey('slug', $array);

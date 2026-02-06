@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ZipExtensionCheck::class)]
 class ZipExtensionCheckTest extends TestCase
 {
-    private ZipExtensionCheck $check;
+    private ZipExtensionCheck $zipExtensionCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ZipExtensionCheck();
+        $this->zipExtensionCheck = new ZipExtensionCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.zip_extension', $this->check->getSlug());
+        $this->assertSame('system.zip_extension', $this->zipExtensionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->zipExtensionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->zipExtensionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->zipExtensionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,57 +50,57 @@ class ZipExtensionCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->zipExtensionCheck->run();
 
-        $this->assertSame('system.zip_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.zip_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->zipExtensionCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->zipExtensionCheck->run();
 
-        $this->assertSame('system.zip_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.zip_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsWarning(): void
     {
         // Zip check returns Critical or Good, never Warning per documentation
-        $result = $this->check->run();
+        $healthCheckResult = $this->zipExtensionCheck->run();
 
-        $this->assertNotSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->zipExtensionCheck->run();
+        $result2 = $this->zipExtensionCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testRunReturnsValidStatusBasedOnExtensionAvailability(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->zipExtensionCheck->run();
 
         // Based on whether zip extension is loaded
         if (extension_loaded('zip')) {
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         } else {
-            $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+            $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
         }
     }
 

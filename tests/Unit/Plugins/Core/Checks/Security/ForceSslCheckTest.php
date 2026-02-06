@@ -21,41 +21,41 @@ class ForceSslCheckTest extends TestCase
 {
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $check = new ForceSslCheck();
-        $this->assertSame('security.force_ssl', $check->getSlug());
+        $forceSslCheck = new ForceSslCheck();
+        $this->assertSame('security.force_ssl', $forceSslCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $check = new ForceSslCheck();
-        $this->assertSame('security', $check->getCategory());
+        $forceSslCheck = new ForceSslCheck();
+        $this->assertSame('security', $forceSslCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $check = new ForceSslCheck();
-        $this->assertSame('core', $check->getProvider());
+        $forceSslCheck = new ForceSslCheck();
+        $this->assertSame('core', $forceSslCheck->getProvider());
     }
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $check = new ForceSslCheck();
-        $result = $check->run();
+        $forceSslCheck = new ForceSslCheck();
+        $healthCheckResult = $forceSslCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame('security.force_ssl', $result->slug);
-        $this->assertSame('security', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame('security.force_ssl', $healthCheckResult->slug);
+        $this->assertSame('security', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $check = new ForceSslCheck();
-        $result = $check->run();
+        $forceSslCheck = new ForceSslCheck();
+        $healthCheckResult = $forceSslCheck->run();
 
         // Force SSL check can return Good, Warning, or Critical
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
             'Force SSL check should return a valid status',
         );
@@ -63,50 +63,50 @@ class ForceSslCheckTest extends TestCase
 
     public function testResultDescriptionIsNotEmpty(): void
     {
-        $check = new ForceSslCheck();
-        $result = $check->run();
+        $forceSslCheck = new ForceSslCheck();
+        $healthCheckResult = $forceSslCheck->run();
 
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testResultDescriptionMentionsSsl(): void
     {
-        $check = new ForceSslCheck();
-        $result = $check->run();
+        $forceSslCheck = new ForceSslCheck();
+        $healthCheckResult = $forceSslCheck->run();
 
-        $this->assertStringContainsStringIgnoringCase('ssl', $result->description);
+        $this->assertStringContainsStringIgnoringCase('ssl', $healthCheckResult->description);
     }
 
     public function testCheckDoesNotRequireDatabase(): void
     {
-        $check = new ForceSslCheck();
+        $forceSslCheck = new ForceSslCheck();
 
         // Database should be null (not injected)
-        $this->assertNull($check->getDatabase());
+        $this->assertNull($forceSslCheck->getDatabase());
 
         // Check should still work without database
-        $result = $check->run();
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
+        $healthCheckResult = $forceSslCheck->run();
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
     }
 
     public function testCheckIsConsistentOnMultipleRuns(): void
     {
-        $check = new ForceSslCheck();
+        $forceSslCheck = new ForceSslCheck();
 
-        $result1 = $check->run();
-        $result2 = $check->run();
+        $healthCheckResult = $forceSslCheck->run();
+        $result2 = $forceSslCheck->run();
 
         // Results should be the same since SSL config doesn't change during test
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testResultCanBeConvertedToArray(): void
     {
-        $check = new ForceSslCheck();
-        $result = $check->run();
+        $forceSslCheck = new ForceSslCheck();
+        $healthCheckResult = $forceSslCheck->run();
 
-        $array = $result->toArray();
+        $array = $healthCheckResult->toArray();
 
         $this->assertIsArray($array);
         $this->assertArrayHasKey('slug', $array);

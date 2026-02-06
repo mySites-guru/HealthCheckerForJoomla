@@ -25,18 +25,18 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(AkeebaBackupPlugin::class)]
 class AkeebaBackupPluginTest extends TestCase
 {
-    private AkeebaBackupPlugin $plugin;
+    private AkeebaBackupPlugin $akeebaBackupPlugin;
 
     protected function setUp(): void
     {
-        $this->plugin = new AkeebaBackupPlugin(new \stdClass());
+        $this->akeebaBackupPlugin = new AkeebaBackupPlugin(new \stdClass());
 
         // Set up params as a Registry object (required for ->get() method)
-        $this->plugin->params = new \Joomla\Registry\Registry();
+        $this->akeebaBackupPlugin->params = new \Joomla\Registry\Registry();
 
         // Set up database
         $database = $this->createMockDatabase();
-        $this->plugin->setDatabase($database);
+        $this->akeebaBackupPlugin->setDatabase($database);
     }
 
     public function testGetSubscribedEventsReturnsExpectedEvents(): void
@@ -54,11 +54,11 @@ class AkeebaBackupPluginTest extends TestCase
 
     public function testOnCollectProvidersRegistersProviderMetadata(): void
     {
-        $event = new CollectProvidersEvent();
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $this->plugin->onCollectProviders($event);
+        $this->akeebaBackupPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertCount(1, $providers);
         $this->assertInstanceOf(ProviderMetadata::class, $providers[0]);
         $this->assertSame('akeeba_backup', $providers[0]->slug);
@@ -69,11 +69,11 @@ class AkeebaBackupPluginTest extends TestCase
 
     public function testOnCollectCategoriesRegistersAkeebaBackupCategory(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->akeebaBackupPlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertCount(1, $categories);
         $this->assertInstanceOf(HealthCategory::class, $categories[0]);
         $this->assertSame('akeeba_backup', $categories[0]->slug);
@@ -83,11 +83,11 @@ class AkeebaBackupPluginTest extends TestCase
 
     public function testOnCollectChecksRegistersBackupChecks(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaBackupPlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
         $this->assertNotEmpty($checks);
 
         // Verify all checks implement HealthCheckInterface
@@ -100,12 +100,12 @@ class AkeebaBackupPluginTest extends TestCase
 
     public function testOnCollectChecksRegistersExpectedCheckSlugs(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaBackupPlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
-        $slugs = array_map(static fn(HealthCheckInterface $check) => $check->getSlug(), $checks);
+        $checks = $collectChecksEvent->getChecks();
+        $slugs = array_map(static fn(HealthCheckInterface $healthCheck): string => $healthCheck->getSlug(), $checks);
 
         $expectedSlugs = [
             'akeeba_backup.installed',
@@ -121,34 +121,37 @@ class AkeebaBackupPluginTest extends TestCase
         ];
 
         foreach ($expectedSlugs as $expectedSlug) {
-            $this->assertContains($expectedSlug, $slugs, "Expected check slug '{$expectedSlug}' not found");
+            $this->assertContains($expectedSlug, $slugs, sprintf("Expected check slug '%s' not found", $expectedSlug));
         }
     }
 
     public function testAllChecksHaveTitles(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaBackupPlugin->onCollectChecks($collectChecksEvent);
 
-        foreach ($event->getChecks() as $check) {
-            $title = $check->getTitle();
+        foreach ($collectChecksEvent->getChecks() as $healthCheck) {
+            $title = $healthCheck->getTitle();
             $this->assertIsString($title);
-            $this->assertNotEmpty($title, "Check {$check->getSlug()} has empty title");
+            $this->assertNotEmpty($title, sprintf('Check %s has empty title', $healthCheck->getSlug()));
         }
     }
 
     public function testAllChecksCanRun(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaBackupPlugin->onCollectChecks($collectChecksEvent);
 
-        foreach ($event->getChecks() as $check) {
+        foreach ($collectChecksEvent->getChecks() as $healthCheck) {
             // Each check should run without throwing exceptions
-            $result = $check->run();
-            $this->assertNotNull($result, "Check {$check->getSlug()} returned null result");
-            $this->assertNotEmpty($result->description, "Check {$check->getSlug()} has empty description");
+            $result = $healthCheck->run();
+            $this->assertNotNull($result, sprintf('Check %s returned null result', $healthCheck->getSlug()));
+            $this->assertNotEmpty(
+                $result->description,
+                sprintf('Check %s has empty description', $healthCheck->getSlug()),
+            );
         }
     }
 
@@ -156,37 +159,37 @@ class AkeebaBackupPluginTest extends TestCase
     {
         // Create database that returns empty array for SHOW TABLES query
         $database = $this->createMockDatabaseWithEmptyTables();
-        $this->plugin->setDatabase($database);
+        $this->akeebaBackupPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaBackupPlugin->onCollectChecks($collectChecksEvent);
 
-        $installedCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_backup.installed');
+        $installedCheck = $this->findCheckBySlug($collectChecksEvent->getChecks(), 'akeeba_backup.installed');
         $this->assertNotNull($installedCheck);
 
-        $result = $installedCheck->run();
-        $this->assertSame('warning', $result->healthStatus->value);
-        $this->assertStringContainsString('not installed', $result->description);
+        $healthCheckResult = $installedCheck->run();
+        $this->assertSame('warning', $healthCheckResult->healthStatus->value);
+        $this->assertStringContainsString('not installed', $healthCheckResult->description);
     }
 
     public function testProviderMetadataHasLogoUrl(): void
     {
-        $event = new CollectProvidersEvent();
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $this->plugin->onCollectProviders($event);
+        $this->akeebaBackupPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertNotNull($providers[0]->logoUrl);
         $this->assertStringContainsString('plg_healthchecker_akeebabackup', $providers[0]->logoUrl);
     }
 
     public function testCategoryHasLogoUrl(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->akeebaBackupPlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertNotNull($categories[0]->logoUrl);
         $this->assertStringContainsString('plg_healthchecker_akeebabackup', $categories[0]->logoUrl);
     }
@@ -195,12 +198,12 @@ class AkeebaBackupPluginTest extends TestCase
     {
         // Create database that returns empty array for SHOW TABLES query (Akeeba Backup not installed)
         $database = $this->createMockDatabaseWithEmptyTables();
-        $this->plugin->setDatabase($database);
+        $this->akeebaBackupPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaBackupPlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
 
         // Test each check returns warning when Akeeba Backup is not installed
         foreach ($checks as $check) {
@@ -208,12 +211,12 @@ class AkeebaBackupPluginTest extends TestCase
             $this->assertSame(
                 'warning',
                 $result->healthStatus->value,
-                "Check {$check->getSlug()} should return warning when Akeeba Backup not installed",
+                sprintf('Check %s should return warning when Akeeba Backup not installed', $check->getSlug()),
             );
             $this->assertStringContainsString(
                 'not installed',
                 $result->description,
-                "Check {$check->getSlug()} should mention 'not installed'",
+                sprintf("Check %s should mention 'not installed'", $check->getSlug()),
             );
         }
     }
@@ -224,24 +227,25 @@ class AkeebaBackupPluginTest extends TestCase
         // Slug is 'akeeba_backup.installed' so param is 'check_akeeba_backup_installed'
         $params = new \Joomla\Registry\Registry();
         $params->set('check_akeeba_backup_installed', 0);
-        $this->plugin->params = $params;
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaBackupPlugin->params = $params;
 
-        $checks = $event->getChecks();
-        $slugs = array_map(static fn(HealthCheckInterface $check) => $check->getSlug(), $checks);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaBackupPlugin->onCollectChecks($collectChecksEvent);
+
+        $checks = $collectChecksEvent->getChecks();
+        $slugs = array_map(static fn(HealthCheckInterface $healthCheck): string => $healthCheck->getSlug(), $checks);
 
         $this->assertNotContains('akeeba_backup.installed', $slugs);
     }
 
     public function testRegisters10BackupChecks(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaBackupPlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
         $this->assertCount(10, $checks);
     }
 
@@ -326,14 +330,14 @@ class AkeebaBackupPluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -470,14 +474,14 @@ class AkeebaBackupPluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string

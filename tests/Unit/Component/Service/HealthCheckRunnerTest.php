@@ -20,7 +20,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(HealthCheckRunner::class)]
 class HealthCheckRunnerTest extends TestCase
 {
-    private HealthCheckRunner $runner;
+    private HealthCheckRunner $healthCheckRunner;
 
     private object $dispatcher;
 
@@ -71,7 +71,7 @@ class HealthCheckRunnerTest extends TestCase
         $this->providerRegistry = new ProviderRegistry();
         $this->database = $this->createStub(DatabaseInterface::class);
 
-        $this->runner = new HealthCheckRunner(
+        $this->healthCheckRunner = new HealthCheckRunner(
             $this->dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -82,47 +82,47 @@ class HealthCheckRunnerTest extends TestCase
 
     public function testGetResultsReturnsEmptyArrayBeforeRun(): void
     {
-        $this->assertSame([], $this->runner->getResults());
+        $this->assertSame([], $this->healthCheckRunner->getResults());
     }
 
     public function testGetLastRunReturnsNullBeforeRun(): void
     {
-        $this->assertNull($this->runner->getLastRun());
+        $this->assertNull($this->healthCheckRunner->getLastRun());
     }
 
     public function testGetCriticalCountReturnsZeroBeforeRun(): void
     {
-        $this->assertSame(0, $this->runner->getCriticalCount());
+        $this->assertSame(0, $this->healthCheckRunner->getCriticalCount());
     }
 
     public function testGetWarningCountReturnsZeroBeforeRun(): void
     {
-        $this->assertSame(0, $this->runner->getWarningCount());
+        $this->assertSame(0, $this->healthCheckRunner->getWarningCount());
     }
 
     public function testGetGoodCountReturnsZeroBeforeRun(): void
     {
-        $this->assertSame(0, $this->runner->getGoodCount());
+        $this->assertSame(0, $this->healthCheckRunner->getGoodCount());
     }
 
     public function testGetTotalCountReturnsZeroBeforeRun(): void
     {
-        $this->assertSame(0, $this->runner->getTotalCount());
+        $this->assertSame(0, $this->healthCheckRunner->getTotalCount());
     }
 
     public function testGetCategoryRegistryReturnsInjectedRegistry(): void
     {
-        $this->assertSame($this->categoryRegistry, $this->runner->getCategoryRegistry());
+        $this->assertSame($this->categoryRegistry, $this->healthCheckRunner->getCategoryRegistry());
     }
 
     public function testGetProviderRegistryReturnsInjectedRegistry(): void
     {
-        $this->assertSame($this->providerRegistry, $this->runner->getProviderRegistry());
+        $this->assertSame($this->providerRegistry, $this->healthCheckRunner->getProviderRegistry());
     }
 
     public function testGetResultsByStatusReturnsStructuredArrayBeforeRun(): void
     {
-        $results = $this->runner->getResultsByStatus();
+        $results = $this->healthCheckRunner->getResultsByStatus();
 
         $this->assertArrayHasKey('critical', $results);
         $this->assertArrayHasKey('warning', $results);
@@ -134,12 +134,12 @@ class HealthCheckRunnerTest extends TestCase
 
     public function testGetResultsByCategoryReturnsEmptyArrayBeforeRun(): void
     {
-        $this->assertSame([], $this->runner->getResultsByCategory());
+        $this->assertSame([], $this->healthCheckRunner->getResultsByCategory());
     }
 
     public function testToArrayReturnsStructuredData(): void
     {
-        $array = $this->runner->toArray();
+        $array = $this->healthCheckRunner->toArray();
 
         $this->assertArrayHasKey('lastRun', $array);
         $this->assertArrayHasKey('summary', $array);
@@ -150,7 +150,7 @@ class HealthCheckRunnerTest extends TestCase
 
     public function testToArraySummaryContainsAllCounts(): void
     {
-        $array = $this->runner->toArray();
+        $array = $this->healthCheckRunner->toArray();
 
         $this->assertArrayHasKey('critical', $array['summary']);
         $this->assertArrayHasKey('warning', $array['summary']);
@@ -160,21 +160,21 @@ class HealthCheckRunnerTest extends TestCase
 
     public function testRunSingleCheckReturnsNullForNonexistentSlug(): void
     {
-        $result = $this->runner->runSingleCheck('nonexistent.check');
+        $result = $this->healthCheckRunner->runSingleCheck('nonexistent.check');
 
         $this->assertNull($result);
     }
 
     public function testRunCategoryReturnsEmptyArrayForNonexistentCategory(): void
     {
-        $results = $this->runner->runCategory('nonexistent');
+        $results = $this->healthCheckRunner->runCategory('nonexistent');
 
         $this->assertSame([], $results);
     }
 
     public function testCollectChecksReturnsEmptyArrayWhenNoPlugins(): void
     {
-        $checks = $this->runner->collectChecks();
+        $checks = $this->healthCheckRunner->collectChecks();
 
         $this->assertSame([], $checks);
     }
@@ -182,33 +182,33 @@ class HealthCheckRunnerTest extends TestCase
     public function testRunWithCacheCallsRunWhenCacheTtlIsNull(): void
     {
         // runWithCache with null TTL should behave like run()
-        $this->runner->runWithCache(null);
+        $this->healthCheckRunner->runWithCache();
 
         // After run, lastRun should be set
-        $this->assertInstanceOf(\DateTimeImmutable::class, $this->runner->getLastRun());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $this->healthCheckRunner->getLastRun());
     }
 
     public function testRunWithCacheCallsRunWhenCacheTtlIsZero(): void
     {
         // runWithCache with 0 TTL should behave like run()
-        $this->runner->runWithCache(0);
+        $this->healthCheckRunner->runWithCache(0);
 
         // After run, lastRun should be set
-        $this->assertInstanceOf(\DateTimeImmutable::class, $this->runner->getLastRun());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $this->healthCheckRunner->getLastRun());
     }
 
     public function testRunWithCacheCallsRunWhenCacheTtlIsNegative(): void
     {
         // runWithCache with negative TTL should behave like run()
-        $this->runner->runWithCache(-1);
+        $this->healthCheckRunner->runWithCache(-1);
 
         // After run, lastRun should be set
-        $this->assertInstanceOf(\DateTimeImmutable::class, $this->runner->getLastRun());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $this->healthCheckRunner->getLastRun());
     }
 
     public function testGetStatsWithCacheReturnsStructuredStats(): void
     {
-        $stats = $this->runner->getStatsWithCache();
+        $stats = $this->healthCheckRunner->getStatsWithCache();
 
         $this->assertArrayHasKey('critical', $stats);
         $this->assertArrayHasKey('warning', $stats);
@@ -219,17 +219,17 @@ class HealthCheckRunnerTest extends TestCase
 
     public function testInitializeDoesNotRunChecks(): void
     {
-        $this->runner->initialize();
+        $this->healthCheckRunner->initialize();
 
         // After initialize, results should still be empty (checks not run)
-        $this->assertSame([], $this->runner->getResults());
-        $this->assertNull($this->runner->getLastRun());
+        $this->assertSame([], $this->healthCheckRunner->getResults());
+        $this->assertNull($this->healthCheckRunner->getLastRun());
     }
 
     public function testClearCacheDoesNotThrow(): void
     {
         // Should not throw
-        $this->runner->clearCache();
+        $this->healthCheckRunner->clearCache();
 
         $this->assertTrue(true);
     }
@@ -237,10 +237,10 @@ class HealthCheckRunnerTest extends TestCase
     public function testRunSetsLastRunTimestamp(): void
     {
         $before = new \DateTimeImmutable();
-        $this->runner->run();
+        $this->healthCheckRunner->run();
         $after = new \DateTimeImmutable();
 
-        $lastRun = $this->runner->getLastRun();
+        $lastRun = $this->healthCheckRunner->getLastRun();
 
         $this->assertInstanceOf(\DateTimeImmutable::class, $lastRun);
         $this->assertGreaterThanOrEqual($before, $lastRun);
@@ -250,14 +250,14 @@ class HealthCheckRunnerTest extends TestCase
     public function testRunWithPositiveCacheTtl(): void
     {
         // Should run with cache enabled
-        $this->runner->runWithCache(60);
+        $this->healthCheckRunner->runWithCache(60);
 
-        $this->assertInstanceOf(\DateTimeImmutable::class, $this->runner->getLastRun());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $this->healthCheckRunner->getLastRun());
     }
 
     public function testGetStatsWithCacheWithPositiveTtl(): void
     {
-        $stats = $this->runner->getStatsWithCache(60);
+        $stats = $this->healthCheckRunner->getStatsWithCache(60);
 
         $this->assertIsArray($stats);
         $this->assertArrayHasKey('critical', $stats);
@@ -312,7 +312,7 @@ class HealthCheckRunnerTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $this->dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -320,16 +320,16 @@ class HealthCheckRunnerTest extends TestCase
             $cacheFactory,
         );
 
-        $runner->runWithCache(300);
+        $healthCheckRunner->runWithCache(300);
 
         // Verify results come from cache
-        $results = $runner->getResults();
+        $results = $healthCheckRunner->getResults();
         $this->assertCount(1, $results);
         $this->assertSame('test.cached_check', $results[0]->slug);
         $this->assertSame('This is a cached result', $results[0]->description);
 
         // Verify lastRun comes from cache
-        $lastRun = $runner->getLastRun();
+        $lastRun = $healthCheckRunner->getLastRun();
         $this->assertInstanceOf(\DateTimeImmutable::class, $lastRun);
         $this->assertSame('2026-01-15', $lastRun->format('Y-m-d'));
     }
@@ -346,7 +346,7 @@ class HealthCheckRunnerTest extends TestCase
 
                 return new class ($parent) {
                     public function __construct(
-                        private object $parent,
+                        private readonly object $parent,
                     ) {}
 
                     public function get(string $id): mixed
@@ -369,7 +369,7 @@ class HealthCheckRunnerTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $this->dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -377,10 +377,10 @@ class HealthCheckRunnerTest extends TestCase
             $cacheFactory,
         );
 
-        $runner->runWithCache(300);
+        $healthCheckRunner->runWithCache(300);
 
         // Verify checks were run (indicated by lastRun being set)
-        $this->assertInstanceOf(\DateTimeImmutable::class, $runner->getLastRun());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $healthCheckRunner->getLastRun());
         // Verify store was called to cache the results
         $this->assertTrue($cacheFactory->storeWasCalled);
     }
@@ -410,7 +410,7 @@ class HealthCheckRunnerTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $this->dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -419,9 +419,9 @@ class HealthCheckRunnerTest extends TestCase
         );
 
         // Should not throw, should fall back to running checks
-        $runner->runWithCache(300);
+        $healthCheckRunner->runWithCache(300);
 
-        $this->assertInstanceOf(\DateTimeImmutable::class, $runner->getLastRun());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $healthCheckRunner->getLastRun());
     }
 
     public function testRunWithCacheHandlesMissingResultsKey(): void
@@ -464,7 +464,7 @@ class HealthCheckRunnerTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $this->dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -473,9 +473,9 @@ class HealthCheckRunnerTest extends TestCase
         );
 
         // Should fall back to running checks when cached data is incomplete
-        $runner->runWithCache(300);
+        $healthCheckRunner->runWithCache(300);
 
-        $this->assertInstanceOf(\DateTimeImmutable::class, $runner->getLastRun());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $healthCheckRunner->getLastRun());
     }
 
     public function testGetStatsWithCacheWithPositiveTtlCallsRunWithCache(): void
@@ -490,7 +490,7 @@ class HealthCheckRunnerTest extends TestCase
 
                 return new class ($parent) {
                     public function __construct(
-                        private object $parent,
+                        private readonly object $parent,
                     ) {}
 
                     public function get(string $id): mixed
@@ -513,7 +513,7 @@ class HealthCheckRunnerTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $this->dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -521,7 +521,7 @@ class HealthCheckRunnerTest extends TestCase
             $cacheFactory,
         );
 
-        $runner->getStatsWithCache(300);
+        $healthCheckRunner->getStatsWithCache(300);
 
         // Verify cache was checked (indicating runWithCache was called)
         $this->assertTrue($cacheFactory->getCalled);
@@ -539,7 +539,7 @@ class HealthCheckRunnerTest extends TestCase
 
                 return new class ($parent) {
                     public function __construct(
-                        private object $parent,
+                        private readonly object $parent,
                     ) {}
 
                     public function get(string $id): mixed
@@ -562,7 +562,7 @@ class HealthCheckRunnerTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $this->dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -570,7 +570,7 @@ class HealthCheckRunnerTest extends TestCase
             $cacheFactory,
         );
 
-        $runner->clearCache();
+        $healthCheckRunner->clearCache();
 
         $this->assertTrue($cacheFactory->cleanCalled);
     }

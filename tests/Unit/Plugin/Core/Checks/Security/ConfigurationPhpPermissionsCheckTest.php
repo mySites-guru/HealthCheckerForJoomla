@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ConfigurationPhpPermissionsCheck::class)]
 class ConfigurationPhpPermissionsCheckTest extends TestCase
 {
-    private ConfigurationPhpPermissionsCheck $check;
+    private ConfigurationPhpPermissionsCheck $configurationPhpPermissionsCheck;
 
     private ?string $originalConfigPath = null;
 
@@ -26,7 +26,7 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->check = new ConfigurationPhpPermissionsCheck();
+        $this->configurationPhpPermissionsCheck = new ConfigurationPhpPermissionsCheck();
 
         // Ensure JPATH_ROOT exists for testing
         if (! is_dir(JPATH_ROOT)) {
@@ -54,22 +54,22 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.configuration_php_permissions', $this->check->getSlug());
+        $this->assertSame('security.configuration_php_permissions', $this->configurationPhpPermissionsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->configurationPhpPermissionsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->configurationPhpPermissionsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->configurationPhpPermissionsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -82,10 +82,10 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0640);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
@@ -98,10 +98,10 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
             unlink($configPath);
         }
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('not found', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not found', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenPermissionsAre600(): void
@@ -110,11 +110,11 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0600);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('600', $result->description);
-        $this->assertStringContainsString('restrictive', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('600', $healthCheckResult->description);
+        $this->assertStringContainsString('restrictive', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenPermissionsAre640(): void
@@ -123,11 +123,11 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0640);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('640', $result->description);
-        $this->assertStringContainsString('restrictive', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('640', $healthCheckResult->description);
+        $this->assertStringContainsString('restrictive', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenWorldReadable644(): void
@@ -136,11 +136,11 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0644);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('644', $result->description);
-        $this->assertStringContainsString('world-readable', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('644', $healthCheckResult->description);
+        $this->assertStringContainsString('world-readable', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenWorldReadable604(): void
@@ -149,11 +149,11 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0604);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('604', $result->description);
-        $this->assertStringContainsString('world-readable', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('604', $healthCheckResult->description);
+        $this->assertStringContainsString('world-readable', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenWorldWritable666(): void
@@ -162,11 +162,11 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0666);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('666', $result->description);
-        $this->assertStringContainsString('world-writable', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('666', $healthCheckResult->description);
+        $this->assertStringContainsString('world-writable', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenWorldWritable777(): void
@@ -175,11 +175,11 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0777);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('777', $result->description);
-        $this->assertStringContainsString('world-writable', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('777', $healthCheckResult->description);
+        $this->assertStringContainsString('world-writable', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenWorldWritable662(): void
@@ -188,11 +188,11 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0662);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('662', $result->description);
-        $this->assertStringContainsString('world-writable', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('662', $healthCheckResult->description);
+        $this->assertStringContainsString('world-writable', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenWorldWritable602(): void
@@ -201,11 +201,11 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0602);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('602', $result->description);
-        $this->assertStringContainsString('world-writable', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('602', $healthCheckResult->description);
+        $this->assertStringContainsString('world-writable', $healthCheckResult->description);
     }
 
     public function testResultContainsSecurityCategory(): void
@@ -214,9 +214,9 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0640);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame('security', $result->category);
+        $this->assertSame('security', $healthCheckResult->category);
     }
 
     public function testResultContainsCorrectSlug(): void
@@ -225,9 +225,9 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0640);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame('security.configuration_php_permissions', $result->slug);
+        $this->assertSame('security.configuration_php_permissions', $healthCheckResult->slug);
     }
 
     public function testResultContainsProvider(): void
@@ -236,9 +236,9 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0640);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testCriticalDescriptionMentionsSecurityRisk(): void
@@ -247,10 +247,10 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0777);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('critical security risk', strtolower($result->description));
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('critical security risk', strtolower($healthCheckResult->description));
     }
 
     public function testWarningDescriptionSuggestsRestrictingPermissions(): void
@@ -259,10 +259,10 @@ class ConfigurationPhpPermissionsCheckTest extends TestCase
         file_put_contents($configPath, '<?php // test config');
         chmod($configPath, 0644);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->configurationPhpPermissionsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('640', $result->description);
-        $this->assertStringContainsString('600', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('640', $healthCheckResult->description);
+        $this->assertStringContainsString('600', $healthCheckResult->description);
     }
 }

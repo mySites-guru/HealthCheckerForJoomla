@@ -20,15 +20,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(SystemCacheCheck::class)]
 class SystemCacheCheckTest extends TestCase
 {
-    private SystemCacheCheck $check;
+    private SystemCacheCheck $systemCacheCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new SystemCacheCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->systemCacheCheck = new SystemCacheCheck();
     }
 
     protected function tearDown(): void
@@ -38,22 +38,22 @@ class SystemCacheCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('performance.system_cache', $this->check->getSlug());
+        $this->assertSame('performance.system_cache', $this->systemCacheCheck->getSlug());
     }
 
     public function testGetCategoryReturnsPerformance(): void
     {
-        $this->assertSame('performance', $this->check->getCategory());
+        $this->assertSame('performance', $this->systemCacheCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->systemCacheCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->systemCacheCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -61,52 +61,52 @@ class SystemCacheCheckTest extends TestCase
 
     public function testRunWithCachingEnabledReturnsGood(): void
     {
-        $this->app->set('caching', 1);
+        $this->cmsApplication->set('caching', 1);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->systemCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('enabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled', $healthCheckResult->description);
     }
 
     public function testRunWithProgressiveCachingReturnsGood(): void
     {
-        $this->app->set('caching', 2);
+        $this->cmsApplication->set('caching', 2);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->systemCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithCachingDisabledReturnsWarning(): void
     {
-        $this->app->set('caching', 0);
+        $this->cmsApplication->set('caching', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->systemCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunReportsCacheHandler(): void
     {
-        $this->app->set('caching', 1);
-        $this->app->set('cache_handler', 'file');
+        $this->cmsApplication->set('caching', 1);
+        $this->cmsApplication->set('cache_handler', 'file');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->systemCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('file', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('file', $healthCheckResult->description);
     }
 
     public function testRunWithRedisHandler(): void
     {
-        $this->app->set('caching', 1);
-        $this->app->set('cache_handler', 'redis');
+        $this->cmsApplication->set('caching', 1);
+        $this->cmsApplication->set('cache_handler', 'redis');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->systemCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('redis', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('redis', $healthCheckResult->description);
     }
 }

@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(UserFieldsCheck::class)]
 class UserFieldsCheckTest extends TestCase
 {
-    private UserFieldsCheck $check;
+    private UserFieldsCheck $userFieldsCheck;
 
     protected function setUp(): void
     {
-        $this->check = new UserFieldsCheck();
+        $this->userFieldsCheck = new UserFieldsCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('users.user_fields', $this->check->getSlug());
+        $this->assertSame('users.user_fields', $this->userFieldsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsUsers(): void
     {
-        $this->assertSame('users', $this->check->getCategory());
+        $this->assertSame('users', $this->userFieldsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->userFieldsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->userFieldsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,9 +51,9 @@ class UserFieldsCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->userFieldsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNoCustomFieldsReturnsGood(): void
@@ -61,12 +61,12 @@ class UserFieldsCheckTest extends TestCase
         // First query: total fields = 0
         // Second query: published fields = 0
         $database = MockDatabaseFactory::createWithSequentialResults([0, 0]);
-        $this->check->setDatabase($database);
+        $this->userFieldsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userFieldsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No custom user fields', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No custom user fields', $healthCheckResult->description);
     }
 
     public function testRunWithAllFieldsPublishedReturnsGood(): void
@@ -74,13 +74,13 @@ class UserFieldsCheckTest extends TestCase
         // First query: total fields = 5
         // Second query: published fields = 5
         $database = MockDatabaseFactory::createWithSequentialResults([5, 5]);
-        $this->check->setDatabase($database);
+        $this->userFieldsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userFieldsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('5 custom user field', $result->description);
-        $this->assertStringContainsString('published', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('5 custom user field', $healthCheckResult->description);
+        $this->assertStringContainsString('published', $healthCheckResult->description);
     }
 
     public function testRunWithSomeUnpublishedFieldsReturnsGood(): void
@@ -88,14 +88,14 @@ class UserFieldsCheckTest extends TestCase
         // First query: total fields = 5
         // Second query: published fields = 3
         $database = MockDatabaseFactory::createWithSequentialResults([5, 3]);
-        $this->check->setDatabase($database);
+        $this->userFieldsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userFieldsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('5 custom user field', $result->description);
-        $this->assertStringContainsString('3 published', $result->description);
-        $this->assertStringContainsString('2 unpublished', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('5 custom user field', $healthCheckResult->description);
+        $this->assertStringContainsString('3 published', $healthCheckResult->description);
+        $this->assertStringContainsString('2 unpublished', $healthCheckResult->description);
     }
 
     public function testRunWithAllFieldsUnpublishedReturnsGood(): void
@@ -103,14 +103,14 @@ class UserFieldsCheckTest extends TestCase
         // First query: total fields = 3
         // Second query: published fields = 0
         $database = MockDatabaseFactory::createWithSequentialResults([3, 0]);
-        $this->check->setDatabase($database);
+        $this->userFieldsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userFieldsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('3 custom user field', $result->description);
-        $this->assertStringContainsString('0 published', $result->description);
-        $this->assertStringContainsString('3 unpublished', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('3 custom user field', $healthCheckResult->description);
+        $this->assertStringContainsString('0 published', $healthCheckResult->description);
+        $this->assertStringContainsString('3 unpublished', $healthCheckResult->description);
     }
 
     public function testRunWithSingleFieldReturnsGood(): void
@@ -118,11 +118,11 @@ class UserFieldsCheckTest extends TestCase
         // First query: total fields = 1
         // Second query: published fields = 1
         $database = MockDatabaseFactory::createWithSequentialResults([1, 1]);
-        $this->check->setDatabase($database);
+        $this->userFieldsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userFieldsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('1 custom user field', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 custom user field', $healthCheckResult->description);
     }
 }

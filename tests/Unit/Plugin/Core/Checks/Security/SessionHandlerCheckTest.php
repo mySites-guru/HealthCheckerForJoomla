@@ -20,15 +20,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(SessionHandlerCheck::class)]
 class SessionHandlerCheckTest extends TestCase
 {
-    private SessionHandlerCheck $check;
+    private SessionHandlerCheck $sessionHandlerCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new SessionHandlerCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->sessionHandlerCheck = new SessionHandlerCheck();
     }
 
     protected function tearDown(): void
@@ -38,22 +38,22 @@ class SessionHandlerCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.session_handler', $this->check->getSlug());
+        $this->assertSame('security.session_handler', $this->sessionHandlerCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->sessionHandlerCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->sessionHandlerCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->sessionHandlerCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -61,41 +61,41 @@ class SessionHandlerCheckTest extends TestCase
 
     public function testRunReturnsCriticalWhenSessionHandlerIsNone(): void
     {
-        $this->app->set('session_handler', 'none');
+        $this->cmsApplication->set('session_handler', 'none');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sessionHandlerCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('none', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('none', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenSessionHandlerIsDatabase(): void
     {
-        $this->app->set('session_handler', 'database');
+        $this->cmsApplication->set('session_handler', 'database');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sessionHandlerCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('database', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('database', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSessionHandlerIsFilesystem(): void
     {
-        $this->app->set('session_handler', 'filesystem');
+        $this->cmsApplication->set('session_handler', 'filesystem');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sessionHandlerCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('filesystem', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('filesystem', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodForOtherHandlers(): void
     {
-        $this->app->set('session_handler', 'redis');
+        $this->cmsApplication->set('session_handler', 'redis');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sessionHandlerCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('redis', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('redis', $healthCheckResult->description);
     }
 }

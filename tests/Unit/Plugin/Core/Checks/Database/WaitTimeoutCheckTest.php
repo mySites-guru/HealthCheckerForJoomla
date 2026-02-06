@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(WaitTimeoutCheck::class)]
 class WaitTimeoutCheckTest extends TestCase
 {
-    private WaitTimeoutCheck $check;
+    private WaitTimeoutCheck $waitTimeoutCheck;
 
     protected function setUp(): void
     {
-        $this->check = new WaitTimeoutCheck();
+        $this->waitTimeoutCheck = new WaitTimeoutCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.wait_timeout', $this->check->getSlug());
+        $this->assertSame('database.wait_timeout', $this->waitTimeoutCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->waitTimeoutCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->waitTimeoutCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->waitTimeoutCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,9 +51,9 @@ class WaitTimeoutCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->waitTimeoutCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenTimeoutIsReasonable(): void
@@ -62,12 +62,12 @@ class WaitTimeoutCheckTest extends TestCase
         $timeoutObj->Value = 600;  // 10 minutes
 
         $database = MockDatabaseFactory::createWithObject($timeoutObj);
-        $this->check->setDatabase($database);
+        $this->waitTimeoutCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->waitTimeoutCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('600 seconds', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('600 seconds', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenTimeoutTooLow(): void
@@ -76,12 +76,12 @@ class WaitTimeoutCheckTest extends TestCase
         $timeoutObj->Value = 10;  // 10 seconds - too low
 
         $database = MockDatabaseFactory::createWithObject($timeoutObj);
-        $this->check->setDatabase($database);
+        $this->waitTimeoutCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->waitTimeoutCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('very low', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('very low', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenTimeoutTooHigh(): void
@@ -90,11 +90,11 @@ class WaitTimeoutCheckTest extends TestCase
         $timeoutObj->Value = 86400;  // 24 hours - too high
 
         $database = MockDatabaseFactory::createWithObject($timeoutObj);
-        $this->check->setDatabase($database);
+        $this->waitTimeoutCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->waitTimeoutCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('very high', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('very high', $healthCheckResult->description);
     }
 }

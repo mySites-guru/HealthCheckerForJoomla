@@ -20,12 +20,12 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(PageCacheCheck::class)]
 class PageCacheCheckTest extends TestCase
 {
-    private PageCacheCheck $check;
+    private PageCacheCheck $pageCacheCheck;
 
     protected function setUp(): void
     {
         PluginHelper::resetEnabled();
-        $this->check = new PageCacheCheck();
+        $this->pageCacheCheck = new PageCacheCheck();
     }
 
     protected function tearDown(): void
@@ -35,22 +35,22 @@ class PageCacheCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('performance.page_cache', $this->check->getSlug());
+        $this->assertSame('performance.page_cache', $this->pageCacheCheck->getSlug());
     }
 
     public function testGetCategoryReturnsPerformance(): void
     {
-        $this->assertSame('performance', $this->check->getCategory());
+        $this->assertSame('performance', $this->pageCacheCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->pageCacheCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->pageCacheCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -59,10 +59,10 @@ class PageCacheCheckTest extends TestCase
     public function testRunReturnsWarningWhenPluginDisabled(): void
     {
         // PluginHelper::isEnabled returns false by default in stub
-        $result = $this->check->run();
+        $healthCheckResult = $this->pageCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenPluginEnabled(): void
@@ -75,18 +75,18 @@ class PageCacheCheckTest extends TestCase
             'browsercache' => 1,
         ]);
         $database = MockDatabaseFactory::createWithResult($params);
-        $this->check->setDatabase($database);
+        $this->pageCacheCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->pageCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('enabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled', $healthCheckResult->description);
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
         // Test with plugin disabled
-        $result = $this->check->run();
+        $result = $this->pageCacheCheck->run();
         $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
 
         // Test with plugin enabled and browser cache enabled
@@ -95,9 +95,9 @@ class PageCacheCheckTest extends TestCase
             'browsercache' => 1,
         ]);
         $database = MockDatabaseFactory::createWithResult($params);
-        $this->check->setDatabase($database);
+        $this->pageCacheCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $result = $this->pageCacheCheck->run();
         $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
     }
 }

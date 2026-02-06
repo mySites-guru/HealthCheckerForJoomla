@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(BlockedUsersCheck::class)]
 class BlockedUsersCheckTest extends TestCase
 {
-    private BlockedUsersCheck $check;
+    private BlockedUsersCheck $blockedUsersCheck;
 
     protected function setUp(): void
     {
-        $this->check = new BlockedUsersCheck();
+        $this->blockedUsersCheck = new BlockedUsersCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('users.blocked_users', $this->check->getSlug());
+        $this->assertSame('users.blocked_users', $this->blockedUsersCheck->getSlug());
     }
 
     public function testGetCategoryReturnsUsers(): void
     {
-        $this->assertSame('users', $this->check->getCategory());
+        $this->assertSame('users', $this->blockedUsersCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->blockedUsersCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->blockedUsersCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,41 +51,41 @@ class BlockedUsersCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->blockedUsersCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNoBlockedUsersReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->blockedUsersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->blockedUsersCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('0 blocked', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('0 blocked', $healthCheckResult->description);
     }
 
     public function testRunWithFewBlockedUsersReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(20);
-        $this->check->setDatabase($database);
+        $this->blockedUsersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->blockedUsersCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithManyBlockedUsersReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithResult(75);
-        $this->check->setDatabase($database);
+        $this->blockedUsersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->blockedUsersCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('75 blocked', $result->description);
-        $this->assertStringContainsString('cleaning up', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('75 blocked', $healthCheckResult->description);
+        $this->assertStringContainsString('cleaning up', $healthCheckResult->description);
     }
 }

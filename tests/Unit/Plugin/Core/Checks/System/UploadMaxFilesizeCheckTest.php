@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(UploadMaxFilesizeCheck::class)]
 class UploadMaxFilesizeCheckTest extends TestCase
 {
-    private UploadMaxFilesizeCheck $check;
+    private UploadMaxFilesizeCheck $uploadMaxFilesizeCheck;
 
     protected function setUp(): void
     {
-        $this->check = new UploadMaxFilesizeCheck();
+        $this->uploadMaxFilesizeCheck = new UploadMaxFilesizeCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.upload_max_filesize', $this->check->getSlug());
+        $this->assertSame('system.upload_max_filesize', $this->uploadMaxFilesizeCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->uploadMaxFilesizeCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->uploadMaxFilesizeCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->uploadMaxFilesizeCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,30 +50,30 @@ class UploadMaxFilesizeCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->uploadMaxFilesizeCheck->run();
 
-        $this->assertSame('system.upload_max_filesize', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.upload_max_filesize', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->uploadMaxFilesizeCheck->run();
 
         // Can return Good, Warning, or Critical
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
 
     public function testRunDescriptionContainsUploadInfo(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->uploadMaxFilesizeCheck->run();
 
         // Description should mention upload_max_filesize
-        $this->assertStringContainsString('upload_max_filesize', $result->description);
+        $this->assertStringContainsString('upload_max_filesize', $healthCheckResult->description);
     }
 
     public function testCurrentUploadMaxFilesizeIsDetectable(): void
@@ -104,26 +104,26 @@ class UploadMaxFilesizeCheckTest extends TestCase
         $postMaxSize = ini_get('post_max_size');
         $postBytes = $this->convertToBytes($postMaxSize);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->uploadMaxFilesizeCheck->run();
 
         if ($uploadBytes < 2 * 1024 * 1024) {
-            $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+            $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
         } elseif ($uploadBytes > $postBytes) {
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+            $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         } elseif ($uploadBytes < 10 * 1024 * 1024) {
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+            $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         } else {
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         }
     }
 
     public function testDescriptionIncludesCurrentValue(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->uploadMaxFilesizeCheck->run();
         $uploadMaxFilesize = ini_get('upload_max_filesize');
 
         // Description should include the current value
-        $this->assertStringContainsString($uploadMaxFilesize, $result->description);
+        $this->assertStringContainsString($uploadMaxFilesize, $healthCheckResult->description);
     }
 
     public function testWarningWhenExceedsPostMaxSize(): void
@@ -133,31 +133,31 @@ class UploadMaxFilesizeCheckTest extends TestCase
         $uploadBytes = $this->convertToBytes($uploadMaxFilesize);
         $postBytes = $this->convertToBytes($postMaxSize);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->uploadMaxFilesizeCheck->run();
 
         if ($uploadBytes > $postBytes) {
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-            $this->assertStringContainsString('exceeds post_max_size', $result->description);
+            $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+            $this->assertStringContainsString('exceeds post_max_size', $healthCheckResult->description);
         } else {
             // If upload_max_filesize <= post_max_size, no warning about exceeding
-            $this->assertStringNotContainsString('exceeds post_max_size', $result->description);
+            $this->assertStringNotContainsString('exceeds post_max_size', $healthCheckResult->description);
         }
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->uploadMaxFilesizeCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->uploadMaxFilesizeCheck->run();
+        $result2 = $this->uploadMaxFilesizeCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testConvertToBytesWithEmptyString(): void
@@ -191,7 +191,7 @@ class UploadMaxFilesizeCheckTest extends TestCase
         // Test lowercase suffixes
         $this->assertSame(10 * 1024 * 1024, $this->convertToBytes('10m'));
         $this->assertSame(512 * 1024, $this->convertToBytes('512k'));
-        $this->assertSame(1 * 1024 * 1024 * 1024, $this->convertToBytes('1g'));
+        $this->assertSame(1024 * 1024 * 1024, $this->convertToBytes('1g'));
     }
 
     public function testConvertToBytesWithUppercaseSuffix(): void
@@ -199,23 +199,23 @@ class UploadMaxFilesizeCheckTest extends TestCase
         // Test uppercase suffixes
         $this->assertSame(10 * 1024 * 1024, $this->convertToBytes('10M'));
         $this->assertSame(512 * 1024, $this->convertToBytes('512K'));
-        $this->assertSame(1 * 1024 * 1024 * 1024, $this->convertToBytes('1G'));
+        $this->assertSame(1024 * 1024 * 1024, $this->convertToBytes('1G'));
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->uploadMaxFilesizeCheck->run();
 
-        $this->assertSame('system.upload_max_filesize', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.upload_max_filesize', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testSlugFormat(): void
     {
-        $slug = $this->check->getSlug();
+        $slug = $this->uploadMaxFilesizeCheck->getSlug();
 
         // Slug should be lowercase with dot separator
         $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
@@ -223,7 +223,7 @@ class UploadMaxFilesizeCheckTest extends TestCase
 
     public function testCategoryIsValid(): void
     {
-        $category = $this->check->getCategory();
+        $category = $this->uploadMaxFilesizeCheck->getCategory();
 
         // Should be a valid category
         $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];

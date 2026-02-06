@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TransactionIsolationCheck::class)]
 class TransactionIsolationCheckTest extends TestCase
 {
-    private TransactionIsolationCheck $check;
+    private TransactionIsolationCheck $transactionIsolationCheck;
 
     protected function setUp(): void
     {
-        $this->check = new TransactionIsolationCheck();
+        $this->transactionIsolationCheck = new TransactionIsolationCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.transaction_isolation', $this->check->getSlug());
+        $this->assertSame('database.transaction_isolation', $this->transactionIsolationCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->transactionIsolationCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->transactionIsolationCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->transactionIsolationCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,124 +51,124 @@ class TransactionIsolationCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenRepeatableRead(): void
     {
         $database = MockDatabaseFactory::createWithResult('REPEATABLE-READ');
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('recommended', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('recommended', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenReadCommitted(): void
     {
         $database = MockDatabaseFactory::createWithResult('READ-COMMITTED');
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenReadUncommitted(): void
     {
         $database = MockDatabaseFactory::createWithResult('READ-UNCOMMITTED');
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('dirty reads', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('dirty reads', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSerializable(): void
     {
         $database = MockDatabaseFactory::createWithResult('SERIALIZABLE');
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('performance', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('performance', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenIsolationLevelNull(): void
     {
         // When isolation level query returns null
         $database = MockDatabaseFactory::createWithResult(null);
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Unable to determine', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to determine', $healthCheckResult->description);
     }
 
     public function testRunNormalizesUnderscoresToHyphens(): void
     {
         // Some MySQL versions return underscores instead of hyphens
         $database = MockDatabaseFactory::createWithResult('REPEATABLE_READ');
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('recommended', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('recommended', $healthCheckResult->description);
     }
 
     public function testRunNormalizesLowerCaseIsolationLevel(): void
     {
         // Handle lowercase isolation level values
         $database = MockDatabaseFactory::createWithResult('repeatable-read');
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('recommended', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('recommended', $healthCheckResult->description);
     }
 
     public function testRunHandlesReadUncommittedWithUnderscores(): void
     {
         // READ_UNCOMMITTED with underscores
         $database = MockDatabaseFactory::createWithResult('READ_UNCOMMITTED');
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('dirty reads', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('dirty reads', $healthCheckResult->description);
     }
 
     public function testRunHandlesReadCommittedWithUnderscores(): void
     {
         // READ_COMMITTED with underscores
         $database = MockDatabaseFactory::createWithResult('READ_COMMITTED');
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenExceptionThrown(): void
     {
         // When database throws an exception on query
         $database = MockDatabaseFactory::createWithException(new \RuntimeException('Connection lost'));
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Unable to check', $result->description);
-        $this->assertStringContainsString('Connection lost', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to check', $healthCheckResult->description);
+        $this->assertStringContainsString('Connection lost', $healthCheckResult->description);
     }
 
     public function testRunFallsBackToTxIsolationVariable(): void
@@ -186,23 +186,23 @@ class TransactionIsolationCheckTest extends TestCase
                 'return' => 'REPEATABLE-READ',
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('recommended', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('recommended', $healthCheckResult->description);
     }
 
     public function testRunHandlesMixedCaseSerializable(): void
     {
         // Handle mixed case SERIALIZABLE
         $database = MockDatabaseFactory::createWithResult('Serializable');
-        $this->check->setDatabase($database);
+        $this->transactionIsolationCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->transactionIsolationCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('performance', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('performance', $healthCheckResult->description);
     }
 }

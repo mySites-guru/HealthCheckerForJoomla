@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(LanguagePacksCheck::class)]
 class LanguagePacksCheckTest extends TestCase
 {
-    private LanguagePacksCheck $check;
+    private LanguagePacksCheck $languagePacksCheck;
 
     protected function setUp(): void
     {
-        $this->check = new LanguagePacksCheck();
+        $this->languagePacksCheck = new LanguagePacksCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('extensions.language_packs', $this->check->getSlug());
+        $this->assertSame('extensions.language_packs', $this->languagePacksCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->languagePacksCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->languagePacksCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->languagePacksCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,33 +51,33 @@ class LanguagePacksCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->languagePacksCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWithLanguageCounts(): void
     {
         // This check makes two queries - site languages and admin languages
         $database = MockDatabaseFactory::createWithSequentialResults([2, 1]);
-        $this->check->setDatabase($database);
+        $this->languagePacksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->languagePacksCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('2 site language(s)', $result->description);
-        $this->assertStringContainsString('1 admin language(s)', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 site language(s)', $healthCheckResult->description);
+        $this->assertStringContainsString('1 admin language(s)', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWithNoLanguages(): void
     {
         $database = MockDatabaseFactory::createWithSequentialResults([0, 0]);
-        $this->check->setDatabase($database);
+        $this->languagePacksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->languagePacksCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('0 site language(s)', $result->description);
-        $this->assertStringContainsString('0 admin language(s)', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('0 site language(s)', $healthCheckResult->description);
+        $this->assertStringContainsString('0 admin language(s)', $healthCheckResult->description);
     }
 }

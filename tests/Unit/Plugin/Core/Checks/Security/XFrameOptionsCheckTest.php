@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(XFrameOptionsCheck::class)]
 class XFrameOptionsCheckTest extends TestCase
 {
-    private XFrameOptionsCheck $check;
+    private XFrameOptionsCheck $xFrameOptionsCheck;
 
     protected function setUp(): void
     {
-        $this->check = new XFrameOptionsCheck();
+        $this->xFrameOptionsCheck = new XFrameOptionsCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.x_frame_options', $this->check->getSlug());
+        $this->assertSame('security.x_frame_options', $this->xFrameOptionsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->xFrameOptionsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->xFrameOptionsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->xFrameOptionsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,21 +51,21 @@ class XFrameOptionsCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->xFrameOptionsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenHttpHeadersPluginNotFound(): void
     {
         // loadObject returns null - plugin not found
         $database = MockDatabaseFactory::createWithObject(null);
-        $this->check->setDatabase($database);
+        $this->xFrameOptionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->xFrameOptionsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('HTTP Headers plugin not found', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('HTTP Headers plugin not found', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenHttpHeadersPluginDisabled(): void
@@ -75,12 +75,12 @@ class XFrameOptionsCheckTest extends TestCase
             'params' => '{"xframeoptions":1}',
         ];
         $database = MockDatabaseFactory::createWithObject($pluginData);
-        $this->check->setDatabase($database);
+        $this->xFrameOptionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->xFrameOptionsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('HTTP Headers plugin is disabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('HTTP Headers plugin is disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenParamsEmpty(): void
@@ -90,12 +90,12 @@ class XFrameOptionsCheckTest extends TestCase
             'params' => '',
         ];
         $database = MockDatabaseFactory::createWithObject($pluginData);
-        $this->check->setDatabase($database);
+        $this->xFrameOptionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->xFrameOptionsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not configured', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not configured', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenParamsIsEmptyArray(): void
@@ -105,12 +105,12 @@ class XFrameOptionsCheckTest extends TestCase
             'params' => '[]',
         ];
         $database = MockDatabaseFactory::createWithObject($pluginData);
-        $this->check->setDatabase($database);
+        $this->xFrameOptionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->xFrameOptionsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not configured', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not configured', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenXFrameOptionsExplicitlyDisabled(): void
@@ -120,12 +120,12 @@ class XFrameOptionsCheckTest extends TestCase
             'params' => '{"xframeoptions":0}',
         ];
         $database = MockDatabaseFactory::createWithObject($pluginData);
-        $this->check->setDatabase($database);
+        $this->xFrameOptionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->xFrameOptionsCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('X-Frame-Options is disabled', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('X-Frame-Options is disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenXFrameOptionsEnabled(): void
@@ -135,12 +135,12 @@ class XFrameOptionsCheckTest extends TestCase
             'params' => '{"xframeoptions":1}',
         ];
         $database = MockDatabaseFactory::createWithObject($pluginData);
-        $this->check->setDatabase($database);
+        $this->xFrameOptionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->xFrameOptionsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('X-Frame-Options header is enabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('X-Frame-Options header is enabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenXFrameOptionsNotSetInParams(): void
@@ -151,11 +151,11 @@ class XFrameOptionsCheckTest extends TestCase
             'params' => '{"some_other_setting":true}',
         ];
         $database = MockDatabaseFactory::createWithObject($pluginData);
-        $this->check->setDatabase($database);
+        $this->xFrameOptionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->xFrameOptionsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenParamsIsInvalidJson(): void
@@ -165,12 +165,12 @@ class XFrameOptionsCheckTest extends TestCase
             'params' => 'not valid json',
         ];
         $database = MockDatabaseFactory::createWithObject($pluginData);
-        $this->check->setDatabase($database);
+        $this->xFrameOptionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->xFrameOptionsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not configured', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not configured', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenXFrameOptionsExplicitlyDisabledAsString(): void
@@ -180,10 +180,10 @@ class XFrameOptionsCheckTest extends TestCase
             'params' => '{"xframeoptions":"0"}',
         ];
         $database = MockDatabaseFactory::createWithObject($pluginData);
-        $this->check->setDatabase($database);
+        $this->xFrameOptionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->xFrameOptionsCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 }

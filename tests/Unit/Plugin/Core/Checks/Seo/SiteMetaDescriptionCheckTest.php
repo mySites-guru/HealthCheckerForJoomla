@@ -20,15 +20,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(SiteMetaDescriptionCheck::class)]
 class SiteMetaDescriptionCheckTest extends TestCase
 {
-    private SiteMetaDescriptionCheck $check;
+    private SiteMetaDescriptionCheck $siteMetaDescriptionCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new SiteMetaDescriptionCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->siteMetaDescriptionCheck = new SiteMetaDescriptionCheck();
     }
 
     protected function tearDown(): void
@@ -38,22 +38,22 @@ class SiteMetaDescriptionCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.site_meta_description', $this->check->getSlug());
+        $this->assertSame('seo.site_meta_description', $this->siteMetaDescriptionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->siteMetaDescriptionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->siteMetaDescriptionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->siteMetaDescriptionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -61,53 +61,53 @@ class SiteMetaDescriptionCheckTest extends TestCase
 
     public function testRunWithNoDescriptionReturnsWarning(): void
     {
-        $this->app->set('MetaDesc', '');
+        $this->cmsApplication->set('MetaDesc', '');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->siteMetaDescriptionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not set', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not set', $healthCheckResult->description);
     }
 
     public function testRunWithOptimalDescriptionReturnsGood(): void
     {
         $description = 'This is a well-crafted site meta description that provides a compelling ' .
                        'summary of the website content for search engine results.';
-        $this->app->set('MetaDesc', $description);
+        $this->cmsApplication->set('MetaDesc', $description);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->siteMetaDescriptionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('characters', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('characters', $healthCheckResult->description);
     }
 
     public function testRunWithShortDescriptionReturnsWarning(): void
     {
-        $this->app->set('MetaDesc', 'Short description');
+        $this->cmsApplication->set('MetaDesc', 'Short description');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->siteMetaDescriptionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('too short', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('too short', $healthCheckResult->description);
     }
 
     public function testRunWithLongDescriptionReturnsWarning(): void
     {
         $longDescription = str_repeat('This is a very long description. ', 10);
-        $this->app->set('MetaDesc', $longDescription);
+        $this->cmsApplication->set('MetaDesc', $longDescription);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->siteMetaDescriptionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('too long', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('too long', $healthCheckResult->description);
     }
 
     public function testRunWithZeroValueReturnsWarning(): void
     {
-        $this->app->set('MetaDesc', '0');
+        $this->cmsApplication->set('MetaDesc', '0');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->siteMetaDescriptionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 }

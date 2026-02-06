@@ -20,15 +20,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(SefUrlsCheck::class)]
 class SefUrlsCheckTest extends TestCase
 {
-    private SefUrlsCheck $check;
+    private SefUrlsCheck $sefUrlsCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new SefUrlsCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->sefUrlsCheck = new SefUrlsCheck();
     }
 
     protected function tearDown(): void
@@ -38,22 +38,22 @@ class SefUrlsCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.sef_urls', $this->check->getSlug());
+        $this->assertSame('seo.sef_urls', $this->sefUrlsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->sefUrlsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->sefUrlsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->sefUrlsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -61,44 +61,44 @@ class SefUrlsCheckTest extends TestCase
 
     public function testRunWithBothEnabledReturnsGood(): void
     {
-        $this->app->set('sef', 1);
-        $this->app->set('sef_rewrite', 1);
+        $this->cmsApplication->set('sef', 1);
+        $this->cmsApplication->set('sef_rewrite', 1);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sefUrlsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('enabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled', $healthCheckResult->description);
     }
 
     public function testRunWithSefDisabledReturnsWarning(): void
     {
-        $this->app->set('sef', 0);
-        $this->app->set('sef_rewrite', 1);
+        $this->cmsApplication->set('sef', 0);
+        $this->cmsApplication->set('sef_rewrite', 1);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sefUrlsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunWithRewriteDisabledReturnsWarning(): void
     {
-        $this->app->set('sef', 1);
-        $this->app->set('sef_rewrite', 0);
+        $this->cmsApplication->set('sef', 1);
+        $this->cmsApplication->set('sef_rewrite', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sefUrlsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('rewriting is off', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('rewriting is off', $healthCheckResult->description);
     }
 
     public function testRunWithBothDisabledReturnsWarning(): void
     {
-        $this->app->set('sef', 0);
-        $this->app->set('sef_rewrite', 0);
+        $this->cmsApplication->set('sef', 0);
+        $this->cmsApplication->set('sef_rewrite', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sefUrlsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 }

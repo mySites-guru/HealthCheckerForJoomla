@@ -22,25 +22,25 @@ class ConnectionCheckTest extends TestCase
 {
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $check = new ConnectionCheck();
-        $this->assertSame('database.connection', $check->getSlug());
+        $connectionCheck = new ConnectionCheck();
+        $this->assertSame('database.connection', $connectionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $check = new ConnectionCheck();
-        $this->assertSame('database', $check->getCategory());
+        $connectionCheck = new ConnectionCheck();
+        $this->assertSame('database', $connectionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $check = new ConnectionCheck();
-        $this->assertSame('core', $check->getProvider());
+        $connectionCheck = new ConnectionCheck();
+        $this->assertSame('core', $connectionCheck->getProvider());
     }
 
     public function testRunWithWorkingDatabaseReturnsGood(): void
     {
-        $check = new ConnectionCheck();
+        $connectionCheck = new ConnectionCheck();
 
         // Create a mock database that works correctly
         $db = $this->createMock(DatabaseInterface::class);
@@ -49,17 +49,17 @@ class ConnectionCheckTest extends TestCase
         $db->method('execute')
             ->willReturn(true);
 
-        $check->setDatabase($db);
-        $result = $check->run();
+        $connectionCheck->setDatabase($db);
+        $healthCheckResult = $connectionCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('working correctly', $result->description);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('working correctly', $healthCheckResult->description);
     }
 
     public function testRunWithFailingDatabaseReturnsCritical(): void
     {
-        $check = new ConnectionCheck();
+        $connectionCheck = new ConnectionCheck();
 
         // Create a mock database that throws an exception
         $db = $this->createMock(DatabaseInterface::class);
@@ -68,29 +68,29 @@ class ConnectionCheckTest extends TestCase
         $db->method('execute')
             ->willThrowException(new \RuntimeException('Connection refused'));
 
-        $check->setDatabase($db);
-        $result = $check->run();
+        $connectionCheck->setDatabase($db);
+        $healthCheckResult = $connectionCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('Connection refused', $result->description);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Connection refused', $healthCheckResult->description);
     }
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $check = new ConnectionCheck();
+        $connectionCheck = new ConnectionCheck();
 
         // Don't inject a database - should return warning about missing database
-        $result = $check->run();
+        $healthCheckResult = $connectionCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
         // Without database injection, the check should fail gracefully
-        $this->assertContains($result->healthStatus, [HealthStatus::Warning, HealthStatus::Critical]);
+        $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Warning, HealthStatus::Critical]);
     }
 
     public function testResultContainsCorrectMetadata(): void
     {
-        $check = new ConnectionCheck();
+        $connectionCheck = new ConnectionCheck();
 
         $db = $this->createMock(DatabaseInterface::class);
         $db->method('setQuery')
@@ -98,17 +98,17 @@ class ConnectionCheckTest extends TestCase
         $db->method('execute')
             ->willReturn(true);
 
-        $check->setDatabase($db);
-        $result = $check->run();
+        $connectionCheck->setDatabase($db);
+        $healthCheckResult = $connectionCheck->run();
 
-        $this->assertSame('database.connection', $result->slug);
-        $this->assertSame('database', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('database.connection', $healthCheckResult->slug);
+        $this->assertSame('database', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testDatabaseExceptionMessageIsIncludedInResult(): void
     {
-        $check = new ConnectionCheck();
+        $connectionCheck = new ConnectionCheck();
 
         $errorMessage = 'SQLSTATE[HY000] [2002] Connection timed out';
         $db = $this->createMock(DatabaseInterface::class);
@@ -117,9 +117,9 @@ class ConnectionCheckTest extends TestCase
         $db->method('execute')
             ->willThrowException(new \Exception($errorMessage));
 
-        $check->setDatabase($db);
-        $result = $check->run();
+        $connectionCheck->setDatabase($db);
+        $healthCheckResult = $connectionCheck->run();
 
-        $this->assertStringContainsString($errorMessage, $result->description);
+        $this->assertStringContainsString($errorMessage, $healthCheckResult->description);
     }
 }

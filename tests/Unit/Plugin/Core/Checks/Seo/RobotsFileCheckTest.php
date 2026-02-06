@@ -18,13 +18,13 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(RobotsFileCheck::class)]
 class RobotsFileCheckTest extends TestCase
 {
-    private RobotsFileCheck $check;
+    private RobotsFileCheck $robotsFileCheck;
 
     private string $robotsPath;
 
     protected function setUp(): void
     {
-        $this->check = new RobotsFileCheck();
+        $this->robotsFileCheck = new RobotsFileCheck();
         $this->robotsPath = JPATH_ROOT . '/robots.txt';
 
         // Ensure JPATH_ROOT exists
@@ -48,22 +48,22 @@ class RobotsFileCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.robots_file', $this->check->getSlug());
+        $this->assertSame('seo.robots_file', $this->robotsFileCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->robotsFileCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->robotsFileCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->robotsFileCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -72,10 +72,10 @@ class RobotsFileCheckTest extends TestCase
     public function testRunReturnsWarningWhenRobotsFileNotFound(): void
     {
         // No robots.txt file exists
-        $result = $this->check->run();
+        $healthCheckResult = $this->robotsFileCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not found', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not found', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenValidRobotsFileExists(): void
@@ -89,10 +89,10 @@ Sitemap: https://example.com/sitemap.xml
 ROBOTS;
         file_put_contents($this->robotsPath, $robotsContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->robotsFileCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('present', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('present', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenDisallowRootFound(): void
@@ -104,10 +104,10 @@ Disallow: /
 ROBOTS;
         file_put_contents($this->robotsPath, $robotsContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->robotsFileCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('blocking', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('blocking', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenDisallowSubdirectoryOnly(): void
@@ -120,9 +120,9 @@ Disallow: /private/
 ROBOTS;
         file_put_contents($this->robotsPath, $robotsContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->robotsFileCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesDisallowRootWithWhitespace(): void
@@ -131,10 +131,10 @@ ROBOTS;
         $robotsContent = "User-agent: *\nDisallow: /\n";
         file_put_contents($this->robotsPath, $robotsContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->robotsFileCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('blocking', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('blocking', $healthCheckResult->description);
     }
 
     public function testRunHandlesCaseInsensitiveDisallow(): void
@@ -143,9 +143,9 @@ ROBOTS;
         $robotsContent = "User-agent: *\nDISALLOW: /\n";
         file_put_contents($this->robotsPath, $robotsContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->robotsFileCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenEmptyDisallow(): void
@@ -157,9 +157,9 @@ Disallow:
 ROBOTS;
         file_put_contents($this->robotsPath, $robotsContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->robotsFileCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenDisallowSlashWithSpace(): void
@@ -169,9 +169,9 @@ ROBOTS;
         $robotsContent = "User-agent: *\nDisallow: / something\n";
         file_put_contents($this->robotsPath, $robotsContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->robotsFileCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunNeverReturnsCritical(): void
@@ -180,9 +180,9 @@ ROBOTS;
         $robotsContent = "User-agent: *\nDisallow: /";
         file_put_contents($this->robotsPath, $robotsContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->robotsFileCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesMultipleUserAgentsWithDisallowRoot(): void
@@ -197,8 +197,8 @@ Disallow: /
 ROBOTS;
         file_put_contents($this->robotsPath, $robotsContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->robotsFileCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 }

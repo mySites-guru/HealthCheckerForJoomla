@@ -20,11 +20,11 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MailerSecurityCheck::class)]
 class MailerSecurityCheckTest extends TestCase
 {
-    private MailerSecurityCheck $check;
+    private MailerSecurityCheck $mailerSecurityCheck;
 
     protected function setUp(): void
     {
-        $this->check = new MailerSecurityCheck();
+        $this->mailerSecurityCheck = new MailerSecurityCheck();
     }
 
     protected function tearDown(): void
@@ -35,22 +35,22 @@ class MailerSecurityCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.mailer_security', $this->check->getSlug());
+        $this->assertSame('security.mailer_security', $this->mailerSecurityCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->mailerSecurityCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->mailerSecurityCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->mailerSecurityCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -58,100 +58,100 @@ class MailerSecurityCheckTest extends TestCase
 
     public function testRunReturnsGoodWhenUsingPhpMail(): void
     {
-        $app = new CMSApplication();
-        $app->set('mailer', 'mail');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('mailer', 'mail');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mailerSecurityCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('PHP mail()', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('PHP mail()', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenUsingSendmail(): void
     {
-        $app = new CMSApplication();
-        $app->set('mailer', 'sendmail');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('mailer', 'sendmail');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mailerSecurityCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('sendmail', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('sendmail', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSmtpWithoutEncryption(): void
     {
-        $app = new CMSApplication();
-        $app->set('mailer', 'smtp');
-        $app->set('smtpsecure', 'none');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('mailer', 'smtp');
+        $cmsApplication->set('smtpsecure', 'none');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mailerSecurityCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('without encryption', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('without encryption', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSmtpWithEmptyEncryption(): void
     {
-        $app = new CMSApplication();
-        $app->set('mailer', 'smtp');
-        $app->set('smtpsecure', '');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('mailer', 'smtp');
+        $cmsApplication->set('smtpsecure', '');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mailerSecurityCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenSmtpWithTls(): void
     {
-        $app = new CMSApplication();
-        $app->set('mailer', 'smtp');
-        $app->set('smtpsecure', 'tls');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('mailer', 'smtp');
+        $cmsApplication->set('smtpsecure', 'tls');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mailerSecurityCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('TLS', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('TLS', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenSmtpWithSsl(): void
     {
-        $app = new CMSApplication();
-        $app->set('mailer', 'smtp');
-        $app->set('smtpsecure', 'ssl');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('mailer', 'smtp');
+        $cmsApplication->set('smtpsecure', 'ssl');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mailerSecurityCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('SSL', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('SSL', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodForOtherMailerTypes(): void
     {
-        $app = new CMSApplication();
-        $app->set('mailer', 'custom_mailer');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('mailer', 'custom_mailer');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mailerSecurityCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('custom_mailer', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('custom_mailer', $healthCheckResult->description);
     }
 
     public function testRunWithDefaultMailerSetting(): void
     {
-        $app = new CMSApplication();
+        $cmsApplication = new CMSApplication();
         // mailer default is 'mail' when not set
-        Factory::setApplication($app);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mailerSecurityCheck->run();
 
         // Default is 'mail' which returns Good
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 }

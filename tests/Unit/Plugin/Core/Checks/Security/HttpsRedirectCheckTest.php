@@ -21,18 +21,18 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(HttpsRedirectCheck::class)]
 class HttpsRedirectCheckTest extends TestCase
 {
-    private HttpsRedirectCheck $check;
+    private HttpsRedirectCheck $httpsRedirectCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     private string $htaccessPath;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
         Uri::resetMockSsl();
-        $this->check = new HttpsRedirectCheck();
+        $this->httpsRedirectCheck = new HttpsRedirectCheck();
         $this->htaccessPath = JPATH_ROOT . '/.htaccess';
 
         // Ensure JPATH_ROOT exists
@@ -60,22 +60,22 @@ class HttpsRedirectCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.https_redirect', $this->check->getSlug());
+        $this->assertSame('security.https_redirect', $this->httpsRedirectCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->httpsRedirectCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->httpsRedirectCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->httpsRedirectCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -84,96 +84,96 @@ class HttpsRedirectCheckTest extends TestCase
     public function testRunReturnsCriticalWhenNoHttpsAndNoRedirect(): void
     {
         // No Force SSL, not using HTTPS, no .htaccess redirect
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
         // Uri::getInstance()->isSsl() returns false by default
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('not configured', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not configured', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenForceSslIsAdminOnly(): void
     {
-        $this->app->set('force_ssl', 1);
+        $this->cmsApplication->set('force_ssl', 1);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('administrator', strtolower($result->description));
-        $this->assertStringContainsString('option 2', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('administrator', strtolower($healthCheckResult->description));
+        $this->assertStringContainsString('option 2', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenForceSslEntireSiteButNoHttps(): void
     {
         // Force SSL is enabled for entire site, but current connection is not HTTPS
-        $this->app->set('force_ssl', 2);
+        $this->cmsApplication->set('force_ssl', 2);
         // Uri::getInstance()->isSsl() returns false by default
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Force SSL is enabled', $result->description);
-        $this->assertStringContainsString('SSL certificate', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Force SSL is enabled', $healthCheckResult->description);
+        $this->assertStringContainsString('SSL certificate', $healthCheckResult->description);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
 
     public function testRunResultDescriptionIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testRunResultDescriptionContainsHttpsOrSsl(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
         // The description should contain HTTPS or SSL related information
         $this->assertTrue(
-            stripos($result->description, 'https') !== false ||
-            stripos($result->description, 'ssl') !== false ||
-            stripos($result->description, 'redirect') !== false ||
-            stripos($result->description, 'configured') !== false,
+            stripos($healthCheckResult->description, 'https') !== false ||
+            stripos($healthCheckResult->description, 'ssl') !== false ||
+            stripos($healthCheckResult->description, 'redirect') !== false ||
+            stripos($healthCheckResult->description, 'configured') !== false,
             'Description should mention HTTPS, SSL, redirect, or configuration status',
         );
     }
 
     public function testRunResultContainsSlug(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame('security.https_redirect', $result->slug);
+        $this->assertSame('security.https_redirect', $healthCheckResult->slug);
     }
 
     public function testRunResultContainsTitle(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testRunResultHasProvider(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunResultHasCategory(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame('security', $result->category);
+        $this->assertSame('security', $healthCheckResult->category);
     }
 
     public function testRunWithHtaccessRedirectPattern1(): void
@@ -185,13 +185,13 @@ RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
         // When htaccess redirect is configured, code falls through to Good fallback
         // The redirect IS configured - so it's considered correct configuration
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithHtaccessRedirectPattern2(): void
@@ -202,13 +202,13 @@ RewriteEngine On
 RewriteRule ^(.*)$ https://example.com/$1 [R=301,L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
         // The htaccess contains "https://" which matches the redirect pattern
         // So hasHtaccessRedirect is true, falls to Good fallback
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithHtaccessRedirectPattern3(): void
@@ -220,67 +220,67 @@ RewriteCond %{HTTPS} !=on
 RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
         // Contains both "RewriteCond %{HTTPS}" and "https://%{HTTP_HOST}" patterns
         // So hasHtaccessRedirect is true, falls to Good fallback
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsCriticalWithEmptyHtaccess(): void
     {
         file_put_contents($this->htaccessPath, '');
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsCriticalWithNoHtaccess(): void
     {
         // No .htaccess file
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithForceSslStringValue(): void
     {
         // Test that string values are cast correctly
-        $this->app->set('force_ssl', '1');
+        $this->cmsApplication->set('force_ssl', '1');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testCriticalDescriptionMentionsConfiguration(): void
     {
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
         $this->assertTrue(
-            stripos($result->description, 'Force SSL') !== false ||
-            stripos($result->description, 'configuration') !== false ||
-            stripos($result->description, 'htaccess') !== false,
+            stripos($healthCheckResult->description, 'Force SSL') !== false ||
+            stripos($healthCheckResult->description, 'configuration') !== false ||
+            stripos($healthCheckResult->description, 'htaccess') !== false,
         );
     }
 
     public function testWarningForAdminOnlyMentionsEntireSite(): void
     {
-        $this->app->set('force_ssl', 1);
+        $this->cmsApplication->set('force_ssl', 1);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('entire site', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('entire site', $healthCheckResult->description);
     }
 
     public function testRunWithHtaccessContainingBothPatterns(): void
@@ -293,13 +293,13 @@ RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
         // Contains HTTPS redirect patterns, so hasHtaccessRedirect is true
         // Falls to Good fallback since redirect is configured
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNoHtaccessRedirectPatterns(): void
@@ -312,11 +312,11 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.*)$ index.php [L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesCaseInsensitiveHtaccessPatterns(): void
@@ -328,45 +328,45 @@ REWRITECOND %{HTTPS} OFF
 RewriteRule ^(.*)$ HTTPS://%{HTTP_HOST}/$1 [R=301,L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
         // The check uses stripos which is case-insensitive
         // Contains HTTPS patterns so hasHtaccessRedirect is true
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithForceSslDefaultValue(): void
     {
         // Don't set force_ssl, should use default of 0
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testWarningForForceSslTwoButNotHttpsIsDescriptive(): void
     {
-        $this->app->set('force_ssl', 2);
+        $this->cmsApplication->set('force_ssl', 2);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // Should mention checking SSL certificate
-        $this->assertStringContainsString('certificate', strtolower($result->description));
+        $this->assertStringContainsString('certificate', strtolower($healthCheckResult->description));
     }
 
     public function testRunReturnsGoodWhenForceSslEntireSiteAndHttps(): void
     {
         // Force SSL enabled for entire site AND currently using HTTPS - optimal
-        $this->app->set('force_ssl', 2);
+        $this->cmsApplication->set('force_ssl', 2);
         Uri::setMockSsl(true);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('enforced', strtolower($result->description));
-        $this->assertStringContainsString('entire site', strtolower($result->description));
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enforced', strtolower($healthCheckResult->description));
+        $this->assertStringContainsString('entire site', strtolower($healthCheckResult->description));
     }
 
     public function testRunReturnsGoodWhenHtaccessRedirectAndHttps(): void
@@ -378,50 +378,50 @@ RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
         Uri::setMockSsl(true);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('htaccess', strtolower($result->description));
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('htaccess', strtolower($healthCheckResult->description));
     }
 
     public function testRunReturnsWarningWhenHttpsButNoRedirect(): void
     {
         // Using HTTPS but no automatic redirect configured
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
         Uri::setMockSsl(true);
         // No .htaccess or no redirect patterns
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('redirect', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('redirect', strtolower($healthCheckResult->description));
     }
 
     public function testRunReturnsWarningWhenHttpsAndEmptyHtaccess(): void
     {
         // Using HTTPS but .htaccess has no redirect patterns
         file_put_contents($this->htaccessPath, 'RewriteEngine On');
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
         Uri::setMockSsl(true);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not be redirected', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not be redirected', $healthCheckResult->description);
     }
 
     public function testGoodDescriptionMentionsJoomlaConfigForForceSsl(): void
     {
-        $this->app->set('force_ssl', 2);
+        $this->cmsApplication->set('force_ssl', 2);
         Uri::setMockSsl(true);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Joomla', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Joomla', $healthCheckResult->description);
     }
 
     public function testGoodDescriptionMentionsHtaccessForHtaccessRedirect(): void
@@ -431,13 +431,13 @@ RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
         Uri::setMockSsl(true);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('.htaccess', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('.htaccess', $healthCheckResult->description);
     }
 
     public function testFallbackGoodCaseWhenHtaccessRedirectButNotHttps(): void
@@ -449,16 +449,16 @@ RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
-        $this->app->set('force_ssl', 0);
+        $this->cmsApplication->set('force_ssl', 0);
         // isHttps = false (default)
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->httpsRedirectCheck->run();
 
         // This case hits the final fallback since:
         // - forceSsl != 2
         // - forceSsl != 1
         // - not critical (hasHtaccessRedirect is true OR isHttps is false... but htaccess exists)
         // - falls to final Good
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 }

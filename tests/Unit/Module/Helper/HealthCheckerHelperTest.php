@@ -19,21 +19,21 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(HealthCheckerHelper::class)]
 class HealthCheckerHelperTest extends TestCase
 {
-    private HealthCheckerHelper $helper;
+    private HealthCheckerHelper $healthCheckerHelper;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->helper = new HealthCheckerHelper();
-        $this->app = new CMSApplication();
+        $this->healthCheckerHelper = new HealthCheckerHelper();
+        $this->cmsApplication = new CMSApplication();
     }
 
     public function testGetHealthStatsReturnsArray(): void
     {
         $registry = new Registry();
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertIsArray($result);
     }
@@ -42,7 +42,7 @@ class HealthCheckerHelperTest extends TestCase
     {
         $registry = new Registry();
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertArrayHasKey('showCritical', $result);
         $this->assertArrayHasKey('showWarning', $result);
@@ -55,7 +55,7 @@ class HealthCheckerHelperTest extends TestCase
     {
         $registry = new Registry();
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertTrue($result['showCritical']);
     }
@@ -66,7 +66,7 @@ class HealthCheckerHelperTest extends TestCase
             'show_critical' => '0',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertFalse($result['showCritical']);
     }
@@ -77,7 +77,7 @@ class HealthCheckerHelperTest extends TestCase
             'show_critical' => '1',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertTrue($result['showCritical']);
     }
@@ -86,7 +86,7 @@ class HealthCheckerHelperTest extends TestCase
     {
         $registry = new Registry();
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertTrue($result['showWarning']);
     }
@@ -97,7 +97,7 @@ class HealthCheckerHelperTest extends TestCase
             'show_warning' => '0',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertFalse($result['showWarning']);
     }
@@ -108,7 +108,7 @@ class HealthCheckerHelperTest extends TestCase
             'show_warning' => '1',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertTrue($result['showWarning']);
     }
@@ -117,7 +117,7 @@ class HealthCheckerHelperTest extends TestCase
     {
         $registry = new Registry();
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertTrue($result['showGood']);
     }
@@ -128,7 +128,7 @@ class HealthCheckerHelperTest extends TestCase
             'show_good' => '0',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertFalse($result['showGood']);
     }
@@ -139,7 +139,7 @@ class HealthCheckerHelperTest extends TestCase
             'show_good' => '1',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertTrue($result['showGood']);
     }
@@ -148,7 +148,7 @@ class HealthCheckerHelperTest extends TestCase
     {
         $registry = new Registry();
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertTrue($result['enableCache']);
     }
@@ -159,7 +159,7 @@ class HealthCheckerHelperTest extends TestCase
             'enable_cache' => '0',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertFalse($result['enableCache']);
     }
@@ -170,7 +170,7 @@ class HealthCheckerHelperTest extends TestCase
             'enable_cache' => '1',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertTrue($result['enableCache']);
     }
@@ -179,7 +179,7 @@ class HealthCheckerHelperTest extends TestCase
     {
         $registry = new Registry();
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertSame(900, $result['cacheDuration']);
     }
@@ -190,7 +190,7 @@ class HealthCheckerHelperTest extends TestCase
             'cache_duration' => '1800',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertSame(1800, $result['cacheDuration']);
     }
@@ -201,7 +201,7 @@ class HealthCheckerHelperTest extends TestCase
             'cache_duration' => '0',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertSame(0, $result['cacheDuration']);
     }
@@ -212,7 +212,7 @@ class HealthCheckerHelperTest extends TestCase
             'cache_duration' => '300',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertIsInt($result['cacheDuration']);
     }
@@ -227,7 +227,7 @@ class HealthCheckerHelperTest extends TestCase
             'cache_duration' => '0',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertFalse($result['showCritical']);
         $this->assertFalse($result['showWarning']);
@@ -246,7 +246,7 @@ class HealthCheckerHelperTest extends TestCase
             'cache_duration' => '3600',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertTrue($result['showCritical']);
         $this->assertTrue($result['showWarning']);
@@ -262,7 +262,7 @@ class HealthCheckerHelperTest extends TestCase
             'show_critical' => '2',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertTrue($result['showCritical']);
     }
@@ -274,7 +274,7 @@ class HealthCheckerHelperTest extends TestCase
             'enable_cache' => '2',
         ]);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertFalse($result['enableCache']);
     }
@@ -287,7 +287,7 @@ class HealthCheckerHelperTest extends TestCase
         ]);
         $registry = new Registry($jsonParams);
 
-        $result = $this->helper->getHealthStats($registry, $this->app);
+        $result = $this->healthCheckerHelper->getHealthStats($registry, $this->cmsApplication);
 
         $this->assertFalse($result['showCritical']);
         $this->assertSame(600, $result['cacheDuration']);

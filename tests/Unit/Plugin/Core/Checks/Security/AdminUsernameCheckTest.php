@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(AdminUsernameCheck::class)]
 class AdminUsernameCheckTest extends TestCase
 {
-    private AdminUsernameCheck $check;
+    private AdminUsernameCheck $adminUsernameCheck;
 
     protected function setUp(): void
     {
-        $this->check = new AdminUsernameCheck();
+        $this->adminUsernameCheck = new AdminUsernameCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.admin_username', $this->check->getSlug());
+        $this->assertSame('security.admin_username', $this->adminUsernameCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->adminUsernameCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->adminUsernameCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->adminUsernameCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,30 +51,30 @@ class AdminUsernameCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->adminUsernameCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenNoInsecureUsernames(): void
     {
         $database = MockDatabaseFactory::createWithColumn([]);
-        $this->check->setDatabase($database);
+        $this->adminUsernameCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->adminUsernameCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No Super Admin', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No Super Admin', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenInsecureUsernamesFound(): void
     {
         $database = MockDatabaseFactory::createWithColumn(['admin', 'administrator']);
-        $this->check->setDatabase($database);
+        $this->adminUsernameCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->adminUsernameCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('insecure username', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('insecure username', $healthCheckResult->description);
     }
 }

@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(BrokenLinksCheck::class)]
 class BrokenLinksCheckTest extends TestCase
 {
-    private BrokenLinksCheck $check;
+    private BrokenLinksCheck $brokenLinksCheck;
 
     protected function setUp(): void
     {
-        $this->check = new BrokenLinksCheck();
+        $this->brokenLinksCheck = new BrokenLinksCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.broken_links', $this->check->getSlug());
+        $this->assertSame('seo.broken_links', $this->brokenLinksCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->brokenLinksCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->brokenLinksCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->brokenLinksCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,21 +51,21 @@ class BrokenLinksCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->brokenLinksCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithRedirectComponentNotInstalledReturnsGood(): void
     {
         // First query checks if com_redirect is installed (0 = not installed)
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->brokenLinksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->brokenLinksCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('not installed', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not installed', $healthCheckResult->description);
     }
 
     public function testRunWithNo404ErrorsReturnsGood(): void
@@ -73,12 +73,12 @@ class BrokenLinksCheckTest extends TestCase
         // First query: redirect component installed = 1
         // Second query: count of 404s = 0
         $database = MockDatabaseFactory::createWithSequentialResults([1, 0]);
-        $this->check->setDatabase($database);
+        $this->brokenLinksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->brokenLinksCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No unhandled 404 errors', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No unhandled 404 errors', $healthCheckResult->description);
     }
 
     public function testRunWithFew404ErrorsReturnsGood(): void
@@ -86,13 +86,13 @@ class BrokenLinksCheckTest extends TestCase
         // First query: redirect component installed = 1
         // Second query: count of 404s = 20
         $database = MockDatabaseFactory::createWithSequentialResults([1, 20]);
-        $this->check->setDatabase($database);
+        $this->brokenLinksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->brokenLinksCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('20 unhandled', $result->description);
-        $this->assertStringContainsString('Consider creating redirects', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('20 unhandled', $healthCheckResult->description);
+        $this->assertStringContainsString('Consider creating redirects', $healthCheckResult->description);
     }
 
     public function testRunWithMany404ErrorsReturnsWarning(): void
@@ -100,13 +100,13 @@ class BrokenLinksCheckTest extends TestCase
         // First query: redirect component installed = 1
         // Second query: count of 404s = 75
         $database = MockDatabaseFactory::createWithSequentialResults([1, 75]);
-        $this->check->setDatabase($database);
+        $this->brokenLinksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->brokenLinksCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('75 unhandled', $result->description);
-        $this->assertStringContainsString('Review', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('75 unhandled', $healthCheckResult->description);
+        $this->assertStringContainsString('Review', $healthCheckResult->description);
     }
 
     public function testRunWithExactlyThreshold404sReturnsGood(): void
@@ -114,11 +114,11 @@ class BrokenLinksCheckTest extends TestCase
         // First query: redirect component installed = 1
         // Second query: count of 404s = 50 (threshold is >50)
         $database = MockDatabaseFactory::createWithSequentialResults([1, 50]);
-        $this->check->setDatabase($database);
+        $this->brokenLinksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->brokenLinksCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithAboveThreshold404sReturnsWarning(): void
@@ -126,11 +126,11 @@ class BrokenLinksCheckTest extends TestCase
         // First query: redirect component installed = 1
         // Second query: count of 404s = 51
         $database = MockDatabaseFactory::createWithSequentialResults([1, 51]);
-        $this->check->setDatabase($database);
+        $this->brokenLinksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->brokenLinksCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithDatabaseExceptionOnRedirectTableReturnsGood(): void
@@ -147,23 +147,23 @@ class BrokenLinksCheckTest extends TestCase
                 'exception' => new \RuntimeException('Table not found'),
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->brokenLinksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->brokenLinksCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Could not check', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Could not check', $healthCheckResult->description);
     }
 
     public function testRunNeverReturnsCritical(): void
     {
         // Even with many 404 errors, should only return warning
         $database = MockDatabaseFactory::createWithSequentialResults([1, 500]);
-        $this->check->setDatabase($database);
+        $this->brokenLinksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->brokenLinksCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithZero404sReturnsGoodWithNoErrorsMessage(): void
@@ -171,12 +171,12 @@ class BrokenLinksCheckTest extends TestCase
         // First query: redirect component installed = 1
         // Second query: count of 404s = 0
         $database = MockDatabaseFactory::createWithSequentialResults([1, 0]);
-        $this->check->setDatabase($database);
+        $this->brokenLinksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->brokenLinksCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No unhandled 404 errors', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No unhandled 404 errors', $healthCheckResult->description);
     }
 
     public function testRunWithSingle404ErrorReturnsGoodWithCount(): void
@@ -184,11 +184,11 @@ class BrokenLinksCheckTest extends TestCase
         // First query: redirect component installed = 1
         // Second query: count of 404s = 1
         $database = MockDatabaseFactory::createWithSequentialResults([1, 1]);
-        $this->check->setDatabase($database);
+        $this->brokenLinksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->brokenLinksCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('1 unhandled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 unhandled', $healthCheckResult->description);
     }
 }

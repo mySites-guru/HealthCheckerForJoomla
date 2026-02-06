@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(DraftArticlesCheck::class)]
 class DraftArticlesCheckTest extends TestCase
 {
-    private DraftArticlesCheck $check;
+    private DraftArticlesCheck $draftArticlesCheck;
 
     protected function setUp(): void
     {
-        $this->check = new DraftArticlesCheck();
+        $this->draftArticlesCheck = new DraftArticlesCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('content.draft_articles', $this->check->getSlug());
+        $this->assertSame('content.draft_articles', $this->draftArticlesCheck->getSlug());
     }
 
     public function testGetCategoryReturnsContent(): void
     {
-        $this->assertSame('content', $this->check->getCategory());
+        $this->assertSame('content', $this->draftArticlesCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->draftArticlesCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->draftArticlesCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,41 +51,41 @@ class DraftArticlesCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->draftArticlesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWithNoDrafts(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->draftArticlesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->draftArticlesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('0 unpublished', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('0 unpublished', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWithFewDrafts(): void
     {
         $database = MockDatabaseFactory::createWithResult(15);
-        $this->check->setDatabase($database);
+        $this->draftArticlesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->draftArticlesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('15 unpublished', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('15 unpublished', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWithManyDrafts(): void
     {
         $database = MockDatabaseFactory::createWithResult(30);
-        $this->check->setDatabase($database);
+        $this->draftArticlesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->draftArticlesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('30 unpublished', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('30 unpublished', $healthCheckResult->description);
     }
 }

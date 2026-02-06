@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ContentSecurityPolicyCheck::class)]
 class ContentSecurityPolicyCheckTest extends TestCase
 {
-    private ContentSecurityPolicyCheck $check;
+    private ContentSecurityPolicyCheck $contentSecurityPolicyCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ContentSecurityPolicyCheck();
+        $this->contentSecurityPolicyCheck = new ContentSecurityPolicyCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.content_security_policy', $this->check->getSlug());
+        $this->assertSame('security.content_security_policy', $this->contentSecurityPolicyCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->contentSecurityPolicyCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->contentSecurityPolicyCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->contentSecurityPolicyCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,20 +51,20 @@ class ContentSecurityPolicyCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenPluginNotFound(): void
     {
         $database = MockDatabaseFactory::createWithObject(null);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not found', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not found', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenPluginDisabled(): void
@@ -74,12 +74,12 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = '{}';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenCspNotEnabled(): void
@@ -89,12 +89,12 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = '{"contentsecuritypolicy": 0}';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not enabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not enabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenCspEnabled(): void
@@ -104,12 +104,12 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = '{"contentsecuritypolicy": 1}';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('enabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenParamsEmpty(): void
@@ -119,12 +119,12 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = '{}';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not configured', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not configured', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenParamsIsEmptyArray(): void
@@ -134,13 +134,13 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = '[]';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
         // json_decode('[]', true) returns [], which is_array but empty
         // The code checks: if (! is_array($params) || $params === [])
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenParamsIsNull(): void
@@ -150,13 +150,13 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = 'null';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
         // json_decode('null', true) returns null, which !is_array
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not configured', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not configured', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenParamsIsInvalidJson(): void
@@ -166,13 +166,13 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = 'invalid json';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
         // json_decode('invalid json', true) returns null
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not configured', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not configured', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenCspMissingFromParams(): void
@@ -182,13 +182,13 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = '{"some_other_setting": 1}';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
         // contentsecuritypolicy not in params, defaults to 0
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not enabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not enabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenCspEnabledAsString(): void
@@ -198,12 +198,12 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = '{"contentsecuritypolicy": "1"}';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
         // String "1" is cast to int 1
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testResultContainsCorrectCategory(): void
@@ -213,11 +213,11 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = '{"contentsecuritypolicy": 1}';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
-        $this->assertSame('security', $result->category);
+        $this->assertSame('security', $healthCheckResult->category);
     }
 
     public function testResultContainsCorrectSlug(): void
@@ -227,11 +227,11 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = '{"contentsecuritypolicy": 1}';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
-        $this->assertSame('security.content_security_policy', $result->slug);
+        $this->assertSame('security.content_security_policy', $healthCheckResult->slug);
     }
 
     public function testResultContainsProvider(): void
@@ -241,10 +241,10 @@ class ContentSecurityPolicyCheckTest extends TestCase
         $plugin->params = '{"contentsecuritypolicy": 1}';
 
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->contentSecurityPolicyCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->contentSecurityPolicyCheck->run();
 
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 }

@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MaxPacketCheck::class)]
 class MaxPacketCheckTest extends TestCase
 {
-    private MaxPacketCheck $check;
+    private MaxPacketCheck $maxPacketCheck;
 
     protected function setUp(): void
     {
-        $this->check = new MaxPacketCheck();
+        $this->maxPacketCheck = new MaxPacketCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.max_packet', $this->check->getSlug());
+        $this->assertSame('database.max_packet', $this->maxPacketCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->maxPacketCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->maxPacketCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->maxPacketCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,9 +51,9 @@ class MaxPacketCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsCriticalWhenPacketTooSmall(): void
@@ -63,12 +63,12 @@ class MaxPacketCheckTest extends TestCase
             'Value' => 512 * 1024,
         ];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('too small', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('too small', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenPacketBelowRecommended(): void
@@ -78,12 +78,12 @@ class MaxPacketCheckTest extends TestCase
             'Value' => 8 * 1024 * 1024,
         ];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('below recommended', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('below recommended', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenPacketSufficient(): void
@@ -93,12 +93,12 @@ class MaxPacketCheckTest extends TestCase
             'Value' => 16 * 1024 * 1024,
         ];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('16 MB', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('16 MB', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenPacketLarge(): void
@@ -108,12 +108,12 @@ class MaxPacketCheckTest extends TestCase
             'Value' => 64 * 1024 * 1024,
         ];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('64 MB', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('64 MB', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenPacketZero(): void
@@ -123,12 +123,12 @@ class MaxPacketCheckTest extends TestCase
             'Value' => 0,
         ];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('too small', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('too small', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenValueMissing(): void
@@ -136,11 +136,11 @@ class MaxPacketCheckTest extends TestCase
         // Object without Value property (null coalesce to 0)
         $object = (object) [];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsCriticalAtExactlyBelowMinimum(): void
@@ -150,11 +150,11 @@ class MaxPacketCheckTest extends TestCase
             'Value' => (1024 * 1024) - 1,
         ];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningAtExactlyMinimum(): void
@@ -164,12 +164,12 @@ class MaxPacketCheckTest extends TestCase
             'Value' => 1024 * 1024,
         ];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('1 MB', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 MB', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningAtJustBelowRecommended(): void
@@ -179,11 +179,11 @@ class MaxPacketCheckTest extends TestCase
             'Value' => (16 * 1024 * 1024) - 1,
         ];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenPacketVeryLarge(): void
@@ -193,12 +193,12 @@ class MaxPacketCheckTest extends TestCase
             'Value' => 1024 * 1024 * 1024,
         ];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('1 GB', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 GB', $healthCheckResult->description);
     }
 
     public function testRunFormatsKBCorrectly(): void
@@ -208,12 +208,12 @@ class MaxPacketCheckTest extends TestCase
             'Value' => 100 * 1024,
         ];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('100 KB', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('100 KB', $healthCheckResult->description);
     }
 
     public function testRunFormatsBytesCorrectly(): void
@@ -223,11 +223,11 @@ class MaxPacketCheckTest extends TestCase
             'Value' => 512,
         ];
         $database = MockDatabaseFactory::createWithObject($object);
-        $this->check->setDatabase($database);
+        $this->maxPacketCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxPacketCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('512 B', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('512 B', $healthCheckResult->description);
     }
 }

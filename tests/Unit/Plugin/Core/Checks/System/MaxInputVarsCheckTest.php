@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MaxInputVarsCheck::class)]
 class MaxInputVarsCheckTest extends TestCase
 {
-    private MaxInputVarsCheck $check;
+    private MaxInputVarsCheck $maxInputVarsCheck;
 
     protected function setUp(): void
     {
-        $this->check = new MaxInputVarsCheck();
+        $this->maxInputVarsCheck = new MaxInputVarsCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.max_input_vars', $this->check->getSlug());
+        $this->assertSame('system.max_input_vars', $this->maxInputVarsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->maxInputVarsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->maxInputVarsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->maxInputVarsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,30 +50,30 @@ class MaxInputVarsCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputVarsCheck->run();
 
-        $this->assertSame('system.max_input_vars', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.max_input_vars', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputVarsCheck->run();
 
         // Can return Good, Warning, or Critical depending on max_input_vars value
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
 
     public function testRunDescriptionContainsMaxInputVarsInfo(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputVarsCheck->run();
 
         // Description should mention max_input_vars
-        $this->assertStringContainsString('max_input_vars', $result->description);
+        $this->assertStringContainsString('max_input_vars', $healthCheckResult->description);
     }
 
     public function testCurrentMaxInputVarsIsDetectable(): void
@@ -91,54 +91,54 @@ class MaxInputVarsCheckTest extends TestCase
         // >= 1000 and < 3000: Warning
         // < 1000: Critical
         $maxInputVars = (int) ini_get('max_input_vars');
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputVarsCheck->run();
 
         if ($maxInputVars >= 3000) {
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
-            $this->assertStringContainsString('meets requirements', $result->description);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+            $this->assertStringContainsString('meets requirements', $healthCheckResult->description);
         } elseif ($maxInputVars >= 1000) {
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-            $this->assertStringContainsString('below the recommended', $result->description);
+            $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+            $this->assertStringContainsString('below the recommended', $healthCheckResult->description);
         } else {
-            $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-            $this->assertStringContainsString('below the minimum', $result->description);
+            $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+            $this->assertStringContainsString('below the minimum', $healthCheckResult->description);
         }
     }
 
     public function testDescriptionIncludesCurrentValue(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputVarsCheck->run();
         $maxInputVars = (int) ini_get('max_input_vars');
 
         // Description should include the current value
-        $this->assertStringContainsString((string) $maxInputVars, $result->description);
+        $this->assertStringContainsString((string) $maxInputVars, $healthCheckResult->description);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputVarsCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->maxInputVarsCheck->run();
+        $result2 = $this->maxInputVarsCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputVarsCheck->run();
 
-        $this->assertSame('system.max_input_vars', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.max_input_vars', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testMinimumThresholdConstant(): void
@@ -161,7 +161,7 @@ class MaxInputVarsCheckTest extends TestCase
 
     public function testSlugFormat(): void
     {
-        $slug = $this->check->getSlug();
+        $slug = $this->maxInputVarsCheck->getSlug();
 
         // Slug should be lowercase with dot separator
         $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
@@ -169,7 +169,7 @@ class MaxInputVarsCheckTest extends TestCase
 
     public function testCategoryIsValid(): void
     {
-        $category = $this->check->getCategory();
+        $category = $this->maxInputVarsCheck->getCategory();
 
         // Should be a valid category
         $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
@@ -178,13 +178,13 @@ class MaxInputVarsCheckTest extends TestCase
 
     public function testDescriptionIncludesThresholdValues(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputVarsCheck->run();
 
         // Description should include threshold values - verify at least one
         $this->assertTrue(
-            str_contains($result->description, '1000') ||
-            str_contains($result->description, '3000') ||
-            str_contains($result->description, 'meets requirements'),
+            str_contains($healthCheckResult->description, '1000') ||
+            str_contains($healthCheckResult->description, '3000') ||
+            str_contains($healthCheckResult->description, 'meets requirements'),
         );
     }
 

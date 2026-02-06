@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(DomExtensionCheck::class)]
 class DomExtensionCheckTest extends TestCase
 {
-    private DomExtensionCheck $check;
+    private DomExtensionCheck $domExtensionCheck;
 
     protected function setUp(): void
     {
-        $this->check = new DomExtensionCheck();
+        $this->domExtensionCheck = new DomExtensionCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.dom_extension', $this->check->getSlug());
+        $this->assertSame('system.dom_extension', $this->domExtensionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->domExtensionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->domExtensionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->domExtensionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,55 +51,55 @@ class DomExtensionCheckTest extends TestCase
     public function testRunReturnsGoodWhenDomLoaded(): void
     {
         // DOM is always loaded in PHP
-        $result = $this->check->run();
+        $healthCheckResult = $this->domExtensionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('DOM', $result->description);
-        $this->assertStringContainsString('loaded', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('DOM', $healthCheckResult->description);
+        $this->assertStringContainsString('loaded', $healthCheckResult->description);
     }
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->domExtensionCheck->run();
 
-        $this->assertSame('system.dom_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.dom_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->domExtensionCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->domExtensionCheck->run();
 
-        $this->assertSame('system.dom_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.dom_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->domExtensionCheck->run();
+        $result2 = $this->domExtensionCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testCheckNeverReturnsWarning(): void
     {
         // DOM check returns Critical or Good, never Warning per documentation
-        $result = $this->check->run();
+        $healthCheckResult = $this->domExtensionCheck->run();
 
-        $this->assertNotSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     /**

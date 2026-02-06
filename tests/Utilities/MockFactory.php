@@ -23,7 +23,7 @@ class MockFactory
     /**
      * Create a mock HealthCheckResult
      *
-     * @param HealthStatus $status      The health status
+     * @param HealthStatus $healthStatus The health status
      * @param string       $title       The title
      * @param string       $description The description
      * @param string       $slug        The slug
@@ -31,7 +31,7 @@ class MockFactory
      * @param string       $provider    The provider
      */
     public static function createResult(
-        HealthStatus $status = HealthStatus::Good,
+        HealthStatus $healthStatus = HealthStatus::Good,
         string $title = 'Test Check',
         string $description = 'Test description',
         string $slug = 'test.check',
@@ -39,7 +39,7 @@ class MockFactory
         string $provider = 'core',
     ): HealthCheckResult {
         return new HealthCheckResult(
-            healthStatus: $status,
+            healthStatus: $healthStatus,
             title: $title,
             description: $description,
             slug: $slug,

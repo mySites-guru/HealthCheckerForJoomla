@@ -9,6 +9,7 @@ declare(strict_types=1);
  */
 
 use Rector\Config\RectorConfig;
+use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Privatization\Rector\Property\PrivatizeFinalClassPropertyRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddParamTypeFromPropertyTypeRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\ParamTypeByMethodCallTypeRector;
@@ -17,6 +18,7 @@ use Rector\TypeDeclaration\Rector\Property\TypedPropertyFromAssignsRector;
 use Rector\TypeDeclaration\Rector\Property\TypedPropertyFromStrictConstructorRector;
 
 return RectorConfig::configure()
+    ->withBootstrapFiles([__DIR__ . '/tests/phpstan-bootstrap.php'])
     ->withPaths([__DIR__ . '/healthchecker', __DIR__ . '/tests', __DIR__ . '/rector.php', __DIR__ . '/ecs.php'])
     ->withSkip([
         // Skip language files
@@ -65,6 +67,7 @@ return RectorConfig::configure()
         // Target PHP 8.1 - will downgrade any 8.2+ features
         php81: true,
     )
+    ->withSets([PHPUnitSetList::PHPUNIT_120])
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,

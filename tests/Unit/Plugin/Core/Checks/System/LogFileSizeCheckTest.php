@@ -20,13 +20,13 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(LogFileSizeCheck::class)]
 class LogFileSizeCheckTest extends TestCase
 {
-    private LogFileSizeCheck $check;
+    private LogFileSizeCheck $logFileSizeCheck;
 
     private string $testLogDir;
 
     protected function setUp(): void
     {
-        $this->check = new LogFileSizeCheck();
+        $this->logFileSizeCheck = new LogFileSizeCheck();
         $this->testLogDir = sys_get_temp_dir() . '/healthchecker_log_test_' . getmypid() . '_' . uniqid();
     }
 
@@ -46,6 +46,7 @@ class LogFileSizeCheckTest extends TestCase
         if (! is_dir($dir)) {
             return;
         }
+
         $items = array_diff(scandir($dir), ['.', '..']);
         foreach ($items as $item) {
             $path = $dir . '/' . $item;
@@ -55,34 +56,35 @@ class LogFileSizeCheckTest extends TestCase
                 unlink($path);
             }
         }
+
         rmdir($dir);
     }
 
     private function setupApplicationWithLogPath(string $logPath): void
     {
-        $app = new CMSApplication();
-        $app->set('log_path', $logPath);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('log_path', $logPath);
+        Factory::setApplication($cmsApplication);
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.log_file_size', $this->check->getSlug());
+        $this->assertSame('system.log_file_size', $this->logFileSizeCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->logFileSizeCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->logFileSizeCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->logFileSizeCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -90,30 +92,30 @@ class LogFileSizeCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame('system.log_file_size', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.log_file_size', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
         // Can return Good, Warning, or Critical depending on log size
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
 
     public function testRunDescriptionIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
         // The check returns a description (may be error message if Joomla not available)
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testGoodWhenLogDirectoryDoesNotExist(): void
@@ -122,10 +124,10 @@ class LogFileSizeCheckTest extends TestCase
         $nonExistentPath = $this->testLogDir . '/nonexistent_logs';
         $this->setupApplicationWithLogPath($nonExistentPath);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('does not exist', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('does not exist', $healthCheckResult->description);
     }
 
     public function testGoodWhenLogDirectoryIsEmpty(): void
@@ -134,10 +136,10 @@ class LogFileSizeCheckTest extends TestCase
         mkdir($this->testLogDir, 0777, true);
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('manageable', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('manageable', $healthCheckResult->description);
     }
 
     public function testGoodWhenLogFilesAreSmall(): void
@@ -151,10 +153,10 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('manageable', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('manageable', $healthCheckResult->description);
     }
 
     public function testGoodWhenLogSizeJustBelowWarningThreshold(): void
@@ -171,10 +173,10 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('manageable', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('manageable', $healthCheckResult->description);
     }
 
     public function testWarningWhenLogSizeExceedsWarningThreshold(): void
@@ -191,11 +193,11 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('growing large', $result->description);
-        $this->assertStringContainsString('review', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('growing large', $healthCheckResult->description);
+        $this->assertStringContainsString('review', strtolower($healthCheckResult->description));
     }
 
     public function testWarningWhenLogSizeJustAboveWarningThreshold(): void
@@ -212,9 +214,9 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testWarningWhenLogSizeJustBelowCriticalThreshold(): void
@@ -231,9 +233,9 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testCriticalWhenLogSizeExceedsCriticalThreshold(): void
@@ -250,11 +252,11 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('very large', $result->description);
-        $this->assertStringContainsString('cleaning', strtolower($result->description));
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('very large', $healthCheckResult->description);
+        $this->assertStringContainsString('cleaning', strtolower($healthCheckResult->description));
     }
 
     public function testCriticalWhenLogSizeJustAboveCriticalThreshold(): void
@@ -271,9 +273,9 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testCalculatesDirectorySizeRecursively(): void
@@ -285,29 +287,29 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
         // Should detect all 3KB of files
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('manageable', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('manageable', $healthCheckResult->description);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame('system.log_file_size', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.log_file_size', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testWarningThresholdIs100MB(): void
@@ -350,10 +352,10 @@ class LogFileSizeCheckTest extends TestCase
         file_put_contents($this->testLogDir . '/test.log', str_repeat('x', 1024));
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
+        $result2 = $this->logFileSizeCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
     }
 
     public function testRecursiveDirectoryIteratorLogic(): void
@@ -384,10 +386,10 @@ class LogFileSizeCheckTest extends TestCase
         mkdir($this->testLogDir, 0777, true);
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('manageable', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('manageable', $healthCheckResult->description);
     }
 
     public function testDescriptionIncludesSizeInfo(): void
@@ -397,10 +399,10 @@ class LogFileSizeCheckTest extends TestCase
         file_put_contents($this->testLogDir . '/test.log', str_repeat('x', 1024));
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
         // Description should include size information (B, KB, MB, GB) or mention directory
-        $descLower = strtolower($result->description);
+        $descLower = strtolower($healthCheckResult->description);
         $this->assertTrue(
             str_contains($descLower, 'b') ||    // B, KB, MB, GB
             str_contains($descLower, 'directory') ||
@@ -420,10 +422,10 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $descLower = strtolower($result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $descLower = strtolower($healthCheckResult->description);
         $this->assertTrue(str_contains($descLower, 'review') || str_contains($descLower, 'rotat'));
     }
 
@@ -439,10 +441,10 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $descLower = strtolower($result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $descLower = strtolower($healthCheckResult->description);
         $this->assertTrue(str_contains($descLower, 'clean') || str_contains($descLower, 'investigat'));
     }
 
@@ -451,15 +453,15 @@ class LogFileSizeCheckTest extends TestCase
         // Create multiple small files
         mkdir($this->testLogDir, 0777, true);
         for ($i = 0; $i < 10; $i++) {
-            file_put_contents($this->testLogDir . "/log_{$i}.php", str_repeat('x', 1024));
+            file_put_contents($this->testLogDir . sprintf('/log_%d.php', $i), str_repeat('x', 1024));
         }
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
         // 10KB total should be Good
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testHandlesDeeplyNestedDirectories(): void
@@ -471,10 +473,10 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
         // Should find the nested file and calculate size correctly
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testHandlesEmptySubdirectories(): void
@@ -486,23 +488,23 @@ class LogFileSizeCheckTest extends TestCase
 
         $this->setupApplicationWithLogPath($this->testLogDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
         // Should handle empty subdirectories gracefully
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesDefaultLogPath(): void
     {
         // Test with no explicit log_path set - should use default
-        $app = new CMSApplication();
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->logFileSizeCheck->run();
 
         // Should return some valid result (may be Good if default path doesn't exist)
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }

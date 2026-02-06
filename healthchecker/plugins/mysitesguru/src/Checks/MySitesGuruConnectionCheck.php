@@ -122,7 +122,7 @@ final class MySitesGuruConnectionCheck extends AbstractHealthCheck
         return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/mysitesguru/src/Checks/MySitesGuruConnectionCheck.php';
     }
 
-    public function getActionUrl(?HealthStatus $status = null): string
+    public function getActionUrl(?HealthStatus $healthStatus = null): string
     {
         return 'https://mysites.guru';
     }

@@ -72,11 +72,11 @@ class HealthCheckRunnerExtendedTest extends TestCase
 
     public function testRunWithChecksExecutesAndStoresResults(): void
     {
-        $testCheck = $this->createConcreteTestCheck('test.check1', 'system', HealthStatus::Good, 'All is good');
+        $healthCheck = $this->createConcreteTestCheck('test.check1', 'system', HealthStatus::Good, 'All is good');
 
-        $dispatcher = new class ($testCheck) implements \Joomla\Event\DispatcherInterface {
+        $dispatcher = new class ($healthCheck) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private HealthCheckInterface $check,
+                private readonly HealthCheckInterface $healthCheck,
             ) {}
 
             public function dispatch(
@@ -84,14 +84,14 @@ class HealthCheckRunnerExtendedTest extends TestCase
                 ?\Joomla\Event\EventInterface $event = null,
             ): \Joomla\Event\EventInterface {
                 if ($name === HealthCheckerEvents::COLLECT_CHECKS->value && $event instanceof CollectChecksEvent) {
-                    $event->addResult($this->check);
+                    $event->addResult($this->healthCheck);
                 }
 
                 return $event;
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -99,9 +99,9 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $runner->run();
+        $healthCheckRunner->run();
 
-        $results = $runner->getResults();
+        $results = $healthCheckRunner->getResults();
         $this->assertCount(1, $results);
         $this->assertSame('test.check1', $results[0]->slug);
         $this->assertSame(HealthStatus::Good, $results[0]->healthStatus);
@@ -136,7 +136,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
 
         $dispatcher = new class ($abstractCheck) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private AbstractHealthCheck $check,
+                private readonly AbstractHealthCheck $healthCheck,
             ) {}
 
             public function dispatch(
@@ -144,14 +144,14 @@ class HealthCheckRunnerExtendedTest extends TestCase
                 ?\Joomla\Event\EventInterface $event = null,
             ): \Joomla\Event\EventInterface {
                 if ($name === HealthCheckerEvents::COLLECT_CHECKS->value && $event instanceof CollectChecksEvent) {
-                    $event->addResult($this->check);
+                    $event->addResult($this->healthCheck);
                 }
 
                 return $event;
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -159,18 +159,23 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $runner->run();
+        $healthCheckRunner->run();
 
         $this->assertTrue($abstractCheck->databaseWasSet);
     }
 
     public function testRunSingleCheckWithExistingSlug(): void
     {
-        $testCheck = $this->createConcreteTestCheck('test.single', 'system', HealthStatus::Warning, 'Warning detected');
+        $healthCheck = $this->createConcreteTestCheck(
+            'test.single',
+            'system',
+            HealthStatus::Warning,
+            'Warning detected',
+        );
 
-        $dispatcher = new class ($testCheck) implements \Joomla\Event\DispatcherInterface {
+        $dispatcher = new class ($healthCheck) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private HealthCheckInterface $check,
+                private readonly HealthCheckInterface $healthCheck,
             ) {}
 
             public function dispatch(
@@ -178,14 +183,14 @@ class HealthCheckRunnerExtendedTest extends TestCase
                 ?\Joomla\Event\EventInterface $event = null,
             ): \Joomla\Event\EventInterface {
                 if ($name === HealthCheckerEvents::COLLECT_CHECKS->value && $event instanceof CollectChecksEvent) {
-                    $event->addResult($this->check);
+                    $event->addResult($this->healthCheck);
                 }
 
                 return $event;
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -193,7 +198,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $result = $runner->runSingleCheck('test.single');
+        $result = $healthCheckRunner->runSingleCheck('test.single');
 
         $this->assertNotNull($result);
         $this->assertSame('test.single', $result->slug);
@@ -229,7 +234,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
 
         $dispatcher = new class ($abstractCheck) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private AbstractHealthCheck $check,
+                private readonly AbstractHealthCheck $healthCheck,
             ) {}
 
             public function dispatch(
@@ -237,14 +242,14 @@ class HealthCheckRunnerExtendedTest extends TestCase
                 ?\Joomla\Event\EventInterface $event = null,
             ): \Joomla\Event\EventInterface {
                 if ($name === HealthCheckerEvents::COLLECT_CHECKS->value && $event instanceof CollectChecksEvent) {
-                    $event->addResult($this->check);
+                    $event->addResult($this->healthCheck);
                 }
 
                 return $event;
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -252,14 +257,14 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $runner->runSingleCheck('test.abstract_single');
+        $healthCheckRunner->runSingleCheck('test.abstract_single');
 
         $this->assertTrue($abstractCheck->databaseWasSet);
     }
 
     public function testRunCategoryExecutesOnlyMatchingChecks(): void
     {
-        $systemCheck = $this->createConcreteTestCheck('test.system_check', 'system', HealthStatus::Good, 'System OK');
+        $healthCheck = $this->createConcreteTestCheck('test.system_check', 'system', HealthStatus::Good, 'System OK');
         $securityCheck = $this->createConcreteTestCheck(
             'test.security_check',
             'security',
@@ -267,10 +272,10 @@ class HealthCheckRunnerExtendedTest extends TestCase
             'Security issue',
         );
 
-        $dispatcher = new class ($systemCheck, $securityCheck) implements \Joomla\Event\DispatcherInterface {
+        $dispatcher = new class ($healthCheck, $securityCheck) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private HealthCheckInterface $systemCheck,
-                private HealthCheckInterface $securityCheck,
+                private readonly HealthCheckInterface $systemCheck,
+                private readonly HealthCheckInterface $securityCheck,
             ) {}
 
             public function dispatch(
@@ -286,7 +291,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -294,7 +299,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $results = $runner->runCategory('system');
+        $results = $healthCheckRunner->runCategory('system');
 
         $this->assertCount(1, $results);
         $this->assertArrayHasKey('test.system_check', $results);
@@ -332,7 +337,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
 
         $dispatcher = new class ($failingCheck) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private HealthCheckInterface $check,
+                private readonly HealthCheckInterface $healthCheck,
             ) {}
 
             public function dispatch(
@@ -340,14 +345,14 @@ class HealthCheckRunnerExtendedTest extends TestCase
                 ?\Joomla\Event\EventInterface $event = null,
             ): \Joomla\Event\EventInterface {
                 if ($name === HealthCheckerEvents::COLLECT_CHECKS->value && $event instanceof CollectChecksEvent) {
-                    $event->addResult($this->check);
+                    $event->addResult($this->healthCheck);
                 }
 
                 return $event;
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -355,7 +360,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $results = $runner->runCategory('system');
+        $results = $healthCheckRunner->runCategory('system');
 
         $this->assertCount(1, $results);
         $this->assertArrayHasKey('test.failing_check', $results);
@@ -374,7 +379,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -384,24 +389,24 @@ class HealthCheckRunnerExtendedTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
 
-        $runner->getMetadata();
+        $healthCheckRunner->getMetadata();
     }
 
     public function testGetMetadataReturnsStructuredData(): void
     {
-        $testCheck = $this->createConcreteTestCheck('test.metadata', 'system', HealthStatus::Good, 'OK');
-        $testProvider = new ProviderMetadata('test', 'Test Provider', 'Test description');
-        $testCategory = new HealthCategory('system', 'System', 'fa-server', 10);
+        $healthCheck = $this->createConcreteTestCheck('test.metadata', 'system', HealthStatus::Good, 'OK');
+        $providerMetadata = new ProviderMetadata('test', 'Test Provider', 'Test description');
+        $healthCategory = new HealthCategory('system', 'System', 'fa-server', 10);
 
         $dispatcher = new class (
-            $testCheck,
-            $testProvider,
-            $testCategory,
+            $healthCheck,
+            $providerMetadata,
+            $healthCategory,
         ) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private HealthCheckInterface $check,
-                private ProviderMetadata $provider,
-                private HealthCategory $category,
+                private readonly HealthCheckInterface $healthCheck,
+                private readonly ProviderMetadata $providerMetadata,
+                private readonly HealthCategory $healthCategory,
             ) {}
 
             public function dispatch(
@@ -409,18 +414,18 @@ class HealthCheckRunnerExtendedTest extends TestCase
                 ?\Joomla\Event\EventInterface $event = null,
             ): \Joomla\Event\EventInterface {
                 if ($name === HealthCheckerEvents::COLLECT_CHECKS->value && $event instanceof CollectChecksEvent) {
-                    $event->addResult($this->check);
+                    $event->addResult($this->healthCheck);
                 } elseif ($name === HealthCheckerEvents::COLLECT_PROVIDERS->value && $event instanceof CollectProvidersEvent) {
-                    $event->addResult($this->provider);
+                    $event->addResult($this->providerMetadata);
                 } elseif ($name === HealthCheckerEvents::COLLECT_CATEGORIES->value && $event instanceof CollectCategoriesEvent) {
-                    $event->addResult($this->category);
+                    $event->addResult($this->healthCategory);
                 }
 
                 return $event;
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -428,7 +433,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $metadata = $runner->getMetadata();
+        $metadata = $healthCheckRunner->getMetadata();
 
         $this->assertArrayHasKey('categories', $metadata);
         $this->assertArrayHasKey('providers', $metadata);
@@ -439,7 +444,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
 
     public function testSortResultsSortsByStatusThenCategory(): void
     {
-        $criticalCheck = $this->createConcreteTestCheck(
+        $healthCheck = $this->createConcreteTestCheck(
             'test.critical',
             'database',
             HealthStatus::Critical,
@@ -453,7 +458,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
         $databaseCategory = new HealthCategory('database', 'Database', 'fa-database', 20);
 
         $dispatcher = new class (
-            $criticalCheck,
+            $healthCheck,
             $warningCheck,
             $goodCheck,
             $goodCheck2,
@@ -461,12 +466,12 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $databaseCategory,
         ) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private HealthCheckInterface $criticalCheck,
-                private HealthCheckInterface $warningCheck,
-                private HealthCheckInterface $goodCheck,
-                private HealthCheckInterface $goodCheck2,
-                private HealthCategory $systemCategory,
-                private HealthCategory $databaseCategory,
+                private readonly HealthCheckInterface $criticalCheck,
+                private readonly HealthCheckInterface $warningCheck,
+                private readonly HealthCheckInterface $goodCheck,
+                private readonly HealthCheckInterface $goodCheck2,
+                private readonly HealthCategory $systemCategory,
+                private readonly HealthCategory $databaseCategory,
             ) {}
 
             public function dispatch(
@@ -487,7 +492,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -495,8 +500,9 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $runner->run();
-        $results = $runner->getResults();
+        $healthCheckRunner->run();
+
+        $results = $healthCheckRunner->getResults();
 
         $this->assertCount(4, $results);
         $this->assertSame(HealthStatus::Critical, $results[0]->healthStatus);
@@ -510,7 +516,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
 
     public function testGetResultsByCategoryGroupsCorrectly(): void
     {
-        $systemCheck1 = $this->createConcreteTestCheck('test.system1', 'system', HealthStatus::Good, 'OK1');
+        $healthCheck = $this->createConcreteTestCheck('test.system1', 'system', HealthStatus::Good, 'OK1');
         $systemCheck2 = $this->createConcreteTestCheck('test.system2', 'system', HealthStatus::Warning, 'Warn');
         $dbCheck = $this->createConcreteTestCheck('test.db', 'database', HealthStatus::Good, 'DB OK');
 
@@ -518,18 +524,18 @@ class HealthCheckRunnerExtendedTest extends TestCase
         $databaseCategory = new HealthCategory('database', 'Database', 'fa-database', 20);
 
         $dispatcher = new class (
-            $systemCheck1,
+            $healthCheck,
             $systemCheck2,
             $dbCheck,
             $systemCategory,
             $databaseCategory,
         ) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private HealthCheckInterface $systemCheck1,
-                private HealthCheckInterface $systemCheck2,
-                private HealthCheckInterface $dbCheck,
-                private HealthCategory $systemCategory,
-                private HealthCategory $databaseCategory,
+                private readonly HealthCheckInterface $systemCheck1,
+                private readonly HealthCheckInterface $systemCheck2,
+                private readonly HealthCheckInterface $dbCheck,
+                private readonly HealthCategory $systemCategory,
+                private readonly HealthCategory $databaseCategory,
             ) {}
 
             public function dispatch(
@@ -549,7 +555,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -557,8 +563,9 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $runner->run();
-        $resultsByCategory = $runner->getResultsByCategory();
+        $healthCheckRunner->run();
+
+        $resultsByCategory = $healthCheckRunner->getResultsByCategory();
 
         $this->assertArrayHasKey('system', $resultsByCategory);
         $this->assertArrayHasKey('database', $resultsByCategory);
@@ -572,16 +579,16 @@ class HealthCheckRunnerExtendedTest extends TestCase
 
     public function testGetResultsByCategoryHandlesUnknownCategory(): void
     {
-        $unknownCategoryCheck = $this->createConcreteTestCheck(
+        $healthCheck = $this->createConcreteTestCheck(
             'test.unknown',
             'unknown_category',
             HealthStatus::Good,
             'OK',
         );
 
-        $dispatcher = new class ($unknownCategoryCheck) implements \Joomla\Event\DispatcherInterface {
+        $dispatcher = new class ($healthCheck) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private HealthCheckInterface $check,
+                private readonly HealthCheckInterface $healthCheck,
             ) {}
 
             public function dispatch(
@@ -589,14 +596,14 @@ class HealthCheckRunnerExtendedTest extends TestCase
                 ?\Joomla\Event\EventInterface $event = null,
             ): \Joomla\Event\EventInterface {
                 if ($name === HealthCheckerEvents::COLLECT_CHECKS->value && $event instanceof CollectChecksEvent) {
-                    $event->addResult($this->check);
+                    $event->addResult($this->healthCheck);
                 }
 
                 return $event;
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -604,27 +611,28 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $runner->run();
-        $resultsByCategory = $runner->getResultsByCategory();
+        $healthCheckRunner->run();
+
+        $resultsByCategory = $healthCheckRunner->getResultsByCategory();
 
         $this->assertArrayHasKey('unknown_category', $resultsByCategory);
     }
 
     public function testGetResultsByStatusGroupsCorrectly(): void
     {
-        $criticalCheck = $this->createConcreteTestCheck('test.critical', 'system', HealthStatus::Critical, 'Critical');
+        $healthCheck = $this->createConcreteTestCheck('test.critical', 'system', HealthStatus::Critical, 'Critical');
         $warningCheck = $this->createConcreteTestCheck('test.warning', 'system', HealthStatus::Warning, 'Warning');
         $goodCheck = $this->createConcreteTestCheck('test.good', 'system', HealthStatus::Good, 'Good');
 
         $dispatcher = new class (
-            $criticalCheck,
+            $healthCheck,
             $warningCheck,
             $goodCheck,
         ) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private HealthCheckInterface $criticalCheck,
-                private HealthCheckInterface $warningCheck,
-                private HealthCheckInterface $goodCheck,
+                private readonly HealthCheckInterface $criticalCheck,
+                private readonly HealthCheckInterface $warningCheck,
+                private readonly HealthCheckInterface $goodCheck,
             ) {}
 
             public function dispatch(
@@ -641,7 +649,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -649,8 +657,9 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $runner->run();
-        $resultsByStatus = $runner->getResultsByStatus();
+        $healthCheckRunner->run();
+
+        $resultsByStatus = $healthCheckRunner->getResultsByStatus();
 
         $this->assertCount(1, $resultsByStatus['critical']);
         $this->assertCount(1, $resultsByStatus['warning']);
@@ -659,7 +668,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
 
     public function testCountMethodsReturnCorrectValues(): void
     {
-        $criticalCheck1 = $this->createConcreteTestCheck(
+        $healthCheck = $this->createConcreteTestCheck(
             'test.critical1',
             'system',
             HealthStatus::Critical,
@@ -675,16 +684,16 @@ class HealthCheckRunnerExtendedTest extends TestCase
         $goodCheck = $this->createConcreteTestCheck('test.good', 'system', HealthStatus::Good, 'Good');
 
         $dispatcher = new class (
-            $criticalCheck1,
+            $healthCheck,
             $criticalCheck2,
             $warningCheck,
             $goodCheck,
         ) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private HealthCheckInterface $criticalCheck1,
-                private HealthCheckInterface $criticalCheck2,
-                private HealthCheckInterface $warningCheck,
-                private HealthCheckInterface $goodCheck,
+                private readonly HealthCheckInterface $criticalCheck1,
+                private readonly HealthCheckInterface $criticalCheck2,
+                private readonly HealthCheckInterface $warningCheck,
+                private readonly HealthCheckInterface $goodCheck,
             ) {}
 
             public function dispatch(
@@ -702,7 +711,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -710,29 +719,29 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $runner->run();
+        $healthCheckRunner->run();
 
-        $this->assertSame(2, $runner->getCriticalCount());
-        $this->assertSame(1, $runner->getWarningCount());
-        $this->assertSame(1, $runner->getGoodCount());
-        $this->assertSame(4, $runner->getTotalCount());
+        $this->assertSame(2, $healthCheckRunner->getCriticalCount());
+        $this->assertSame(1, $healthCheckRunner->getWarningCount());
+        $this->assertSame(1, $healthCheckRunner->getGoodCount());
+        $this->assertSame(4, $healthCheckRunner->getTotalCount());
     }
 
     public function testToArrayIncludesAllData(): void
     {
-        $testCheck = $this->createConcreteTestCheck('test.toarray', 'system', HealthStatus::Good, 'OK');
-        $testProvider = new ProviderMetadata('test', 'Test Provider');
-        $testCategory = new HealthCategory('system', 'System', 'fa-server', 10);
+        $healthCheck = $this->createConcreteTestCheck('test.toarray', 'system', HealthStatus::Good, 'OK');
+        $providerMetadata = new ProviderMetadata('test', 'Test Provider');
+        $healthCategory = new HealthCategory('system', 'System', 'fa-server', 10);
 
         $dispatcher = new class (
-            $testCheck,
-            $testProvider,
-            $testCategory,
+            $healthCheck,
+            $providerMetadata,
+            $healthCategory,
         ) implements \Joomla\Event\DispatcherInterface {
             public function __construct(
-                private HealthCheckInterface $check,
-                private ProviderMetadata $provider,
-                private HealthCategory $category,
+                private readonly HealthCheckInterface $healthCheck,
+                private readonly ProviderMetadata $providerMetadata,
+                private readonly HealthCategory $healthCategory,
             ) {}
 
             public function dispatch(
@@ -740,18 +749,18 @@ class HealthCheckRunnerExtendedTest extends TestCase
                 ?\Joomla\Event\EventInterface $event = null,
             ): \Joomla\Event\EventInterface {
                 if ($name === HealthCheckerEvents::COLLECT_CHECKS->value && $event instanceof CollectChecksEvent) {
-                    $event->addResult($this->check);
+                    $event->addResult($this->healthCheck);
                 } elseif ($name === HealthCheckerEvents::COLLECT_PROVIDERS->value && $event instanceof CollectProvidersEvent) {
-                    $event->addResult($this->provider);
+                    $event->addResult($this->providerMetadata);
                 } elseif ($name === HealthCheckerEvents::COLLECT_CATEGORIES->value && $event instanceof CollectCategoriesEvent) {
-                    $event->addResult($this->category);
+                    $event->addResult($this->healthCategory);
                 }
 
                 return $event;
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -759,8 +768,9 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $runner->run();
-        $array = $runner->toArray();
+        $healthCheckRunner->run();
+
+        $array = $healthCheckRunner->toArray();
 
         $this->assertNotNull($array['lastRun']);
         $this->assertSame(0, $array['summary']['critical']);
@@ -806,7 +816,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -814,9 +824,9 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $cacheFactory,
         );
 
-        $runner->runWithCache(300);
+        $healthCheckRunner->runWithCache(300);
 
-        $this->assertInstanceOf(\DateTimeImmutable::class, $runner->getLastRun());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $healthCheckRunner->getLastRun());
     }
 
     public function testGetStatsWithCacheWithNullTtl(): void
@@ -830,7 +840,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -838,14 +848,14 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $stats = $runner->getStatsWithCache(null);
+        $stats = $healthCheckRunner->getStatsWithCache();
 
         $this->assertArrayHasKey('critical', $stats);
         $this->assertArrayHasKey('warning', $stats);
         $this->assertArrayHasKey('good', $stats);
         $this->assertArrayHasKey('total', $stats);
         $this->assertArrayHasKey('lastRun', $stats);
-        $this->assertInstanceOf(\DateTimeImmutable::class, $runner->getLastRun());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $healthCheckRunner->getLastRun());
     }
 
     public function testGetStatsWithCacheWithZeroTtl(): void
@@ -859,7 +869,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             }
         };
 
-        $runner = new HealthCheckRunner(
+        $healthCheckRunner = new HealthCheckRunner(
             $dispatcher,
             $this->categoryRegistry,
             $this->providerRegistry,
@@ -867,24 +877,24 @@ class HealthCheckRunnerExtendedTest extends TestCase
             $this->cacheFactory,
         );
 
-        $stats = $runner->getStatsWithCache(0);
+        $stats = $healthCheckRunner->getStatsWithCache(0);
 
         $this->assertArrayHasKey('critical', $stats);
-        $this->assertInstanceOf(\DateTimeImmutable::class, $runner->getLastRun());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $healthCheckRunner->getLastRun());
     }
 
     private function createConcreteTestCheck(
         string $slug,
         string $category,
-        HealthStatus $status,
+        HealthStatus $healthStatus,
         string $description,
     ): HealthCheckInterface {
-        return new class ($slug, $category, $status, $description) implements HealthCheckInterface {
+        return new class ($slug, $category, $healthStatus, $description) implements HealthCheckInterface {
             public function __construct(
-                private string $slug,
-                private string $category,
-                private HealthStatus $status,
-                private string $description,
+                private readonly string $slug,
+                private readonly string $category,
+                private readonly HealthStatus $healthStatus,
+                private readonly string $description,
             ) {}
 
             public function getSlug(): string
@@ -910,7 +920,7 @@ class HealthCheckRunnerExtendedTest extends TestCase
             public function run(): HealthCheckResult
             {
                 return new HealthCheckResult(
-                    healthStatus: $this->status,
+                    healthStatus: $this->healthStatus,
                     title: $this->getTitle(),
                     description: $this->description,
                     slug: $this->slug,

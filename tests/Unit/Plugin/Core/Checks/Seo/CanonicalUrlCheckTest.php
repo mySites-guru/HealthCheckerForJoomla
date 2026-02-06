@@ -21,15 +21,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(CanonicalUrlCheck::class)]
 class CanonicalUrlCheckTest extends TestCase
 {
-    private CanonicalUrlCheck $check;
+    private CanonicalUrlCheck $canonicalUrlCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new CanonicalUrlCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->canonicalUrlCheck = new CanonicalUrlCheck();
     }
 
     protected function tearDown(): void
@@ -39,22 +39,22 @@ class CanonicalUrlCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.canonical_url', $this->check->getSlug());
+        $this->assertSame('seo.canonical_url', $this->canonicalUrlCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->canonicalUrlCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->canonicalUrlCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->canonicalUrlCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -62,35 +62,35 @@ class CanonicalUrlCheckTest extends TestCase
 
     public function testRunReturnsWarningWhenSefDisabled(): void
     {
-        $this->app->set('sef', 0);
+        $this->cmsApplication->set('sef', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->canonicalUrlCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('SEF URLs are disabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('SEF URLs are disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSefPluginDisabled(): void
     {
-        $this->app->set('sef', 1);
+        $this->cmsApplication->set('sef', 1);
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->canonicalUrlCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->canonicalUrlCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('SEF plugin', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('SEF plugin', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenSefEnabledAndPluginActive(): void
     {
-        $this->app->set('sef', 1);
+        $this->cmsApplication->set('sef', 1);
         $database = MockDatabaseFactory::createWithResult(1);
-        $this->check->setDatabase($database);
+        $this->canonicalUrlCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->canonicalUrlCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('SEF URLs are enabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('SEF URLs are enabled', $healthCheckResult->description);
     }
 }

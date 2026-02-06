@@ -19,13 +19,13 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ModulePositionCheck::class)]
 class ModulePositionCheckTest extends TestCase
 {
-    private ModulePositionCheck $check;
+    private ModulePositionCheck $modulePositionCheck;
 
     private string $templatesPath;
 
     protected function setUp(): void
     {
-        $this->check = new ModulePositionCheck();
+        $this->modulePositionCheck = new ModulePositionCheck();
         $this->templatesPath = JPATH_SITE . '/templates';
 
         // Clean up and recreate templates directory
@@ -39,22 +39,22 @@ class ModulePositionCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('extensions.module_positions', $this->check->getSlug());
+        $this->assertSame('extensions.module_positions', $this->modulePositionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->modulePositionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->modulePositionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->modulePositionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -62,21 +62,21 @@ class ModulePositionCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->modulePositionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('database', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('database', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithNoActiveTemplateReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithObject(null);
-        $this->check->setDatabase($database);
+        $this->modulePositionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->modulePositionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Could not determine active template', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Could not determine active template', $healthCheckResult->description);
     }
 
     public function testRunWithMissingTemplateManifestReturnsWarning(): void
@@ -90,14 +90,14 @@ class ModulePositionCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->modulePositionCheck->setDatabase($database);
 
         // Don't create the template manifest file
-        $result = $this->check->run();
+        $healthCheckResult = $this->modulePositionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Template manifest not found', $result->description);
-        $this->assertStringContainsString('cassiopeia', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Template manifest not found', $healthCheckResult->description);
+        $this->assertStringContainsString('cassiopeia', $healthCheckResult->description);
     }
 
     public function testRunWithTemplateWithoutPositionsReturnsGood(): void
@@ -124,12 +124,12 @@ XML;
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->modulePositionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->modulePositionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('does not define positions', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('does not define positions', $healthCheckResult->description);
     }
 
     public function testRunWithAllModulesInValidPositionsReturnsGood(): void
@@ -175,13 +175,13 @@ XML;
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->modulePositionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->modulePositionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('All 2 published modules', $result->description);
-        $this->assertStringContainsString('valid positions', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('All 2 published modules', $healthCheckResult->description);
+        $this->assertStringContainsString('valid positions', $healthCheckResult->description);
     }
 
     public function testRunWithOrphanedModulesReturnsWarning(): void
@@ -231,13 +231,13 @@ XML;
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->modulePositionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->modulePositionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('2 published module(s)', $result->description);
-        $this->assertStringContainsString('not defined in template', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 published module(s)', $healthCheckResult->description);
+        $this->assertStringContainsString('not defined in template', $healthCheckResult->description);
     }
 
     public function testRunWithNoPublishedModulesReturnsGood(): void
@@ -270,19 +270,19 @@ XML;
                 'return' => [],
             ], // No published modules
         ]);
-        $this->check->setDatabase($database);
+        $this->modulePositionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->modulePositionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('All 0 published modules', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('All 0 published modules', $healthCheckResult->description);
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->modulePositionCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     /**

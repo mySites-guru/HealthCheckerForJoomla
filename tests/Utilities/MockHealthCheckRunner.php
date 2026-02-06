@@ -26,9 +26,7 @@ class MockHealthCheckRunner
 
     private ?array $categoryResults = null;
 
-    private ?HealthCheckResult $singleCheckResult = null;
-
-    private bool $throwOnSingleCheck = false;
+    private ?HealthCheckResult $healthCheckResult = null;
 
     private int $criticalCount = 0;
 
@@ -44,7 +42,7 @@ class MockHealthCheckRunner
 
     private ?array $toArrayResult = null;
 
-    private ?\Exception $exceptionToThrow = null;
+    private ?\Exception $exception = null;
 
     private string $methodToThrowOn = '';
 
@@ -54,15 +52,15 @@ class MockHealthCheckRunner
     public function throwExceptionOn(string $method, \Exception $exception): self
     {
         $this->methodToThrowOn = $method;
-        $this->exceptionToThrow = $exception;
+        $this->exception = $exception;
 
         return $this;
     }
 
     private function maybeThrow(string $method): void
     {
-        if ($this->methodToThrowOn === $method && $this->exceptionToThrow !== null) {
-            throw $this->exceptionToThrow;
+        if ($this->methodToThrowOn === $method && $this->exception instanceof \Exception) {
+            throw $this->exception;
         }
     }
 
@@ -104,9 +102,9 @@ class MockHealthCheckRunner
         return $this->categoryResults ?? [];
     }
 
-    public function setSingleCheckResult(?HealthCheckResult $result): self
+    public function setSingleCheckResult(?HealthCheckResult $healthCheckResult): self
     {
-        $this->singleCheckResult = $result;
+        $this->healthCheckResult = $healthCheckResult;
 
         return $this;
     }
@@ -115,7 +113,7 @@ class MockHealthCheckRunner
     {
         $this->maybeThrow('runSingleCheck');
 
-        return $this->singleCheckResult;
+        return $this->healthCheckResult;
     }
 
     public function setCounts(int $critical, int $warning, int $good): self

@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TwitterCardsCheck::class)]
 class TwitterCardsCheckTest extends TestCase
 {
-    private TwitterCardsCheck $check;
+    private TwitterCardsCheck $twitterCardsCheck;
 
     protected function setUp(): void
     {
-        $this->check = new TwitterCardsCheck();
+        $this->twitterCardsCheck = new TwitterCardsCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.twitter_cards', $this->check->getSlug());
+        $this->assertSame('seo.twitter_cards', $this->twitterCardsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->twitterCardsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->twitterCardsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->twitterCardsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -65,12 +65,12 @@ class TwitterCardsCheckTest extends TestCase
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twitterCardsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('essential', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('essential', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWithOpenGraphFallbacks(): void
@@ -90,12 +90,12 @@ HTML;
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twitterCardsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('fallback', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('fallback', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenMissingTwitterCardType(): void
@@ -112,12 +112,12 @@ HTML;
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twitterCardsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('twitter:card', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('twitter:card', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenAllTagsMissing(): void
@@ -133,34 +133,34 @@ HTML;
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twitterCardsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Missing', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Missing', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenHttpError(): void
     {
         $httpClient = MockHttpFactory::createWithGetResponse(500, '');
-        $this->check->setHttpClient($httpClient);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twitterCardsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('HTTP 500', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('HTTP 500', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenConnectionFails(): void
     {
         $httpClient = MockHttpFactory::createThatThrows('Connection refused');
-        $this->check->setHttpClient($httpClient);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twitterCardsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Unable to check', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to check', $healthCheckResult->description);
     }
 
     public function testDetectsContentBeforeNameOrder(): void
@@ -179,11 +179,11 @@ HTML;
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twitterCardsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testDetectsOpenGraphContentBeforePropertyOrder(): void
@@ -202,11 +202,11 @@ HTML;
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twitterCardsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testSuggestsImageWhenMissing(): void
@@ -224,24 +224,24 @@ HTML;
 HTML;
 
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twitterCardsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('image', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('image', $healthCheckResult->description);
     }
 
     public function testResultMetadata(): void
     {
         $html = '<html><head></head><body></body></html>';
         $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
-        $this->check->setHttpClient($httpClient);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twitterCardsCheck->run();
 
-        $this->assertSame('seo.twitter_cards', $result->slug);
-        $this->assertSame('seo', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('seo.twitter_cards', $healthCheckResult->slug);
+        $this->assertSame('seo', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 }

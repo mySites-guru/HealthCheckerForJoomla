@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(RealpathCacheCheck::class)]
 class RealpathCacheCheckTest extends TestCase
 {
-    private RealpathCacheCheck $check;
+    private RealpathCacheCheck $realpathCacheCheck;
 
     protected function setUp(): void
     {
-        $this->check = new RealpathCacheCheck();
+        $this->realpathCacheCheck = new RealpathCacheCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.realpath_cache', $this->check->getSlug());
+        $this->assertSame('system.realpath_cache', $this->realpathCacheCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->realpathCacheCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->realpathCacheCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->realpathCacheCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,29 +50,29 @@ class RealpathCacheCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
 
-        $this->assertSame('system.realpath_cache', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.realpath_cache', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
 
         // Can return Good or Warning (never Critical)
-        $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+        $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
     }
 
     public function testRunDescriptionContainsCacheInfo(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
 
         // Description should mention realpath, cache, or usage
         $this->assertTrue(
-            str_contains(strtolower($result->description), 'realpath') ||
-            str_contains(strtolower($result->description), 'cache'),
+            str_contains(strtolower($healthCheckResult->description), 'realpath') ||
+            str_contains(strtolower($healthCheckResult->description), 'cache'),
         );
     }
 
@@ -104,47 +104,47 @@ class RealpathCacheCheckTest extends TestCase
     public function testCheckNeverReturnsCritical(): void
     {
         // This check should never return Critical status
-        $result = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testDescriptionIncludesUsagePercentage(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
 
         // Description should include usage percentage or mention usage
         $this->assertTrue(
-            str_contains($result->description, '%') ||
-            str_contains(strtolower($result->description), 'unable'),
+            str_contains($healthCheckResult->description, '%') ||
+            str_contains(strtolower($healthCheckResult->description), 'unable'),
         );
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
+        $result2 = $this->realpathCacheCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
         // Description may vary slightly due to usage changes, but status should be same
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
 
-        $this->assertSame('system.realpath_cache', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.realpath_cache', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testConvertToBytesLogicWithKilobytes(): void
@@ -165,7 +165,7 @@ class RealpathCacheCheckTest extends TestCase
     {
         // Test that the check can parse G suffix
         // '1G' should be converted to 1073741824 bytes
-        $this->assertSame(1073741824, 1 * 1024 * 1024 * 1024);
+        $this->assertSame(1073741824, 1024 * 1024 * 1024);
     }
 
     public function testRecommendedMinimumSizeIs4M(): void
@@ -178,28 +178,28 @@ class RealpathCacheCheckTest extends TestCase
 
     public function testGoodResultIncludesTtl(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
 
-        if ($result->healthStatus === HealthStatus::Good) {
+        if ($healthCheckResult->healthStatus === HealthStatus::Good) {
             // Good result should include TTL information
-            $this->assertStringContainsString('TTL', $result->description);
+            $this->assertStringContainsString('TTL', $healthCheckResult->description);
         }
     }
 
     public function testWarningResultExplainsIssue(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
 
-        if ($result->healthStatus === HealthStatus::Warning) {
+        if ($healthCheckResult->healthStatus === HealthStatus::Warning) {
             // Warning should explain why
             $this->assertTrue(
-                str_contains($result->description, 'below') ||
-                str_contains($result->description, 'nearly full') ||
-                str_contains($result->description, 'Unable'),
+                str_contains($healthCheckResult->description, 'below') ||
+                str_contains($healthCheckResult->description, 'nearly full') ||
+                str_contains($healthCheckResult->description, 'Unable'),
             );
         } else {
             // If not Warning, should be Good
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         }
     }
 
@@ -244,7 +244,7 @@ class RealpathCacheCheckTest extends TestCase
         // Test lowercase suffixes
         $this->assertSame(4 * 1024 * 1024, $this->convertToBytesHelper('4m'));
         $this->assertSame(512 * 1024, $this->convertToBytesHelper('512k'));
-        $this->assertSame(1 * 1024 * 1024 * 1024, $this->convertToBytesHelper('1g'));
+        $this->assertSame(1024 * 1024 * 1024, $this->convertToBytesHelper('1g'));
     }
 
     public function testConvertToBytesWithUppercaseSuffix(): void
@@ -252,24 +252,24 @@ class RealpathCacheCheckTest extends TestCase
         // Test uppercase suffixes
         $this->assertSame(4 * 1024 * 1024, $this->convertToBytesHelper('4M'));
         $this->assertSame(512 * 1024, $this->convertToBytesHelper('512K'));
-        $this->assertSame(1 * 1024 * 1024 * 1024, $this->convertToBytesHelper('1G'));
+        $this->assertSame(1024 * 1024 * 1024, $this->convertToBytesHelper('1G'));
     }
 
     public function testCacheSizeThresholdCheck(): void
     {
         $cacheSize = ini_get('realpath_cache_size');
         $sizeBytes = $this->convertToBytesHelper($cacheSize);
-        $result = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
 
         // Verify check correctly evaluates against 4MB threshold
         $recommendedSize = 4 * 1024 * 1024;
 
         if ($sizeBytes < $recommendedSize) {
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-            $this->assertStringContainsString('below', $result->description);
+            $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+            $this->assertStringContainsString('below', $healthCheckResult->description);
         } else {
             // Either Good or Warning for high usage
-            $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+            $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
         }
     }
 
@@ -282,12 +282,12 @@ class RealpathCacheCheckTest extends TestCase
         // Calculate usage percentage
         $usedPercent = $sizeBytes > 0 ? round(($currentUsage / $sizeBytes) * 100, 1) : 0;
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->realpathCacheCheck->run();
 
         // If usage is over 90% and cache is big enough, should warn
         if ($usedPercent > 90 && $sizeBytes >= 4 * 1024 * 1024) {
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-            $this->assertStringContainsString('nearly full', $result->description);
+            $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+            $this->assertStringContainsString('nearly full', $healthCheckResult->description);
         } else {
             // Document usage percentage and ensure result is valid
             $this->assertLessThanOrEqual(100.0, $usedPercent, 'Cache usage percentage is valid');
@@ -296,7 +296,7 @@ class RealpathCacheCheckTest extends TestCase
 
     public function testSlugFormat(): void
     {
-        $slug = $this->check->getSlug();
+        $slug = $this->realpathCacheCheck->getSlug();
 
         // Slug should be lowercase with dot separator
         $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
@@ -304,7 +304,7 @@ class RealpathCacheCheckTest extends TestCase
 
     public function testCategoryIsValid(): void
     {
-        $category = $this->check->getCategory();
+        $category = $this->realpathCacheCheck->getCategory();
 
         // Should be a valid category
         $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];

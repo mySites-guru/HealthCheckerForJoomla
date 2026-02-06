@@ -19,34 +19,34 @@ class DisplayControllerTest extends TestCase
 {
     public function testDisplayControllerExtendsBaseController(): void
     {
-        $controller = new DisplayController();
+        $displayController = new DisplayController();
 
-        $this->assertInstanceOf(\Joomla\CMS\MVC\Controller\BaseController::class, $controller);
+        $this->assertInstanceOf(\Joomla\CMS\MVC\Controller\BaseController::class, $displayController);
     }
 
     public function testDisplayReturnsControllerInstance(): void
     {
-        $controller = new DisplayController();
+        $displayController = new DisplayController();
 
-        $result = $controller->display();
+        $result = $displayController->display();
 
         $this->assertInstanceOf(DisplayController::class, $result);
     }
 
     public function testDisplayWithCachableParameter(): void
     {
-        $controller = new DisplayController();
+        $displayController = new DisplayController();
 
-        $result = $controller->display(true);
+        $result = $displayController->display(true);
 
         $this->assertInstanceOf(DisplayController::class, $result);
     }
 
     public function testDisplayWithUrlParams(): void
     {
-        $controller = new DisplayController();
+        $displayController = new DisplayController();
 
-        $result = $controller->display(false, [
+        $result = $displayController->display(false, [
             'view' => 'CMD',
         ]);
 
@@ -55,9 +55,9 @@ class DisplayControllerTest extends TestCase
 
     public function testDisplayWithBothParameters(): void
     {
-        $controller = new DisplayController();
+        $displayController = new DisplayController();
 
-        $result = $controller->display(true, [
+        $result = $displayController->display(true, [
             'view' => 'CMD',
             'layout' => 'CMD',
         ]);
@@ -67,21 +67,21 @@ class DisplayControllerTest extends TestCase
 
     public function testDefaultViewIsReport(): void
     {
-        $controller = new DisplayController();
+        $displayController = new DisplayController();
 
         // Use reflection to check the protected property
-        $reflection = new \ReflectionClass($controller);
-        $property = $reflection->getProperty('default_view');
+        $reflectionClass = new \ReflectionClass($displayController);
+        $reflectionProperty = $reflectionClass->getProperty('default_view');
 
-        $this->assertSame('report', $property->getValue($controller));
+        $this->assertSame('report', $reflectionProperty->getValue($displayController));
     }
 
     public function testDisplaySupportsMethodChaining(): void
     {
-        $controller = new DisplayController();
+        $displayController = new DisplayController();
 
         // Should be able to chain display calls
-        $result = $controller->display()
+        $result = $displayController->display()
             ->display();
 
         $this->assertInstanceOf(DisplayController::class, $result);

@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MenuOrphansCheck::class)]
 class MenuOrphansCheckTest extends TestCase
 {
-    private MenuOrphansCheck $check;
+    private MenuOrphansCheck $menuOrphansCheck;
 
     protected function setUp(): void
     {
-        $this->check = new MenuOrphansCheck();
+        $this->menuOrphansCheck = new MenuOrphansCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('content.menu_orphans', $this->check->getSlug());
+        $this->assertSame('content.menu_orphans', $this->menuOrphansCheck->getSlug());
     }
 
     public function testGetCategoryReturnsContent(): void
     {
-        $this->assertSame('content', $this->check->getCategory());
+        $this->assertSame('content', $this->menuOrphansCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->menuOrphansCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->menuOrphansCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,43 +51,43 @@ class MenuOrphansCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->menuOrphansCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenNoOrphanedMenuItems(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->menuOrphansCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->menuOrphansCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('existing content', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('existing content', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenOrphanedMenuItemsExist(): void
     {
         $database = MockDatabaseFactory::createWithResult(3);
-        $this->check->setDatabase($database);
+        $this->menuOrphansCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->menuOrphansCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('3 menu item(s)', $result->description);
-        $this->assertStringContainsString('404', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('3 menu item(s)', $healthCheckResult->description);
+        $this->assertStringContainsString('404', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenSingleOrphanedMenuItemExists(): void
     {
         $database = MockDatabaseFactory::createWithResult(1);
-        $this->check->setDatabase($database);
+        $this->menuOrphansCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->menuOrphansCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('1 menu item(s)', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 menu item(s)', $healthCheckResult->description);
     }
 
     public function testRunFallsBackToSubstringIndexOnRegexpError(): void
@@ -103,12 +103,12 @@ class MenuOrphansCheckTest extends TestCase
                 'return' => 2,
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->menuOrphansCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->menuOrphansCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('2 menu item(s)', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 menu item(s)', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWithFallbackWhenNoOrphans(): void
@@ -124,11 +124,11 @@ class MenuOrphansCheckTest extends TestCase
                 'return' => 0,
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->menuOrphansCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->menuOrphansCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('existing content', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('existing content', $healthCheckResult->description);
     }
 }

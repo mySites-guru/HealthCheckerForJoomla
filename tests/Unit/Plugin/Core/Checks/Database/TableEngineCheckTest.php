@@ -21,17 +21,17 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TableEngineCheck::class)]
 class TableEngineCheckTest extends TestCase
 {
-    private TableEngineCheck $check;
+    private TableEngineCheck $tableEngineCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        $this->app->set('dbprefix', 'test_');
-        $this->app->set('db', 'test_database');
-        Factory::setApplication($this->app);
-        $this->check = new TableEngineCheck();
+        $this->cmsApplication = new CMSApplication();
+        $this->cmsApplication->set('dbprefix', 'test_');
+        $this->cmsApplication->set('db', 'test_database');
+        Factory::setApplication($this->cmsApplication);
+        $this->tableEngineCheck = new TableEngineCheck();
     }
 
     protected function tearDown(): void
@@ -41,22 +41,22 @@ class TableEngineCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.table_engine', $this->check->getSlug());
+        $this->assertSame('database.table_engine', $this->tableEngineCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->tableEngineCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->tableEngineCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->tableEngineCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -64,21 +64,21 @@ class TableEngineCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tableEngineCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenAllTablesUseInnoDB(): void
     {
         // Empty array means no tables with non-InnoDB engine
         $database = MockDatabaseFactory::createWithObjectList([]);
-        $this->check->setDatabase($database);
+        $this->tableEngineCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tableEngineCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('InnoDB', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('InnoDB', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenTablesUseMyISAM(): void
@@ -88,11 +88,11 @@ class TableEngineCheckTest extends TestCase
         $table1->ENGINE = 'MyISAM';
 
         $database = MockDatabaseFactory::createWithObjectList([$table1]);
-        $this->check->setDatabase($database);
+        $this->tableEngineCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tableEngineCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('1 table(s)', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 table(s)', $healthCheckResult->description);
     }
 }

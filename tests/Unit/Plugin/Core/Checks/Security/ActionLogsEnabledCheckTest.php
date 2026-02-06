@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ActionLogsEnabledCheck::class)]
 class ActionLogsEnabledCheckTest extends TestCase
 {
-    private ActionLogsEnabledCheck $check;
+    private ActionLogsEnabledCheck $actionLogsEnabledCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ActionLogsEnabledCheck();
+        $this->actionLogsEnabledCheck = new ActionLogsEnabledCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.action_logs_enabled', $this->check->getSlug());
+        $this->assertSame('security.action_logs_enabled', $this->actionLogsEnabledCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->actionLogsEnabledCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->actionLogsEnabledCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->actionLogsEnabledCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,44 +51,44 @@ class ActionLogsEnabledCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->actionLogsEnabledCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenSystemPluginDisabled(): void
     {
         // System plugin returns enabled = 0 (disabled)
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->actionLogsEnabledCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->actionLogsEnabledCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('System - Action Logs plugin is disabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('System - Action Logs plugin is disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSystemPluginNotFound(): void
     {
         // System plugin not found (null result)
         $database = MockDatabaseFactory::createWithResult(null);
-        $this->check->setDatabase($database);
+        $this->actionLogsEnabledCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->actionLogsEnabledCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenSystemPluginEnabled(): void
     {
         // System plugin returns enabled = 1
         $database = MockDatabaseFactory::createWithResult(1);
-        $this->check->setDatabase($database);
+        $this->actionLogsEnabledCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->actionLogsEnabledCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Action Logs system plugin is enabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Action Logs system plugin is enabled', $healthCheckResult->description);
     }
 }

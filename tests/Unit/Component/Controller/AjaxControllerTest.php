@@ -26,9 +26,9 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(AjaxController::class)]
 class AjaxControllerTest extends TestCase
 {
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
-    private AjaxController $controller;
+    private AjaxController $ajaxController;
 
     protected function setUp(): void
     {
@@ -37,10 +37,10 @@ class AjaxControllerTest extends TestCase
         Factory::setApplication(null);
 
         // Create mock application
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
 
-        $this->controller = new AjaxController();
+        $this->ajaxController = new AjaxController();
     }
 
     protected function tearDown(): void
@@ -57,7 +57,8 @@ class AjaxControllerTest extends TestCase
     {
         $user = new User(1);
         $user->setAuthorisation('core.manage', 'com_healthchecker', true);
-        $this->app->setIdentity($user);
+
+        $this->cmsApplication->setIdentity($user);
 
         return $user;
     }
@@ -65,18 +66,19 @@ class AjaxControllerTest extends TestCase
     /**
      * Helper to create a mock component with a mock runner
      *
-     * @param MockHealthCheckRunner $runner The configured mock runner
+     * @param MockHealthCheckRunner $mockHealthCheckRunner The configured mock runner
      */
-    private function setUpMockComponent(MockHealthCheckRunner $runner): void
+    private function setUpMockComponent(MockHealthCheckRunner $mockHealthCheckRunner): void
     {
-        $component = new MockHealthCheckerComponent();
-        $component->setHealthCheckRunner($runner);
-        $this->app->setComponent('com_healthchecker', $component);
+        $mockHealthCheckerComponent = new MockHealthCheckerComponent();
+        $mockHealthCheckerComponent->setHealthCheckRunner($mockHealthCheckRunner);
+
+        $this->cmsApplication->setComponent('com_healthchecker', $mockHealthCheckerComponent);
     }
 
     public function testAjaxControllerExtendsBaseController(): void
     {
-        $this->assertInstanceOf(\Joomla\CMS\MVC\Controller\BaseController::class, $this->controller);
+        $this->assertInstanceOf(\Joomla\CMS\MVC\Controller\BaseController::class, $this->ajaxController);
     }
 
     // =========================================================================
@@ -88,11 +90,11 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->metadata();
+        $this->ajaxController->metadata();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type'] ?? '');
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type'] ?? '');
     }
 
     public function testCategoryRejectsInvalidToken(): void
@@ -100,10 +102,10 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->category();
+        $this->ajaxController->category();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testCheckRejectsInvalidToken(): void
@@ -111,10 +113,10 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->check();
+        $this->ajaxController->check();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testStatsRejectsInvalidToken(): void
@@ -122,10 +124,10 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->stats();
+        $this->ajaxController->stats();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testClearCacheRejectsInvalidToken(): void
@@ -133,10 +135,10 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->clearCache();
+        $this->ajaxController->clearCache();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testRunRejectsInvalidToken(): void
@@ -144,10 +146,10 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->run();
+        $this->ajaxController->run();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     // =========================================================================
@@ -158,55 +160,55 @@ class AjaxControllerTest extends TestCase
     {
         // No user set (null identity)
         ob_start();
-        $this->controller->metadata();
+        $this->ajaxController->metadata();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testCategoryRejectsNullUser(): void
     {
         ob_start();
-        $this->controller->category();
+        $this->ajaxController->category();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testCheckRejectsNullUser(): void
     {
         ob_start();
-        $this->controller->check();
+        $this->ajaxController->check();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testStatsRejectsNullUser(): void
     {
         ob_start();
-        $this->controller->stats();
+        $this->ajaxController->stats();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testClearCacheRejectsNullUser(): void
     {
         ob_start();
-        $this->controller->clearCache();
+        $this->ajaxController->clearCache();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testRunRejectsNullUser(): void
     {
         ob_start();
-        $this->controller->run();
+        $this->ajaxController->run();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     // =========================================================================
@@ -217,73 +219,73 @@ class AjaxControllerTest extends TestCase
     {
         $user = new User(1);
         // User has no authorisation for core.manage
-        $this->app->setIdentity($user);
+        $this->cmsApplication->setIdentity($user);
 
         ob_start();
-        $this->controller->metadata();
+        $this->ajaxController->metadata();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testCategoryRejectsUnauthorizedUser(): void
     {
         $user = new User(1);
-        $this->app->setIdentity($user);
+        $this->cmsApplication->setIdentity($user);
 
         ob_start();
-        $this->controller->category();
+        $this->ajaxController->category();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testCheckRejectsUnauthorizedUser(): void
     {
         $user = new User(1);
-        $this->app->setIdentity($user);
+        $this->cmsApplication->setIdentity($user);
 
         ob_start();
-        $this->controller->check();
+        $this->ajaxController->check();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testStatsRejectsUnauthorizedUser(): void
     {
         $user = new User(1);
-        $this->app->setIdentity($user);
+        $this->cmsApplication->setIdentity($user);
 
         ob_start();
-        $this->controller->stats();
+        $this->ajaxController->stats();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testClearCacheRejectsUnauthorizedUser(): void
     {
         $user = new User(1);
-        $this->app->setIdentity($user);
+        $this->cmsApplication->setIdentity($user);
 
         ob_start();
-        $this->controller->clearCache();
+        $this->ajaxController->clearCache();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testRunRejectsUnauthorizedUser(): void
     {
         $user = new User(1);
-        $this->app->setIdentity($user);
+        $this->cmsApplication->setIdentity($user);
 
         ob_start();
-        $this->controller->run();
+        $this->ajaxController->run();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     // =========================================================================
@@ -294,32 +296,34 @@ class AjaxControllerTest extends TestCase
     {
         $user = new User(1);
         $user->setAuthorisation('core.manage', 'com_healthchecker', true);
-        $this->app->setIdentity($user);
+
+        $this->cmsApplication->setIdentity($user);
 
         // Empty input - no category parameter
-        $this->app->setInput(new Input([]));
+        $this->cmsApplication->setInput(new Input([]));
 
         ob_start();
-        $this->controller->category();
+        $this->ajaxController->category();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testCheckRejectsMissingSlugParameter(): void
     {
         $user = new User(1);
         $user->setAuthorisation('core.manage', 'com_healthchecker', true);
-        $this->app->setIdentity($user);
+
+        $this->cmsApplication->setIdentity($user);
 
         // Empty input - no slug parameter
-        $this->app->setInput(new Input([]));
+        $this->cmsApplication->setInput(new Input([]));
 
         ob_start();
-        $this->controller->check();
+        $this->ajaxController->check();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     // =========================================================================
@@ -331,10 +335,10 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->metadata();
+        $this->ajaxController->metadata();
         ob_end_clean();
 
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testCategorySetsJsonContentType(): void
@@ -342,10 +346,10 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->category();
+        $this->ajaxController->category();
         ob_end_clean();
 
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testCheckSetsJsonContentType(): void
@@ -353,10 +357,10 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->check();
+        $this->ajaxController->check();
         ob_end_clean();
 
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testStatsSetsJsonContentType(): void
@@ -364,10 +368,10 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->stats();
+        $this->ajaxController->stats();
         ob_end_clean();
 
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testClearCacheSetsJsonContentType(): void
@@ -375,10 +379,10 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->clearCache();
+        $this->ajaxController->clearCache();
         ob_end_clean();
 
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testRunSetsJsonContentType(): void
@@ -386,10 +390,10 @@ class AjaxControllerTest extends TestCase
         Session::setTokenValid(false);
 
         ob_start();
-        $this->controller->run();
+        $this->ajaxController->run();
         ob_end_clean();
 
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     // =========================================================================
@@ -399,55 +403,55 @@ class AjaxControllerTest extends TestCase
     public function testMetadataClosesApplication(): void
     {
         ob_start();
-        $this->controller->metadata();
+        $this->ajaxController->metadata();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testCategoryClosesApplication(): void
     {
         ob_start();
-        $this->controller->category();
+        $this->ajaxController->category();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testCheckClosesApplication(): void
     {
         ob_start();
-        $this->controller->check();
+        $this->ajaxController->check();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testStatsClosesApplication(): void
     {
         ob_start();
-        $this->controller->stats();
+        $this->ajaxController->stats();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testClearCacheClosesApplication(): void
     {
         ob_start();
-        $this->controller->clearCache();
+        $this->ajaxController->clearCache();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testRunClosesApplication(): void
     {
         ob_start();
-        $this->controller->run();
+        $this->ajaxController->run();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     // =========================================================================
@@ -458,34 +462,36 @@ class AjaxControllerTest extends TestCase
     {
         $user = new User(1);
         $user->setAuthorisation('core.manage', 'com_healthchecker', true);
-        $this->app->setIdentity($user);
 
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setIdentity($user);
+
+        $this->cmsApplication->setInput(new Input([
             'category' => '',
         ]));
 
         ob_start();
-        $this->controller->category();
+        $this->ajaxController->category();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     public function testCheckRejectsEmptySlug(): void
     {
         $user = new User(1);
         $user->setAuthorisation('core.manage', 'com_healthchecker', true);
-        $this->app->setIdentity($user);
 
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setIdentity($user);
+
+        $this->cmsApplication->setInput(new Input([
             'slug' => '',
         ]));
 
         ob_start();
-        $this->controller->check();
+        $this->ajaxController->check();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     // =========================================================================
@@ -496,8 +502,8 @@ class AjaxControllerTest extends TestCase
     {
         $this->setUpAuthorizedUser();
 
-        $runner = new MockHealthCheckRunner();
-        $runner->setMetadata([
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->setMetadata([
             'categories' => [[
                 'slug' => 'system',
                 'label' => 'System',
@@ -512,30 +518,30 @@ class AjaxControllerTest extends TestCase
                 'title' => 'PHP Version',
             ]],
         ]);
-        $this->setUpMockComponent($runner);
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->metadata();
+        $this->ajaxController->metadata();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testMetadataHandlesExceptionGracefully(): void
     {
         $this->setUpAuthorizedUser();
 
-        $runner = new MockHealthCheckRunner();
-        $runner->throwExceptionOn('getMetadata', new \RuntimeException('Test error'));
-        $this->setUpMockComponent($runner);
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->throwExceptionOn('getMetadata', new \RuntimeException('Test error'));
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->metadata();
+        $this->ajaxController->metadata();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     // =========================================================================
@@ -545,12 +551,12 @@ class AjaxControllerTest extends TestCase
     public function testCategoryReturnsSuccessfulResponseForAuthorizedUser(): void
     {
         $this->setUpAuthorizedUser();
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setInput(new Input([
             'category' => 'system',
         ]));
 
-        $runner = new MockHealthCheckRunner();
-        $runner->setCategoryResults([
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->setCategoryResults([
             'core.php_version' => [
                 'status' => 'good',
                 'title' => 'PHP Version',
@@ -560,47 +566,47 @@ class AjaxControllerTest extends TestCase
                 'provider' => 'core',
             ],
         ]);
-        $this->setUpMockComponent($runner);
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->category();
+        $this->ajaxController->category();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testCategoryHandlesExceptionGracefully(): void
     {
         $this->setUpAuthorizedUser();
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setInput(new Input([
             'category' => 'system',
         ]));
 
-        $runner = new MockHealthCheckRunner();
-        $runner->throwExceptionOn('runCategory', new \RuntimeException('Test error'));
-        $this->setUpMockComponent($runner);
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->throwExceptionOn('runCategory', new \RuntimeException('Test error'));
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->category();
+        $this->ajaxController->category();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testCategoryRejectsZeroAsCategory(): void
     {
         $this->setUpAuthorizedUser();
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setInput(new Input([
             'category' => '0',
         ]));
 
         ob_start();
-        $this->controller->category();
+        $this->ajaxController->category();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     // =========================================================================
@@ -610,11 +616,11 @@ class AjaxControllerTest extends TestCase
     public function testCheckReturnsSuccessfulResponseForAuthorizedUser(): void
     {
         $this->setUpAuthorizedUser();
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setInput(new Input([
             'slug' => 'core.php_version',
         ]));
 
-        $result = new HealthCheckResult(
+        $healthCheckResult = new HealthCheckResult(
             healthStatus: HealthStatus::Good,
             title: 'PHP Version',
             description: 'PHP version is good',
@@ -623,68 +629,68 @@ class AjaxControllerTest extends TestCase
             provider: 'core',
         );
 
-        $runner = new MockHealthCheckRunner();
-        $runner->setSingleCheckResult($result);
-        $this->setUpMockComponent($runner);
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->setSingleCheckResult($healthCheckResult);
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->check();
+        $this->ajaxController->check();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testCheckReturnsErrorForNonExistentSlug(): void
     {
         $this->setUpAuthorizedUser();
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setInput(new Input([
             'slug' => 'nonexistent.check',
         ]));
 
-        $runner = new MockHealthCheckRunner();
-        $runner->setSingleCheckResult(null);
-        $this->setUpMockComponent($runner);
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->setSingleCheckResult(null);
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->check();
+        $this->ajaxController->check();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testCheckHandlesExceptionGracefully(): void
     {
         $this->setUpAuthorizedUser();
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setInput(new Input([
             'slug' => 'core.php_version',
         ]));
 
-        $runner = new MockHealthCheckRunner();
-        $runner->throwExceptionOn('runSingleCheck', new \RuntimeException('Test error'));
-        $this->setUpMockComponent($runner);
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->throwExceptionOn('runSingleCheck', new \RuntimeException('Test error'));
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->check();
+        $this->ajaxController->check();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testCheckRejectsZeroAsSlug(): void
     {
         $this->setUpAuthorizedUser();
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setInput(new Input([
             'slug' => '0',
         ]));
 
         ob_start();
-        $this->controller->check();
+        $this->ajaxController->check();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
+        $this->assertTrue($this->cmsApplication->isClosed());
     }
 
     // =========================================================================
@@ -694,85 +700,85 @@ class AjaxControllerTest extends TestCase
     public function testStatsReturnsSuccessfulResponseWithoutCache(): void
     {
         $this->setUpAuthorizedUser();
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setInput(new Input([
             'cache' => 0,
         ]));
 
-        $runner = new MockHealthCheckRunner();
-        $runner->setCounts(1, 2, 10);
-        $runner->setLastRun(new \DateTimeImmutable('2026-01-23T10:00:00+00:00'));
-        $this->setUpMockComponent($runner);
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->setCounts(1, 2, 10);
+        $mockHealthCheckRunner->setLastRun(new \DateTimeImmutable('2026-01-23T10:00:00+00:00'));
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->stats();
+        $this->ajaxController->stats();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testStatsReturnsSuccessfulResponseWithCache(): void
     {
         $this->setUpAuthorizedUser();
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setInput(new Input([
             'cache' => 1,
             'cache_ttl' => 900,
         ]));
 
-        $runner = new MockHealthCheckRunner();
-        $runner->setStatsWithCache([
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->setStatsWithCache([
             'critical' => 0,
             'warning' => 3,
             'good' => 15,
             'total' => 18,
             'lastRun' => '2026-01-23T10:00:00+00:00',
         ]);
-        $this->setUpMockComponent($runner);
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->stats();
+        $this->ajaxController->stats();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testStatsHandlesZeroCacheTtl(): void
     {
         $this->setUpAuthorizedUser();
-        $this->app->setInput(new Input([
+        $this->cmsApplication->setInput(new Input([
             'cache' => 1,
             'cache_ttl' => 0,
         ]));
 
-        $runner = new MockHealthCheckRunner();
-        $runner->setCounts(0, 0, 5);
-        $runner->setLastRun(null);
-        $this->setUpMockComponent($runner);
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->setCounts(0, 0, 5);
+        $mockHealthCheckRunner->setLastRun(null);
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->stats();
+        $this->ajaxController->stats();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testStatsHandlesExceptionGracefully(): void
     {
         $this->setUpAuthorizedUser();
-        $this->app->setInput(new Input([]));
+        $this->cmsApplication->setInput(new Input([]));
 
-        $runner = new MockHealthCheckRunner();
-        $runner->throwExceptionOn('run', new \RuntimeException('Test error'));
-        $this->setUpMockComponent($runner);
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->throwExceptionOn('run', new \RuntimeException('Test error'));
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->stats();
+        $this->ajaxController->stats();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     // =========================================================================
@@ -783,31 +789,31 @@ class AjaxControllerTest extends TestCase
     {
         $this->setUpAuthorizedUser();
 
-        $runner = new MockHealthCheckRunner();
-        $this->setUpMockComponent($runner);
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->clearCache();
+        $this->ajaxController->clearCache();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testClearCacheHandlesExceptionGracefully(): void
     {
         $this->setUpAuthorizedUser();
 
-        $runner = new MockHealthCheckRunner();
-        $runner->throwExceptionOn('clearCache', new \RuntimeException('Test error'));
-        $this->setUpMockComponent($runner);
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->throwExceptionOn('clearCache', new \RuntimeException('Test error'));
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->clearCache();
+        $this->ajaxController->clearCache();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     // =========================================================================
@@ -818,8 +824,8 @@ class AjaxControllerTest extends TestCase
     {
         $this->setUpAuthorizedUser();
 
-        $runner = new MockHealthCheckRunner();
-        $runner->setToArrayResult([
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->setToArrayResult([
             'lastRun' => '2026-01-23T10:00:00+00:00',
             'summary' => [
                 'critical' => 0,
@@ -831,29 +837,29 @@ class AjaxControllerTest extends TestCase
             'providers' => [],
             'results' => [],
         ]);
-        $this->setUpMockComponent($runner);
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->run();
+        $this->ajaxController->run();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 
     public function testRunHandlesExceptionGracefully(): void
     {
         $this->setUpAuthorizedUser();
 
-        $runner = new MockHealthCheckRunner();
-        $runner->throwExceptionOn('run', new \RuntimeException('Test error'));
-        $this->setUpMockComponent($runner);
+        $mockHealthCheckRunner = new MockHealthCheckRunner();
+        $mockHealthCheckRunner->throwExceptionOn('run', new \RuntimeException('Test error'));
+        $this->setUpMockComponent($mockHealthCheckRunner);
 
         ob_start();
-        $this->controller->run();
+        $this->ajaxController->run();
         ob_end_clean();
 
-        $this->assertTrue($this->app->isClosed());
-        $this->assertSame('application/json', $this->app->getHeaders()['Content-Type']);
+        $this->assertTrue($this->cmsApplication->isClosed());
+        $this->assertSame('application/json', $this->cmsApplication->getHeaders()['Content-Type']);
     }
 }

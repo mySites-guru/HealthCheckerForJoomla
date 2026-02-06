@@ -20,15 +20,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(GzipCompressionCheck::class)]
 class GzipCompressionCheckTest extends TestCase
 {
-    private GzipCompressionCheck $check;
+    private GzipCompressionCheck $gzipCompressionCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new GzipCompressionCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->gzipCompressionCheck = new GzipCompressionCheck();
     }
 
     protected function tearDown(): void
@@ -38,22 +38,22 @@ class GzipCompressionCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('performance.gzip_compression', $this->check->getSlug());
+        $this->assertSame('performance.gzip_compression', $this->gzipCompressionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsPerformance(): void
     {
-        $this->assertSame('performance', $this->check->getCategory());
+        $this->assertSame('performance', $this->gzipCompressionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->gzipCompressionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->gzipCompressionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -61,21 +61,21 @@ class GzipCompressionCheckTest extends TestCase
 
     public function testRunReturnsWarningWhenGzipDisabled(): void
     {
-        $this->app->set('gzip', 0);
+        $this->cmsApplication->set('gzip', 0);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->gzipCompressionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenGzipEnabled(): void
     {
-        $this->app->set('gzip', 1);
+        $this->cmsApplication->set('gzip', 1);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->gzipCompressionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('enabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled', $healthCheckResult->description);
     }
 }

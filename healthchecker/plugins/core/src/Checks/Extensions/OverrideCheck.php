@@ -92,11 +92,11 @@ final class OverrideCheck extends AbstractHealthCheck
      */
     protected function performCheck(): HealthCheckResult
     {
-        $db = $this->requireDatabase();
+        $database = $this->requireDatabase();
 
         // Check if template_overrides table exists (Joomla 4+ feature)
-        $tables = $db->getTableList();
-        $prefix = $db->getPrefix();
+        $tables = $database->getTableList();
+        $prefix = $database->getPrefix();
         $overridesTable = $prefix . 'template_overrides';
 
         if (! \in_array($overridesTable, $tables, true)) {
@@ -105,19 +105,19 @@ final class OverrideCheck extends AbstractHealthCheck
 
         // Get details of overrides that may need updating
         // state = 0 indicates the original file has changed since the override was created
-        $query = $db->getQuery(true)
+        $query = $database->getQuery(true)
             ->select([
-                $db->quoteName('template'),
-                $db->quoteName('hash_id'),
-                $db->quoteName('action'),
-                $db->quoteName('modified_date'),
-                $db->quoteName('client_id'),
+                $database->quoteName('template'),
+                $database->quoteName('hash_id'),
+                $database->quoteName('action'),
+                $database->quoteName('modified_date'),
+                $database->quoteName('client_id'),
             ])
-            ->from($db->quoteName('#__template_overrides'))
-            ->where($db->quoteName('state') . ' = 0')
-            ->order($db->quoteName('modified_date') . ' DESC');
+            ->from($database->quoteName('#__template_overrides'))
+            ->where($database->quoteName('state') . ' = 0')
+            ->order($database->quoteName('modified_date') . ' DESC');
 
-        $outdatedOverrides = $db->setQuery($query)
+        $outdatedOverrides = $database->setQuery($query)
             ->loadObjectList();
         $outdatedCount = \count($outdatedOverrides);
 
@@ -128,11 +128,11 @@ final class OverrideCheck extends AbstractHealthCheck
         }
 
         // Get total count of tracked overrides for context
-        $query = $db->getQuery(true)
+        $query = $database->getQuery(true)
             ->select('COUNT(*)')
-            ->from($db->quoteName('#__template_overrides'));
+            ->from($database->quoteName('#__template_overrides'));
 
-        $totalOverrides = (int) $db->setQuery($query)
+        $totalOverrides = (int) $database->setQuery($query)
             ->loadResult();
 
         return $this->good(sprintf('%d template override(s) tracked, all up to date.', $totalOverrides));
@@ -195,6 +195,7 @@ final class OverrideCheck extends AbstractHealthCheck
                 if ($shownCount >= self::MAX_DETAILS_TO_SHOW) {
                     break;
                 }
+
                 // Clean up the file path for display (remove leading slash if present)
                 $fileList[] = ltrim($file, '/');
                 ++$shownCount;

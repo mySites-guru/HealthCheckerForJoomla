@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ServerVersionCheck::class)]
 class ServerVersionCheckTest extends TestCase
 {
-    private ServerVersionCheck $check;
+    private ServerVersionCheck $serverVersionCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ServerVersionCheck();
+        $this->serverVersionCheck = new ServerVersionCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.server_version', $this->check->getSlug());
+        $this->assertSame('database.server_version', $this->serverVersionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->serverVersionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->serverVersionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->serverVersionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,54 +51,54 @@ class ServerVersionCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverVersionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithMysqlMeetsRequirements(): void
     {
         $database = MockDatabaseFactory::createWithVersion('8.0.30');
-        $this->check->setDatabase($database);
+        $this->serverVersionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverVersionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('MySQL', $result->description);
-        $this->assertStringContainsString('8.0.30', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('MySQL', $healthCheckResult->description);
+        $this->assertStringContainsString('8.0.30', $healthCheckResult->description);
     }
 
     public function testRunWithOldMysqlReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithVersion('5.7.44');
-        $this->check->setDatabase($database);
+        $this->serverVersionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverVersionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('below recommended', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('below recommended', $healthCheckResult->description);
     }
 
     public function testRunWithMariaDbMeetsRequirements(): void
     {
         $database = MockDatabaseFactory::createWithVersion('10.6.15-MariaDB');
-        $this->check->setDatabase($database);
+        $this->serverVersionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverVersionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('MariaDB', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('MariaDB', $healthCheckResult->description);
     }
 
     public function testRunWithOldMariaDbReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithVersion('10.3.39-MariaDB');
-        $this->check->setDatabase($database);
+        $this->serverVersionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverVersionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('MariaDB', $result->description);
-        $this->assertStringContainsString('below recommended', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('MariaDB', $healthCheckResult->description);
+        $this->assertStringContainsString('below recommended', $healthCheckResult->description);
     }
 }

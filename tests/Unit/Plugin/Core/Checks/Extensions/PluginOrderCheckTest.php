@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(PluginOrderCheck::class)]
 class PluginOrderCheckTest extends TestCase
 {
-    private PluginOrderCheck $check;
+    private PluginOrderCheck $pluginOrderCheck;
 
     protected function setUp(): void
     {
-        $this->check = new PluginOrderCheck();
+        $this->pluginOrderCheck = new PluginOrderCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('extensions.plugin_order', $this->check->getSlug());
+        $this->assertSame('extensions.plugin_order', $this->pluginOrderCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->pluginOrderCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->pluginOrderCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->pluginOrderCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,20 +51,20 @@ class PluginOrderCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->pluginOrderCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('database', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('database', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithNoSystemPluginsReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithObjectList([]);
-        $this->check->setDatabase($database);
+        $this->pluginOrderCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->pluginOrderCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithCorrectPluginOrderReturnsGood(): void
@@ -88,12 +88,12 @@ class PluginOrderCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($plugins);
-        $this->check->setDatabase($database);
+        $this->pluginOrderCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->pluginOrderCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('4', $result->description); // 4 plugins
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('4', $healthCheckResult->description); // 4 plugins
     }
 
     public function testRunWithSefBeforeRedirectReturnsWarning(): void
@@ -109,13 +109,13 @@ class PluginOrderCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($plugins);
-        $this->check->setDatabase($database);
+        $this->pluginOrderCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->pluginOrderCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('sef', strtolower($result->description));
-        $this->assertStringContainsString('redirect', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('sef', strtolower($healthCheckResult->description));
+        $this->assertStringContainsString('redirect', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithSessionRunningLateReturnsWarning(): void
@@ -151,12 +151,12 @@ class PluginOrderCheckTest extends TestCase
             ], // Too late - 6 plugins before it
         ];
         $database = MockDatabaseFactory::createWithObjectList($plugins);
-        $this->check->setDatabase($database);
+        $this->pluginOrderCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->pluginOrderCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('session', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('session', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithCacheRunningEarlyReturnsWarning(): void
@@ -192,12 +192,12 @@ class PluginOrderCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($plugins);
-        $this->check->setDatabase($database);
+        $this->pluginOrderCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->pluginOrderCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('cache', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('cache', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithMultipleIssuesReturnsWarningWithAllIssues(): void
@@ -245,11 +245,11 @@ class PluginOrderCheckTest extends TestCase
             ], // Too late
         ];
         $database = MockDatabaseFactory::createWithObjectList($plugins);
-        $this->check->setDatabase($database);
+        $this->pluginOrderCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->pluginOrderCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithoutCachePluginReturnsGood(): void
@@ -269,17 +269,17 @@ class PluginOrderCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($plugins);
-        $this->check->setDatabase($database);
+        $this->pluginOrderCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->pluginOrderCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->pluginOrderCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 }

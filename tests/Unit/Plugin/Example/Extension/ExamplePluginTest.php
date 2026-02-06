@@ -45,12 +45,12 @@ class ExamplePluginTest extends TestCase
 
     public function testOnCollectCategoriesAddsThirdPartyCategory(): void
     {
-        $plugin = new ExamplePlugin(new \stdClass());
-        $event = new CollectCategoriesEvent();
+        $examplePlugin = new ExamplePlugin(new \stdClass());
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $plugin->onCollectCategories($event);
+        $examplePlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertCount(1, $categories);
         $this->assertInstanceOf(HealthCategory::class, $categories[0]);
         $this->assertSame('thirdparty', $categories[0]->slug);
@@ -61,23 +61,23 @@ class ExamplePluginTest extends TestCase
 
     public function testOnCollectChecksAddsTwoChecks(): void
     {
-        $plugin = new ExamplePlugin(new \stdClass());
-        $event = new CollectChecksEvent();
+        $examplePlugin = new ExamplePlugin(new \stdClass());
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $plugin->onCollectChecks($event);
+        $examplePlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
         $this->assertCount(2, $checks);
     }
 
     public function testOnCollectChecksAddsCustomConfigCheck(): void
     {
-        $plugin = new ExamplePlugin(new \stdClass());
-        $event = new CollectChecksEvent();
+        $examplePlugin = new ExamplePlugin(new \stdClass());
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $plugin->onCollectChecks($event);
+        $examplePlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
         $hasCustomConfigCheck = false;
 
         foreach ($checks as $check) {
@@ -93,12 +93,12 @@ class ExamplePluginTest extends TestCase
 
     public function testOnCollectChecksAddsThirdPartyServiceCheck(): void
     {
-        $plugin = new ExamplePlugin(new \stdClass());
-        $event = new CollectChecksEvent();
+        $examplePlugin = new ExamplePlugin(new \stdClass());
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $plugin->onCollectChecks($event);
+        $examplePlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
         $hasThirdPartyServiceCheck = false;
 
         foreach ($checks as $check) {
@@ -114,57 +114,57 @@ class ExamplePluginTest extends TestCase
 
     public function testOnCollectProvidersAddsExampleProvider(): void
     {
-        $plugin = new ExamplePlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $examplePlugin = new ExamplePlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $examplePlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertCount(1, $providers);
         $this->assertInstanceOf(ProviderMetadata::class, $providers[0]);
     }
 
     public function testOnCollectProvidersRegistersCorrectSlug(): void
     {
-        $plugin = new ExamplePlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $examplePlugin = new ExamplePlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $examplePlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame('example', $providers[0]->slug);
     }
 
     public function testOnCollectProvidersRegistersCorrectName(): void
     {
-        $plugin = new ExamplePlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $examplePlugin = new ExamplePlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $examplePlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame('Example Provider', $providers[0]->name);
     }
 
     public function testOnCollectProvidersRegistersCorrectDescription(): void
     {
-        $plugin = new ExamplePlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $examplePlugin = new ExamplePlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $examplePlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame('Example health checks demonstrating the SDK', $providers[0]->description);
     }
 
     public function testOnCollectProvidersRegistersCorrectUrl(): void
     {
-        $plugin = new ExamplePlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $examplePlugin = new ExamplePlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $examplePlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame(
             'https://github.com/mySites-guru/HealthCheckerForJoomla/tree/main/healthchecker/plugins/example',
             $providers[0]->url,
@@ -173,23 +173,23 @@ class ExamplePluginTest extends TestCase
 
     public function testOnCollectProvidersRegistersCorrectIcon(): void
     {
-        $plugin = new ExamplePlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $examplePlugin = new ExamplePlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $examplePlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame('fa-flask', $providers[0]->icon);
     }
 
     public function testOnCollectProvidersRegistersCorrectVersion(): void
     {
-        $plugin = new ExamplePlugin(new \stdClass());
-        $event = new CollectProvidersEvent();
+        $examplePlugin = new ExamplePlugin(new \stdClass());
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $plugin->onCollectProviders($event);
+        $examplePlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertSame('1.0.0', $providers[0]->version);
     }
 }

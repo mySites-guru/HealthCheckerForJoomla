@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(OpcacheCheck::class)]
 class OpcacheCheckTest extends TestCase
 {
-    private OpcacheCheck $check;
+    private OpcacheCheck $opcacheCheck;
 
     protected function setUp(): void
     {
-        $this->check = new OpcacheCheck();
+        $this->opcacheCheck = new OpcacheCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.opcache', $this->check->getSlug());
+        $this->assertSame('system.opcache', $this->opcacheCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->opcacheCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->opcacheCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->opcacheCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -52,65 +52,65 @@ class OpcacheCheckTest extends TestCase
     {
         // The actual opcache check depends on the system configuration
         // but we can verify it returns a valid status
-        $result = $this->check->run();
+        $healthCheckResult = $this->opcacheCheck->run();
 
-        $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+        $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
     }
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->opcacheCheck->run();
 
-        $this->assertSame('system.opcache', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.opcache', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->opcacheCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->opcacheCheck->run();
 
-        $this->assertSame('system.opcache', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.opcache', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
         // OPcache check should never return Critical status per documentation
-        $result = $this->check->run();
+        $healthCheckResult = $this->opcacheCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testDescriptionContainsOpcacheInfo(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->opcacheCheck->run();
 
         // Description should mention OPcache
         $this->assertTrue(
-            str_contains(strtolower($result->description), 'opcache') ||
-            str_contains(strtolower($result->description), 'memory'),
+            str_contains(strtolower($healthCheckResult->description), 'opcache') ||
+            str_contains(strtolower($healthCheckResult->description), 'memory'),
             'Description should contain relevant OPcache information',
         );
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->opcacheCheck->run();
+        $result2 = $this->opcacheCheck->run();
 
         // Status should be consistent (may have slight description variance due to memory stats)
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
     }
 
     /**
@@ -156,22 +156,22 @@ class OpcacheCheckTest extends TestCase
     public function testOpcacheExtensionLoadedStatus(): void
     {
         $extensionLoaded = extension_loaded('Zend OPcache');
-        $result = $this->check->run();
+        $healthCheckResult = $this->opcacheCheck->run();
 
         // Verify check runs based on actual extension state
         if ($extensionLoaded) {
             // Should continue with further checks
-            $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+            $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
         } else {
             // Should warn about missing extension
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-            $this->assertStringContainsString('not loaded', $result->description);
+            $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+            $this->assertStringContainsString('not loaded', $healthCheckResult->description);
         }
     }
 
     public function testSlugFormat(): void
     {
-        $slug = $this->check->getSlug();
+        $slug = $this->opcacheCheck->getSlug();
 
         // Slug should be lowercase with dot separator
         $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z]+$/', $slug);
@@ -179,7 +179,7 @@ class OpcacheCheckTest extends TestCase
 
     public function testCategoryIsValid(): void
     {
-        $category = $this->check->getCategory();
+        $category = $this->opcacheCheck->getCategory();
 
         // Should be a valid category
         $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];

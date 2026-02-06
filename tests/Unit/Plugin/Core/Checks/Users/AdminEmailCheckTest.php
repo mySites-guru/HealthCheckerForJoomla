@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(AdminEmailCheck::class)]
 class AdminEmailCheckTest extends TestCase
 {
-    private AdminEmailCheck $check;
+    private AdminEmailCheck $adminEmailCheck;
 
     protected function setUp(): void
     {
-        $this->check = new AdminEmailCheck();
+        $this->adminEmailCheck = new AdminEmailCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('users.admin_email', $this->check->getSlug());
+        $this->assertSame('users.admin_email', $this->adminEmailCheck->getSlug());
     }
 
     public function testGetCategoryReturnsUsers(): void
     {
-        $this->assertSame('users', $this->check->getCategory());
+        $this->assertSame('users', $this->adminEmailCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->adminEmailCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->adminEmailCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,20 +51,20 @@ class AdminEmailCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->adminEmailCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNoSuperAdminsReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithObjectList([]);
-        $this->check->setDatabase($database);
+        $this->adminEmailCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->adminEmailCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('No active Super Admin', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No active Super Admin', $healthCheckResult->description);
     }
 
     public function testRunWithValidEmailsReturnsGood(): void
@@ -82,13 +82,13 @@ class AdminEmailCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($superAdmins);
-        $this->check->setDatabase($database);
+        $this->adminEmailCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->adminEmailCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('2 Super Admin', $result->description);
-        $this->assertStringContainsString('valid email', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 Super Admin', $healthCheckResult->description);
+        $this->assertStringContainsString('valid email', $healthCheckResult->description);
     }
 
     public function testRunWithEmptyEmailReturnsCritical(): void
@@ -101,13 +101,13 @@ class AdminEmailCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($superAdmins);
-        $this->check->setDatabase($database);
+        $this->adminEmailCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->adminEmailCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('admin', $result->description);
-        $this->assertStringContainsString('no email', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('admin', $healthCheckResult->description);
+        $this->assertStringContainsString('no email', $healthCheckResult->description);
     }
 
     public function testRunWithInvalidEmailFormatReturnsCritical(): void
@@ -120,13 +120,13 @@ class AdminEmailCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($superAdmins);
-        $this->check->setDatabase($database);
+        $this->adminEmailCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->adminEmailCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('admin', $result->description);
-        $this->assertStringContainsString('invalid format', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('admin', $healthCheckResult->description);
+        $this->assertStringContainsString('invalid format', $healthCheckResult->description);
     }
 
     public function testRunWithExampleDomainReturnsCritical(): void
@@ -139,13 +139,13 @@ class AdminEmailCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($superAdmins);
-        $this->check->setDatabase($database);
+        $this->adminEmailCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->adminEmailCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('admin', $result->description);
-        $this->assertStringContainsString('example.com', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('admin', $healthCheckResult->description);
+        $this->assertStringContainsString('example.com', $healthCheckResult->description);
     }
 
     public function testRunWithMailinatorDomainReturnsCritical(): void
@@ -158,12 +158,12 @@ class AdminEmailCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($superAdmins);
-        $this->check->setDatabase($database);
+        $this->adminEmailCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->adminEmailCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('mailinator.com', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('mailinator.com', $healthCheckResult->description);
     }
 
     public function testRunWithMultipleInvalidEmailsReturnsCritical(): void
@@ -186,12 +186,12 @@ class AdminEmailCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($superAdmins);
-        $this->check->setDatabase($database);
+        $this->adminEmailCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->adminEmailCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('admin1', $result->description);
-        $this->assertStringContainsString('admin2', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('admin1', $healthCheckResult->description);
+        $this->assertStringContainsString('admin2', $healthCheckResult->description);
     }
 }

@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ExpiredContentCheck::class)]
 class ExpiredContentCheckTest extends TestCase
 {
-    private ExpiredContentCheck $check;
+    private ExpiredContentCheck $expiredContentCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ExpiredContentCheck();
+        $this->expiredContentCheck = new ExpiredContentCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('content.expired_content', $this->check->getSlug());
+        $this->assertSame('content.expired_content', $this->expiredContentCheck->getSlug());
     }
 
     public function testGetCategoryReturnsContent(): void
     {
-        $this->assertSame('content', $this->check->getCategory());
+        $this->assertSame('content', $this->expiredContentCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->expiredContentCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->expiredContentCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,31 +51,31 @@ class ExpiredContentCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->expiredContentCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenNoExpiredContent(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->expiredContentCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->expiredContentCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No published articles', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No published articles', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenExpiredContentExists(): void
     {
         $database = MockDatabaseFactory::createWithResult(5);
-        $this->check->setDatabase($database);
+        $this->expiredContentCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->expiredContentCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('5 published article', $result->description);
-        $this->assertStringContainsString('expiry date', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('5 published article', $healthCheckResult->description);
+        $this->assertStringContainsString('expiry date', $healthCheckResult->description);
     }
 }

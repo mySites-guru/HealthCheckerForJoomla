@@ -338,8 +338,14 @@ final class HealthCheckRunner
         }
 
         return [
-            'categories' => array_map(fn($c): array => $c->toArray(), $this->categoryRegistry->all()),
-            'providers' => array_map(fn($p): array => $p->toArray(), $this->providerRegistry->all()),
+            'categories' => array_map(
+                fn(\MySitesGuru\HealthChecker\Component\Administrator\Category\HealthCategory $healthCategory): array => $healthCategory->toArray(),
+                $this->categoryRegistry->all(),
+            ),
+            'providers' => array_map(
+                fn(\MySitesGuru\HealthChecker\Component\Administrator\Provider\ProviderMetadata $providerMetadata): array => $providerMetadata->toArray(),
+                $this->providerRegistry->all(),
+            ),
             'checks' => $checkList,
         ];
     }
@@ -472,7 +478,12 @@ final class HealthCheckRunner
      */
     public function getCriticalCount(): int
     {
-        return count(array_filter($this->results, fn($r): bool => $r->healthStatus === HealthStatus::Critical));
+        return count(
+            array_filter(
+                $this->results,
+                fn(\MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult $healthCheckResult): bool => $healthCheckResult->healthStatus === HealthStatus::Critical,
+            ),
+        );
     }
 
     /**
@@ -484,7 +495,12 @@ final class HealthCheckRunner
      */
     public function getWarningCount(): int
     {
-        return count(array_filter($this->results, fn($r): bool => $r->healthStatus === HealthStatus::Warning));
+        return count(
+            array_filter(
+                $this->results,
+                fn(\MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult $healthCheckResult): bool => $healthCheckResult->healthStatus === HealthStatus::Warning,
+            ),
+        );
     }
 
     /**
@@ -496,7 +512,12 @@ final class HealthCheckRunner
      */
     public function getGoodCount(): int
     {
-        return count(array_filter($this->results, fn($r): bool => $r->healthStatus === HealthStatus::Good));
+        return count(
+            array_filter(
+                $this->results,
+                fn(\MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult $healthCheckResult): bool => $healthCheckResult->healthStatus === HealthStatus::Good,
+            ),
+        );
     }
 
     /**
@@ -595,15 +616,12 @@ final class HealthCheckRunner
         if ($cachedData !== false && $cachedData !== null) {
             // Cache hit - use cached data
             // Security: Use JSON instead of unserialize to prevent object injection attacks
-            $data = json_decode($cachedData, true);
+            $data = json_decode((string) $cachedData, true);
             if (is_array($data) && isset($data['results']) && isset($data['lastRun'])) {
                 // Reconstruct HealthCheckResult objects from cached array data
                 /** @var array<array{status: string, title: string, description: string, slug: string, category: string, provider?: string}> $cachedResults */
                 $cachedResults = $data['results'];
-                $this->results = array_map(
-                    fn(array $resultData): HealthCheckResult => HealthCheckResult::fromArray($resultData),
-                    $cachedResults,
-                );
+                $this->results = array_map(HealthCheckResult::fromArray(...), $cachedResults);
                 $this->dateTimeImmutable = new \DateTimeImmutable($data['lastRun']);
                 return;
             }
@@ -612,7 +630,10 @@ final class HealthCheckRunner
         // Cache miss or invalid data - run checks and store
         $this->run();
         $data = [
-            'results' => array_map(fn(HealthCheckResult $r): array => $r->toArray(), $this->results),
+            'results' => array_map(
+                fn(HealthCheckResult $healthCheckResult): array => $healthCheckResult->toArray(),
+                $this->results,
+            ),
             'lastRun' => $this->dateTimeImmutable?->format('c'),
         ];
         // Security: Use JSON instead of serialize to prevent object injection attacks
@@ -705,9 +726,18 @@ final class HealthCheckRunner
                 'good' => $this->getGoodCount(),
                 'total' => $this->getTotalCount(),
             ],
-            'categories' => array_map(fn($c): array => $c->toArray(), $this->categoryRegistry->all()),
-            'providers' => array_map(fn($p): array => $p->toArray(), $this->providerRegistry->all()),
-            'results' => array_map(fn($r): array => $r->toArray(), $this->results),
+            'categories' => array_map(
+                fn(\MySitesGuru\HealthChecker\Component\Administrator\Category\HealthCategory $healthCategory): array => $healthCategory->toArray(),
+                $this->categoryRegistry->all(),
+            ),
+            'providers' => array_map(
+                fn(\MySitesGuru\HealthChecker\Component\Administrator\Provider\ProviderMetadata $providerMetadata): array => $providerMetadata->toArray(),
+                $this->providerRegistry->all(),
+            ),
+            'results' => array_map(
+                fn(\MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult $healthCheckResult): array => $healthCheckResult->toArray(),
+                $this->results,
+            ),
         ];
     }
 }

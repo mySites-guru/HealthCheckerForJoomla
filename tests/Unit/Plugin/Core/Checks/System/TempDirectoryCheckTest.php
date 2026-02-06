@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TempDirectoryCheck::class)]
 class TempDirectoryCheckTest extends TestCase
 {
-    private TempDirectoryCheck $check;
+    private TempDirectoryCheck $tempDirectoryCheck;
 
     protected function setUp(): void
     {
-        $this->check = new TempDirectoryCheck();
+        $this->tempDirectoryCheck = new TempDirectoryCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.temp_directory', $this->check->getSlug());
+        $this->assertSame('system.temp_directory', $this->tempDirectoryCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->tempDirectoryCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->tempDirectoryCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->tempDirectoryCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,40 +50,40 @@ class TempDirectoryCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
-        $this->assertSame('system.temp_directory', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.temp_directory', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
         // Can return Good or Critical (never Warning according to source)
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
 
     public function testRunDescriptionIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
         // The check returns a description (may be error message if Joomla not available)
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testJpathRootConstantHandled(): void
     {
         // Check handles JPATH_ROOT whether defined or not
         // In unit tests, Joomla Factory may not be available
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
@@ -92,70 +92,70 @@ class TempDirectoryCheckTest extends TestCase
     {
         // In test environment, the check might work if JPATH_ROOT/tmp exists
         // or it will use the configured path from Joomla
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
         // If directory is valid, should return Good
         // If directory is invalid, should return Critical
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
 
     public function testGoodResultConfirmsWritability(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
-        if ($result->healthStatus === HealthStatus::Good) {
+        if ($healthCheckResult->healthStatus === HealthStatus::Good) {
             // Good result should confirm the directory is writable
-            $this->assertStringContainsString('writable', $result->description);
+            $this->assertStringContainsString('writable', $healthCheckResult->description);
         } else {
             // If not Good, should be Warning or Critical
-            $this->assertContains($result->healthStatus, [HealthStatus::Warning, HealthStatus::Critical]);
+            $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Warning, HealthStatus::Critical]);
         }
     }
 
     public function testCriticalResultExplainsIssue(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
-        if ($result->healthStatus === HealthStatus::Critical) {
+        if ($healthCheckResult->healthStatus === HealthStatus::Critical) {
             // Critical result should explain the issue
             $this->assertTrue(
-                str_contains($result->description, 'does not exist') ||
-                str_contains($result->description, 'not writable'),
+                str_contains($healthCheckResult->description, 'does not exist') ||
+                str_contains($healthCheckResult->description, 'not writable'),
             );
         } else {
             // If not Critical, should be Good or Warning
-            $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+            $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
         }
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
+        $result2 = $this->tempDirectoryCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
-        $this->assertSame('system.temp_directory', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.temp_directory', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testJpathRootConstantIsDefined(): void
@@ -185,12 +185,12 @@ class TempDirectoryCheckTest extends TestCase
     {
         // According to the source comments, this check does not produce Warning
         // However the implementation does use Warning for error handling wrapper
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
         // The check itself only produces Good or Critical
         // But run() method can return Warning if exception is thrown
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
@@ -205,7 +205,7 @@ class TempDirectoryCheckTest extends TestCase
 
     public function testSlugFormat(): void
     {
-        $slug = $this->check->getSlug();
+        $slug = $this->tempDirectoryCheck->getSlug();
 
         // Slug should be lowercase with dot separator
         $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
@@ -213,7 +213,7 @@ class TempDirectoryCheckTest extends TestCase
 
     public function testCategoryIsValid(): void
     {
-        $category = $this->check->getCategory();
+        $category = $this->tempDirectoryCheck->getCategory();
 
         // Should be a valid category
         $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
@@ -248,30 +248,30 @@ class TempDirectoryCheckTest extends TestCase
 
     public function testCriticalMessageContainsTempPath(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
-        if ($result->healthStatus === HealthStatus::Critical) {
+        if ($healthCheckResult->healthStatus === HealthStatus::Critical) {
             // Critical message should mention the temp directory path
             $this->assertTrue(
-                str_contains($result->description, 'tmp') ||
-                str_contains($result->description, 'Temp'),
+                str_contains($healthCheckResult->description, 'tmp') ||
+                str_contains($healthCheckResult->description, 'Temp'),
             );
         }
     }
 
     public function testGoodMessageContainsTempPath(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tempDirectoryCheck->run();
 
-        if ($result->healthStatus === HealthStatus::Good) {
+        if ($healthCheckResult->healthStatus === HealthStatus::Good) {
             // Good message should include the actual temp path
             $this->assertTrue(
-                str_contains($result->description, 'tmp') ||
-                str_contains($result->description, '/'),
+                str_contains($healthCheckResult->description, 'tmp') ||
+                str_contains($healthCheckResult->description, '/'),
             );
         } else {
             // Not good means there was an issue with the temp directory
-            $this->assertContains($result->healthStatus, [HealthStatus::Warning, HealthStatus::Critical]);
+            $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Warning, HealthStatus::Critical]);
         }
     }
 }

@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(FileinfoExtensionCheck::class)]
 class FileinfoExtensionCheckTest extends TestCase
 {
-    private FileinfoExtensionCheck $check;
+    private FileinfoExtensionCheck $fileinfoExtensionCheck;
 
     protected function setUp(): void
     {
-        $this->check = new FileinfoExtensionCheck();
+        $this->fileinfoExtensionCheck = new FileinfoExtensionCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.fileinfo_extension', $this->check->getSlug());
+        $this->assertSame('system.fileinfo_extension', $this->fileinfoExtensionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->fileinfoExtensionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->fileinfoExtensionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->fileinfoExtensionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,57 +50,57 @@ class FileinfoExtensionCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->fileinfoExtensionCheck->run();
 
-        $this->assertSame('system.fileinfo_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.fileinfo_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->fileinfoExtensionCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->fileinfoExtensionCheck->run();
 
-        $this->assertSame('system.fileinfo_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.fileinfo_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
         // Fileinfo check should never return Critical status per documentation
-        $result = $this->check->run();
+        $healthCheckResult = $this->fileinfoExtensionCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->fileinfoExtensionCheck->run();
+        $result2 = $this->fileinfoExtensionCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testRunReturnsValidStatusBasedOnExtensionAvailability(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->fileinfoExtensionCheck->run();
 
         // Based on whether fileinfo extension is loaded
         if (extension_loaded('fileinfo')) {
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         } else {
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+            $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         }
     }
 

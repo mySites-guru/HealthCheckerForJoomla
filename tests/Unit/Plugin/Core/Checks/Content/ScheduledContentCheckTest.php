@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ScheduledContentCheck::class)]
 class ScheduledContentCheckTest extends TestCase
 {
-    private ScheduledContentCheck $check;
+    private ScheduledContentCheck $scheduledContentCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ScheduledContentCheck();
+        $this->scheduledContentCheck = new ScheduledContentCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('content.scheduled_content', $this->check->getSlug());
+        $this->assertSame('content.scheduled_content', $this->scheduledContentCheck->getSlug());
     }
 
     public function testGetCategoryReturnsContent(): void
     {
-        $this->assertSame('content', $this->check->getCategory());
+        $this->assertSame('content', $this->scheduledContentCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->scheduledContentCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->scheduledContentCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,30 +51,30 @@ class ScheduledContentCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->scheduledContentCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWithScheduledArticles(): void
     {
         $database = MockDatabaseFactory::createWithResult(5);
-        $this->check->setDatabase($database);
+        $this->scheduledContentCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->scheduledContentCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('5 article(s) scheduled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('5 article(s) scheduled', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWithNoScheduledArticles(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->scheduledContentCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->scheduledContentCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No articles scheduled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No articles scheduled', $healthCheckResult->description);
     }
 }

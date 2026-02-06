@@ -21,17 +21,17 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(IndexUsageCheck::class)]
 class IndexUsageCheckTest extends TestCase
 {
-    private IndexUsageCheck $check;
+    private IndexUsageCheck $indexUsageCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        $this->app->set('dbprefix', 'test_');
-        $this->app->set('db', 'test_database');
-        Factory::setApplication($this->app);
-        $this->check = new IndexUsageCheck();
+        $this->cmsApplication = new CMSApplication();
+        $this->cmsApplication->set('dbprefix', 'test_');
+        $this->cmsApplication->set('db', 'test_database');
+        Factory::setApplication($this->cmsApplication);
+        $this->indexUsageCheck = new IndexUsageCheck();
     }
 
     protected function tearDown(): void
@@ -41,22 +41,22 @@ class IndexUsageCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.index_usage', $this->check->getSlug());
+        $this->assertSame('database.index_usage', $this->indexUsageCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->indexUsageCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->indexUsageCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->indexUsageCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -64,21 +64,21 @@ class IndexUsageCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenNoTables(): void
     {
         // Mock returns empty column for table list
         $database = MockDatabaseFactory::createWithColumn([]);
-        $this->check->setDatabase($database);
+        $this->indexUsageCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('0 tables', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('0 tables', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenAllTablesHaveIndexes(): void
@@ -117,13 +117,13 @@ class IndexUsageCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->indexUsageCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('2 tables', $result->description);
-        $this->assertStringContainsString('primary keys', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 tables', $healthCheckResult->description);
+        $this->assertStringContainsString('primary keys', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenTableMissingPrimaryKey(): void
@@ -144,13 +144,13 @@ class IndexUsageCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->indexUsageCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('missing primary key', $result->description);
-        $this->assertStringContainsString('test_custom', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('missing primary key', $healthCheckResult->description);
+        $this->assertStringContainsString('test_custom', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenTableHasNoIndexes(): void
@@ -165,15 +165,15 @@ class IndexUsageCheckTest extends TestCase
                 'return' => [],
             ], // No indexes at all
         ]);
-        $this->check->setDatabase($database);
+        $this->indexUsageCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // Could be "no indexes" or "missing primary key" depending on implementation
         $this->assertTrue(
-            str_contains($result->description, 'no indexes') || str_contains(
-                $result->description,
+            str_contains($healthCheckResult->description, 'no indexes') || str_contains(
+                $healthCheckResult->description,
                 'missing primary key',
             ),
         );
@@ -208,12 +208,12 @@ class IndexUsageCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->indexUsageCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
         // Should be GOOD because contentitem_tag_map is excluded from primary key check
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReportsMultipleTablesMissingPrimaryKey(): void
@@ -255,14 +255,14 @@ class IndexUsageCheckTest extends TestCase
                 'return' => [],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->indexUsageCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('6 table(s)', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('6 table(s)', $healthCheckResult->description);
         // Should show only first 5 and then "..."
-        $this->assertStringContainsString('...', $result->description);
+        $this->assertStringContainsString('...', $healthCheckResult->description);
     }
 
     public function testRunSkipsTablesWithQueryException(): void
@@ -296,14 +296,14 @@ class IndexUsageCheckTest extends TestCase
                 ],
             ], // test_users - OK
         ]);
-        $this->check->setDatabase($database);
+        $this->indexUsageCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
         // Should still return GOOD because the problematic table is skipped
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         // Only 2 tables should be counted (skipped the problematic one)
-        $this->assertStringContainsString('3 tables', $result->description);
+        $this->assertStringContainsString('3 tables', $healthCheckResult->description);
     }
 
     public function testRunExcludesAllDesignedWithoutPrimaryKeyTables(): void
@@ -327,7 +327,7 @@ class IndexUsageCheckTest extends TestCase
         ];
 
         // Each table has an index but no PRIMARY key
-        foreach ($tablesWithoutPkByDesign as $table) {
+        foreach ($tablesWithoutPkByDesign as $tablesWithoutPk) {
             $queries[] = [
                 'method' => 'loadObjectList',
                 'return' => [
@@ -340,12 +340,12 @@ class IndexUsageCheckTest extends TestCase
         }
 
         $database = MockDatabaseFactory::createWithSequentialQueries($queries);
-        $this->check->setDatabase($database);
+        $this->indexUsageCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
         // Should be GOOD - all tables are excluded from primary key check
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesTableWithoutPrefix(): void
@@ -362,12 +362,12 @@ class IndexUsageCheckTest extends TestCase
                 'return' => [],  // No indexes
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->indexUsageCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
         // Should return warning for missing primary key
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWarnsAboutTablesWithOnlyNoPrimaryKeyAndNoOtherIndex(): void
@@ -393,13 +393,13 @@ class IndexUsageCheckTest extends TestCase
                 'return' => [],  // test_totally_unindexed - no indexes at all
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->indexUsageCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // Should mention the table missing primary key
-        $this->assertStringContainsString('test_totally_unindexed', $result->description);
+        $this->assertStringContainsString('test_totally_unindexed', $healthCheckResult->description);
     }
 
     public function testRunPrioritizesMissingPrimaryKeyOverNoIndexes(): void
@@ -425,12 +425,12 @@ class IndexUsageCheckTest extends TestCase
                 'return' => [],  // test_no_indexes - nothing at all
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->indexUsageCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->indexUsageCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // Should warn about missing primary key first
-        $this->assertStringContainsString('missing primary key', $result->description);
+        $this->assertStringContainsString('missing primary key', $healthCheckResult->description);
     }
 }

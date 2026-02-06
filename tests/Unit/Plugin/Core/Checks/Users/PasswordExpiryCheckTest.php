@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(PasswordExpiryCheck::class)]
 class PasswordExpiryCheckTest extends TestCase
 {
-    private PasswordExpiryCheck $check;
+    private PasswordExpiryCheck $passwordExpiryCheck;
 
     protected function setUp(): void
     {
-        $this->check = new PasswordExpiryCheck();
+        $this->passwordExpiryCheck = new PasswordExpiryCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('users.password_expiry', $this->check->getSlug());
+        $this->assertSame('users.password_expiry', $this->passwordExpiryCheck->getSlug());
     }
 
     public function testGetCategoryReturnsUsers(): void
     {
-        $this->assertSame('users', $this->check->getCategory());
+        $this->assertSame('users', $this->passwordExpiryCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->passwordExpiryCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->passwordExpiryCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,9 +51,9 @@ class PasswordExpiryCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordExpiryCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithAllPasswordsRecentReturnsGood(): void
@@ -61,12 +61,12 @@ class PasswordExpiryCheckTest extends TestCase
         // First query: expired count = 0
         // Second query: total users = 100
         $database = MockDatabaseFactory::createWithSequentialResults([0, 100]);
-        $this->check->setDatabase($database);
+        $this->passwordExpiryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordExpiryCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('recently updated', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('recently updated', $healthCheckResult->description);
     }
 
     public function testRunWithFewExpiredPasswordsReturnsGood(): void
@@ -74,13 +74,13 @@ class PasswordExpiryCheckTest extends TestCase
         // First query: expired count = 20 (20% of total)
         // Second query: total users = 100
         $database = MockDatabaseFactory::createWithSequentialResults([20, 100]);
-        $this->check->setDatabase($database);
+        $this->passwordExpiryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordExpiryCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('20 of 100', $result->description);
-        $this->assertStringContainsString('acceptable', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('20 of 100', $healthCheckResult->description);
+        $this->assertStringContainsString('acceptable', $healthCheckResult->description);
     }
 
     public function testRunWithMediumExpiredPasswordsReturnsWarning(): void
@@ -88,12 +88,12 @@ class PasswordExpiryCheckTest extends TestCase
         // First query: expired count = 30 (30% of total, above 25% threshold)
         // Second query: total users = 100
         $database = MockDatabaseFactory::createWithSequentialResults([30, 100]);
-        $this->check->setDatabase($database);
+        $this->passwordExpiryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordExpiryCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('30 of 100', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('30 of 100', $healthCheckResult->description);
     }
 
     public function testRunWithHighExpiredPasswordsReturnsWarning(): void
@@ -101,13 +101,13 @@ class PasswordExpiryCheckTest extends TestCase
         // First query: expired count = 80 (80% of total, above 75% threshold)
         // Second query: total users = 100
         $database = MockDatabaseFactory::createWithSequentialResults([80, 100]);
-        $this->check->setDatabase($database);
+        $this->passwordExpiryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordExpiryCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('80%', $result->description);
-        $this->assertStringContainsString('password policy', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('80%', $healthCheckResult->description);
+        $this->assertStringContainsString('password policy', $healthCheckResult->description);
     }
 
     public function testRunWithExactly25PercentReturnsGood(): void
@@ -115,11 +115,11 @@ class PasswordExpiryCheckTest extends TestCase
         // First query: expired count = 25 (exactly 25%)
         // Second query: total users = 100
         $database = MockDatabaseFactory::createWithSequentialResults([25, 100]);
-        $this->check->setDatabase($database);
+        $this->passwordExpiryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordExpiryCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithAbove25PercentReturnsWarning(): void
@@ -127,11 +127,11 @@ class PasswordExpiryCheckTest extends TestCase
         // First query: expired count = 26 (26%, above 25% threshold)
         // Second query: total users = 100
         $database = MockDatabaseFactory::createWithSequentialResults([26, 100]);
-        $this->check->setDatabase($database);
+        $this->passwordExpiryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordExpiryCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithExactly75PercentReturnsWarningWithPolicyMessage(): void
@@ -139,13 +139,13 @@ class PasswordExpiryCheckTest extends TestCase
         // First query: expired count = 75 (exactly 75%)
         // Second query: total users = 100
         $database = MockDatabaseFactory::createWithSequentialResults([75, 100]);
-        $this->check->setDatabase($database);
+        $this->passwordExpiryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordExpiryCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // 75% is at threshold, message mentions reviewing policies
-        $this->assertStringContainsString('password policies', $result->description);
+        $this->assertStringContainsString('password policies', $healthCheckResult->description);
     }
 
     public function testRunWithAbove75PercentMentionsImplementingPolicy(): void
@@ -153,13 +153,13 @@ class PasswordExpiryCheckTest extends TestCase
         // First query: expired count = 76 (76%, above 75% threshold)
         // Second query: total users = 100
         $database = MockDatabaseFactory::createWithSequentialResults([76, 100]);
-        $this->check->setDatabase($database);
+        $this->passwordExpiryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordExpiryCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // Above 75% mentions implementing policy
-        $this->assertStringContainsString('implementing', $result->description);
+        $this->assertStringContainsString('implementing', $healthCheckResult->description);
     }
 
     /**
@@ -179,11 +179,11 @@ class PasswordExpiryCheckTest extends TestCase
         // but recent registerDate are excluded by the updated query)
         // Second query: total users = 5
         $database = MockDatabaseFactory::createWithSequentialResults([0, 5]);
-        $this->check->setDatabase($database);
+        $this->passwordExpiryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->passwordExpiryCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('recently updated', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('recently updated', $healthCheckResult->description);
     }
 }

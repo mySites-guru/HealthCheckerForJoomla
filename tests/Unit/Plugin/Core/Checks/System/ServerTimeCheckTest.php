@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ServerTimeCheck::class)]
 class ServerTimeCheckTest extends TestCase
 {
-    private ServerTimeCheck $check;
+    private ServerTimeCheck $serverTimeCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ServerTimeCheck();
+        $this->serverTimeCheck = new ServerTimeCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.server_time', $this->check->getSlug());
+        $this->assertSame('system.server_time', $this->serverTimeCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->serverTimeCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->serverTimeCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->serverTimeCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -58,12 +58,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('accurate', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('accurate', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenServerTimeIsDriftedSlightly(): void
@@ -75,12 +75,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('off by', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('off by', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenServerTimeIsDriftedSignificantly(): void
@@ -92,37 +92,37 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('off by', $result->description);
-        $this->assertStringContainsString('immediately', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('off by', $healthCheckResult->description);
+        $this->assertStringContainsString('immediately', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenHttpRequestFails(): void
     {
         // When HTTP fails, it should gracefully return Good with informational message
         $httpClient = MockHttpFactory::createThatThrows('Connection refused');
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Unable to verify', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to verify', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenNoDateHeader(): void
     {
         // When no Date header is present, should fall back gracefully
         $httpClient = MockHttpFactory::createWithHeadResponse(200, []);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Unable to verify', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to verify', $healthCheckResult->description);
     }
 
     public function testRunHandlesArrayDateHeader(): void
@@ -134,11 +134,11 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => [$dateHeader],
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testResultContainsTimezone(): void
@@ -149,12 +149,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
         $timezone = date_default_timezone_get();
 
-        $this->assertStringContainsString($timezone, $result->description);
+        $this->assertStringContainsString($timezone, $healthCheckResult->description);
     }
 
     public function testResultMetadata(): void
@@ -165,13 +165,13 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame('system.server_time', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.server_time', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultTitleIsNotEmpty(): void
@@ -182,11 +182,11 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testRunReturnsGoodWhenEmptyArrayDateHeader(): void
@@ -195,12 +195,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => [],
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Unable to verify', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to verify', $healthCheckResult->description);
     }
 
     public function testRunHandlesLowercaseDateHeader(): void
@@ -212,11 +212,11 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testWarningThresholdIs30Seconds(): void
@@ -228,11 +228,11 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testCriticalThresholdIs5Minutes(): void
@@ -244,11 +244,11 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testBelowWarningThresholdReturnsGood(): void
@@ -260,12 +260,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('accurate', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('accurate', $healthCheckResult->description);
     }
 
     public function testGoodResultIncludesDriftValue(): void
@@ -276,12 +276,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
         // Good result should include drift value and source
-        $this->assertStringContainsString('drift:', $result->description);
+        $this->assertStringContainsString('drift:', $healthCheckResult->description);
     }
 
     public function testGoodResultIncludesSourceName(): void
@@ -292,12 +292,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
         // Good result should mention the source (Google or Cloudflare)
-        $this->assertStringContainsString('Verified against', $result->description);
+        $this->assertStringContainsString('Verified against', $healthCheckResult->description);
     }
 
     public function testFormatTimeDiffSeconds(): void
@@ -309,12 +309,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
         // Should mention seconds
-        $this->assertStringContainsString('second', $result->description);
+        $this->assertStringContainsString('second', $healthCheckResult->description);
     }
 
     public function testFormatTimeDiffMinutes(): void
@@ -326,12 +326,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
         // Should mention minutes
-        $this->assertStringContainsString('minute', $result->description);
+        $this->assertStringContainsString('minute', $healthCheckResult->description);
     }
 
     public function testFormatTimeDiffHours(): void
@@ -343,12 +343,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
         // Should mention hours
-        $this->assertStringContainsString('hour', $result->description);
+        $this->assertStringContainsString('hour', $healthCheckResult->description);
     }
 
     public function testCriticalResultRecommendsNtpCheck(): void
@@ -359,11 +359,11 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertStringContainsString('NTP', $result->description);
+        $this->assertStringContainsString('NTP', $healthCheckResult->description);
     }
 
     public function testFormatTimeDiff1Second(): void
@@ -375,12 +375,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
         // Should be warning (over 30s threshold)
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testFormatTimeDiff1Minute(): void
@@ -392,12 +392,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('minute', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('minute', $healthCheckResult->description);
     }
 
     public function testFormatTimeDiff1Hour(): void
@@ -409,12 +409,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('hour', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('hour', $healthCheckResult->description);
     }
 
     public function testFormatTimeDiffMultipleHours(): void
@@ -426,12 +426,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('hours', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('hours', $healthCheckResult->description);
     }
 
     public function testFormatTimeDiff1HourExactly(): void
@@ -443,12 +443,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('hour', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('hour', $healthCheckResult->description);
     }
 
     public function testFutureDriftAlsoDetected(): void
@@ -460,12 +460,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
         // Should detect drift regardless of direction (uses abs())
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testInvalidDateHeaderFormat(): void
@@ -474,13 +474,13 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => 'invalid-date-format',
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
         // Should fall back to "Unable to verify" message
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Unable to verify', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to verify', $healthCheckResult->description);
     }
 
     public function testAlternativeDateFormat(): void
@@ -494,12 +494,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
         // Should parse the alternative format successfully
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testMultipleRunsWithSameHttpClient(): void
@@ -510,12 +510,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
+        $result2 = $this->serverTimeCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
     }
 
     public function testWarningMentionsNtpSynchronization(): void
@@ -526,12 +526,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('NTP', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('NTP', $healthCheckResult->description);
     }
 
     public function testGoodResultShowsVerifiedSource(): void
@@ -542,13 +542,13 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         // Result should mention verification against Google (the source)
-        $this->assertStringContainsString('Google', $result->description);
+        $this->assertStringContainsString('Google', $healthCheckResult->description);
     }
 
     public function testExactlyAtWarningThreshold(): void
@@ -560,12 +560,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
         // At exactly 30 seconds, should still be Good (threshold is > 30)
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testExactlyAtCriticalThreshold(): void
@@ -577,12 +577,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
         // At exactly 300 seconds, should still be Warning (threshold is > 300)
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testZeroDrift(): void
@@ -594,12 +594,12 @@ class ServerTimeCheckTest extends TestCase
         $httpClient = MockHttpFactory::createWithHeadResponse(200, [
             'Date' => $dateHeader,
         ]);
-        $this->check->setHttpClient($httpClient);
+        $this->serverTimeCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->serverTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         // Should show drift: 0s or similar
-        $this->assertMatchesRegularExpression('/drift:\s*\d+s/', $result->description);
+        $this->assertMatchesRegularExpression('/drift:\s*\d+s/', $healthCheckResult->description);
     }
 }

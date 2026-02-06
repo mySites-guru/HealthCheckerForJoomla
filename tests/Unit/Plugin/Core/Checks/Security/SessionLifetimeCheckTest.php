@@ -20,15 +20,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(SessionLifetimeCheck::class)]
 class SessionLifetimeCheckTest extends TestCase
 {
-    private SessionLifetimeCheck $check;
+    private SessionLifetimeCheck $sessionLifetimeCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new SessionLifetimeCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->sessionLifetimeCheck = new SessionLifetimeCheck();
     }
 
     protected function tearDown(): void
@@ -38,22 +38,22 @@ class SessionLifetimeCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.session_lifetime', $this->check->getSlug());
+        $this->assertSame('security.session_lifetime', $this->sessionLifetimeCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->sessionLifetimeCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->sessionLifetimeCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->sessionLifetimeCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -61,31 +61,31 @@ class SessionLifetimeCheckTest extends TestCase
 
     public function testRunReturnsGoodWhenLifetimeInRange(): void
     {
-        $this->app->set('lifetime', 30);
+        $this->cmsApplication->set('lifetime', 30);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sessionLifetimeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('30 minutes', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('30 minutes', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenLifetimeTooShort(): void
     {
-        $this->app->set('lifetime', 10);
+        $this->cmsApplication->set('lifetime', 10);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sessionLifetimeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('very short', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('very short', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenLifetimeTooLong(): void
     {
-        $this->app->set('lifetime', 120);
+        $this->cmsApplication->set('lifetime', 120);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sessionLifetimeCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('longer than recommended', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('longer than recommended', $healthCheckResult->description);
     }
 }

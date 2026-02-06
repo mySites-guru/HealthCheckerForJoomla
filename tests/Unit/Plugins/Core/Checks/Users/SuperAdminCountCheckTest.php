@@ -23,129 +23,129 @@ class SuperAdminCountCheckTest extends TestCase
 {
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $check = new SuperAdminCountCheck();
-        $this->assertSame('users.super_admin_count', $check->getSlug());
+        $superAdminCountCheck = new SuperAdminCountCheck();
+        $this->assertSame('users.super_admin_count', $superAdminCountCheck->getSlug());
     }
 
     public function testGetCategoryReturnsUsers(): void
     {
-        $check = new SuperAdminCountCheck();
-        $this->assertSame('users', $check->getCategory());
+        $superAdminCountCheck = new SuperAdminCountCheck();
+        $this->assertSame('users', $superAdminCountCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $check = new SuperAdminCountCheck();
-        $this->assertSame('core', $check->getProvider());
+        $superAdminCountCheck = new SuperAdminCountCheck();
+        $this->assertSame('core', $superAdminCountCheck->getProvider());
     }
 
     public function testRunWithOneSuperAdminReturnsGood(): void
     {
-        $check = new SuperAdminCountCheck();
-        $db = $this->createDatabaseMock(1);
-        $check->setDatabase($db);
+        $superAdminCountCheck = new SuperAdminCountCheck();
+        $database = $this->createDatabaseMock(1);
+        $superAdminCountCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $superAdminCountCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('1', $result->description);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1', $healthCheckResult->description);
     }
 
     public function testRunWithThreeSuperAdminsReturnsGood(): void
     {
-        $check = new SuperAdminCountCheck();
-        $db = $this->createDatabaseMock(3);
-        $check->setDatabase($db);
+        $superAdminCountCheck = new SuperAdminCountCheck();
+        $database = $this->createDatabaseMock(3);
+        $superAdminCountCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $superAdminCountCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithFourSuperAdminsReturnsWarning(): void
     {
-        $check = new SuperAdminCountCheck();
-        $db = $this->createDatabaseMock(4);
-        $check->setDatabase($db);
+        $superAdminCountCheck = new SuperAdminCountCheck();
+        $database = $this->createDatabaseMock(4);
+        $superAdminCountCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $superAdminCountCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('4', $result->description);
-        $this->assertStringContainsString('reducing', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('4', $healthCheckResult->description);
+        $this->assertStringContainsString('reducing', $healthCheckResult->description);
     }
 
     public function testRunWithFiveSuperAdminsReturnsWarning(): void
     {
-        $check = new SuperAdminCountCheck();
-        $db = $this->createDatabaseMock(5);
-        $check->setDatabase($db);
+        $superAdminCountCheck = new SuperAdminCountCheck();
+        $database = $this->createDatabaseMock(5);
+        $superAdminCountCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $superAdminCountCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithSixSuperAdminsReturnsCritical(): void
     {
-        $check = new SuperAdminCountCheck();
-        $db = $this->createDatabaseMock(6);
-        $check->setDatabase($db);
+        $superAdminCountCheck = new SuperAdminCountCheck();
+        $database = $this->createDatabaseMock(6);
+        $superAdminCountCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $superAdminCountCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('6', $result->description);
-        $this->assertStringContainsString('security risk', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('6', $healthCheckResult->description);
+        $this->assertStringContainsString('security risk', $healthCheckResult->description);
     }
 
     public function testRunWithZeroSuperAdminsReturnsCritical(): void
     {
-        $check = new SuperAdminCountCheck();
-        $db = $this->createDatabaseMock(0);
-        $check->setDatabase($db);
+        $superAdminCountCheck = new SuperAdminCountCheck();
+        $database = $this->createDatabaseMock(0);
+        $superAdminCountCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $superAdminCountCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('No active Super Admin', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No active Super Admin', $healthCheckResult->description);
     }
 
     public function testRunWithTenSuperAdminsReturnsCritical(): void
     {
-        $check = new SuperAdminCountCheck();
-        $db = $this->createDatabaseMock(10);
-        $check->setDatabase($db);
+        $superAdminCountCheck = new SuperAdminCountCheck();
+        $database = $this->createDatabaseMock(10);
+        $superAdminCountCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $superAdminCountCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testResultContainsCorrectMetadata(): void
     {
-        $check = new SuperAdminCountCheck();
-        $db = $this->createDatabaseMock(2);
-        $check->setDatabase($db);
+        $superAdminCountCheck = new SuperAdminCountCheck();
+        $database = $this->createDatabaseMock(2);
+        $superAdminCountCheck->setDatabase($database);
 
-        $result = $check->run();
+        $healthCheckResult = $superAdminCountCheck->run();
 
-        $this->assertSame('users.super_admin_count', $result->slug);
-        $this->assertSame('users', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('users.super_admin_count', $healthCheckResult->slug);
+        $this->assertSame('users', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $check = new SuperAdminCountCheck();
+        $superAdminCountCheck = new SuperAdminCountCheck();
 
         // Don't inject a database - should return warning about missing database
-        $result = $check->run();
+        $healthCheckResult = $superAdminCountCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
         // Without database injection, the check should fail gracefully
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     /**
@@ -167,7 +167,7 @@ class SuperAdminCountCheckTest extends TestCase
         $db->method('getQuery')
             ->willReturn($query);
         $db->method('quoteName')
-            ->willReturnCallback(fn($name) => "`{$name}`");
+            ->willReturnCallback(fn(string $name): string => sprintf('`%s`', $name));
         $db->method('setQuery')
             ->willReturnSelf();
         $db->method('loadResult')

@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(DisabledExtensionsCheck::class)]
 class DisabledExtensionsCheckTest extends TestCase
 {
-    private DisabledExtensionsCheck $check;
+    private DisabledExtensionsCheck $disabledExtensionsCheck;
 
     protected function setUp(): void
     {
-        $this->check = new DisabledExtensionsCheck();
+        $this->disabledExtensionsCheck = new DisabledExtensionsCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('extensions.disabled_extensions', $this->check->getSlug());
+        $this->assertSame('extensions.disabled_extensions', $this->disabledExtensionsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->disabledExtensionsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->disabledExtensionsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->disabledExtensionsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,51 +51,51 @@ class DisabledExtensionsCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->disabledExtensionsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithFewDisabledExtensionsReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(5);
-        $this->check->setDatabase($database);
+        $this->disabledExtensionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->disabledExtensionsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('5 extension(s) disabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('5 extension(s) disabled', $healthCheckResult->description);
     }
 
     public function testRunWithTwentyDisabledExtensionsReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(20);
-        $this->check->setDatabase($database);
+        $this->disabledExtensionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->disabledExtensionsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithManyDisabledExtensionsReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithResult(25);
-        $this->check->setDatabase($database);
+        $this->disabledExtensionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->disabledExtensionsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('25 extensions', $result->description);
-        $this->assertStringContainsString('uninstalling', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('25 extensions', $healthCheckResult->description);
+        $this->assertStringContainsString('uninstalling', $healthCheckResult->description);
     }
 
     public function testRunWithZeroDisabledExtensionsReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->disabledExtensionsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->disabledExtensionsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 }

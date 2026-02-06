@@ -18,13 +18,13 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(BrowserCacheCheck::class)]
 class BrowserCacheCheckTest extends TestCase
 {
-    private BrowserCacheCheck $check;
+    private BrowserCacheCheck $browserCacheCheck;
 
     private string $htaccessPath;
 
     protected function setUp(): void
     {
-        $this->check = new BrowserCacheCheck();
+        $this->browserCacheCheck = new BrowserCacheCheck();
 
         // Create temp directory if it doesn't exist
         if (! is_dir(JPATH_ROOT)) {
@@ -49,22 +49,22 @@ class BrowserCacheCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('performance.browser_cache', $this->check->getSlug());
+        $this->assertSame('performance.browser_cache', $this->browserCacheCheck->getSlug());
     }
 
     public function testGetCategoryReturnsPerformance(): void
     {
-        $this->assertSame('performance', $this->check->getCategory());
+        $this->assertSame('performance', $this->browserCacheCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->browserCacheCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->browserCacheCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -73,20 +73,20 @@ class BrowserCacheCheckTest extends TestCase
     public function testRunReturnsWarningWhenHtaccessNotFound(): void
     {
         // No .htaccess file exists
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('.htaccess file not found', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('.htaccess file not found', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenHtaccessIsEmpty(): void
     {
         file_put_contents($this->htaccessPath, '');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('.htaccess file is empty', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('.htaccess file is empty', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenExpiresByTypeFound(): void
@@ -101,10 +101,10 @@ class BrowserCacheCheckTest extends TestCase
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Expires headers', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Expires headers', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenExpiresDefaultFound(): void
@@ -117,10 +117,10 @@ HTACCESS;
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Expires headers', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Expires headers', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenCacheControlFound(): void
@@ -134,10 +134,10 @@ HTACCESS;
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Cache-Control headers', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Cache-Control headers', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenBothExpiresAndCacheControlFound(): void
@@ -153,11 +153,11 @@ HTACCESS;
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Expires headers', $result->description);
-        $this->assertStringContainsString('Cache-Control headers', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Expires headers', $healthCheckResult->description);
+        $this->assertStringContainsString('Cache-Control headers', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenOnlyModExpiresReferenced(): void
@@ -169,11 +169,11 @@ HTACCESS;
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('mod_expires module reference found', $result->description);
-        $this->assertStringContainsString('no ExpiresByType rules detected', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('mod_expires module reference found', $healthCheckResult->description);
+        $this->assertStringContainsString('no ExpiresByType rules detected', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenNoCachingRulesFound(): void
@@ -187,10 +187,10 @@ RewriteRule ^(.*)$ index.php [L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('No browser caching rules detected', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No browser caching rules detected', $healthCheckResult->description);
     }
 
     public function testRunIsCaseInsensitiveForDirectives(): void
@@ -199,9 +199,9 @@ HTACCESS;
         $htaccessContent = 'expiresbytype image/jpeg "access plus 1 year"';
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunNeverReturnsCritical(): void
@@ -209,9 +209,9 @@ HTACCESS;
         // Even with no caching rules, should only return warning
         file_put_contents($this->htaccessPath, 'RewriteEngine On');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunIsCaseInsensitiveForCacheControl(): void
@@ -219,9 +219,9 @@ HTACCESS;
         $htaccessContent = 'header set cache-control "max-age=31536000"';
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunIsCaseInsensitiveForExpiresDefault(): void
@@ -229,9 +229,9 @@ HTACCESS;
         $htaccessContent = 'expiresdefault "access plus 1 month"';
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunDescriptionMentionsBothMethodsWhenPresent(): void
@@ -242,12 +242,12 @@ Header set Cache-Control "max-age=31536000"
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Expires headers', $result->description);
-        $this->assertStringContainsString('Cache-Control headers', $result->description);
-        $this->assertStringContainsString(' and ', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Expires headers', $healthCheckResult->description);
+        $this->assertStringContainsString('Cache-Control headers', $healthCheckResult->description);
+        $this->assertStringContainsString(' and ', $healthCheckResult->description);
     }
 
     public function testRunHandlesHtaccessWithOnlyComments(): void
@@ -259,10 +259,10 @@ HTACCESS;
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('No browser caching rules', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No browser caching rules', $healthCheckResult->description);
     }
 
     public function testRunHandlesHtaccessWithModExpiresAndRules(): void
@@ -276,9 +276,9 @@ HTACCESS;
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWarningMessageSuggestsAction(): void
@@ -286,9 +286,9 @@ HTACCESS;
         $htaccessContent = 'RewriteEngine On';
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->browserCacheCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Consider adding', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Consider adding', $healthCheckResult->description);
     }
 }

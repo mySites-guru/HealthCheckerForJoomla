@@ -258,7 +258,7 @@ class AbstractHealthCheckTest extends TestCase
                 return 'system';
             }
 
-            public function getDocsUrl(): ?string
+            public function getDocsUrl(): string
             {
                 return 'https://example.com/docs/custom';
             }
@@ -271,8 +271,8 @@ class AbstractHealthCheckTest extends TestCase
 
         $this->assertSame('https://example.com/docs/custom', $check->getDocsUrl());
 
-        $result = $check->run();
-        $this->assertSame('https://example.com/docs/custom', $result->docsUrl);
+        $healthCheckResult = $check->run();
+        $this->assertSame('https://example.com/docs/custom', $healthCheckResult->docsUrl);
     }
 
     public function testCustomActionUrlCanBeOverridden(): void
@@ -288,7 +288,7 @@ class AbstractHealthCheckTest extends TestCase
                 return 'system';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): ?string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_custom';
             }
@@ -301,8 +301,8 @@ class AbstractHealthCheckTest extends TestCase
 
         $this->assertSame('/administrator/index.php?option=com_custom', $check->getActionUrl());
 
-        $result = $check->run();
-        $this->assertSame('/administrator/index.php?option=com_custom', $result->actionUrl);
+        $healthCheckResult = $check->run();
+        $this->assertSame('/administrator/index.php?option=com_custom', $healthCheckResult->actionUrl);
     }
 
     public function testConditionalActionUrlBasedOnStatus(): void
@@ -318,12 +318,13 @@ class AbstractHealthCheckTest extends TestCase
                 return 'system';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): ?string
+            public function getActionUrl(?HealthStatus $healthStatus = null): ?string
             {
                 // Only show action URL for failed checks, not for Good status
-                if ($status === HealthStatus::Good) {
+                if ($healthStatus === HealthStatus::Good) {
                     return null;
                 }
+
                 return '/administrator/index.php?option=com_fix';
             }
 
@@ -349,8 +350,8 @@ class AbstractHealthCheckTest extends TestCase
         };
 
         // Action URL should be present for Critical status
-        $criticalResult = $check->exposeCritical('Critical issue');
-        $this->assertSame('/administrator/index.php?option=com_fix', $criticalResult->actionUrl);
+        $healthCheckResult = $check->exposeCritical('Critical issue');
+        $this->assertSame('/administrator/index.php?option=com_fix', $healthCheckResult->actionUrl);
 
         // Action URL should be present for Warning status
         $warningResult = $check->exposeWarning('Warning issue');
@@ -374,12 +375,12 @@ class AbstractHealthCheckTest extends TestCase
                 return 'system';
             }
 
-            public function getDocsUrl(): ?string
+            public function getDocsUrl(): string
             {
                 return 'https://docs.test.com';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): ?string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/admin/test';
             }
@@ -405,9 +406,9 @@ class AbstractHealthCheckTest extends TestCase
             }
         };
 
-        $criticalResult = $check->exposeCritical('Critical issue');
-        $this->assertSame('https://docs.test.com', $criticalResult->docsUrl);
-        $this->assertSame('/admin/test', $criticalResult->actionUrl);
+        $healthCheckResult = $check->exposeCritical('Critical issue');
+        $this->assertSame('https://docs.test.com', $healthCheckResult->docsUrl);
+        $this->assertSame('/admin/test', $healthCheckResult->actionUrl);
 
         $warningResult = $check->exposeWarning('Warning issue');
         $this->assertSame('https://docs.test.com', $warningResult->docsUrl);

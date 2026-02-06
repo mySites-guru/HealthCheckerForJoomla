@@ -20,62 +20,62 @@ class CurlExtensionCheckTest extends TestCase
 {
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $check = new CurlExtensionCheck();
-        $this->assertSame('system.curl_extension', $check->getSlug());
+        $curlExtensionCheck = new CurlExtensionCheck();
+        $this->assertSame('system.curl_extension', $curlExtensionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $check = new CurlExtensionCheck();
-        $this->assertSame('system', $check->getCategory());
+        $curlExtensionCheck = new CurlExtensionCheck();
+        $this->assertSame('system', $curlExtensionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $check = new CurlExtensionCheck();
-        $this->assertSame('core', $check->getProvider());
+        $curlExtensionCheck = new CurlExtensionCheck();
+        $this->assertSame('core', $curlExtensionCheck->getProvider());
     }
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $check = new CurlExtensionCheck();
-        $result = $check->run();
+        $curlExtensionCheck = new CurlExtensionCheck();
+        $healthCheckResult = $curlExtensionCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame('system.curl_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame('system.curl_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testCheckDoesNotRequireDatabase(): void
     {
-        $check = new CurlExtensionCheck();
+        $curlExtensionCheck = new CurlExtensionCheck();
 
         // Database should be null (not injected)
-        $this->assertNull($check->getDatabase());
+        $this->assertNull($curlExtensionCheck->getDatabase());
 
         // Check should still work without database
-        $result = $check->run();
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
+        $healthCheckResult = $curlExtensionCheck->run();
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
     }
 
     public function testCheckIsConsistentOnMultipleRuns(): void
     {
-        $check = new CurlExtensionCheck();
+        $curlExtensionCheck = new CurlExtensionCheck();
 
-        $result1 = $check->run();
-        $result2 = $check->run();
+        $healthCheckResult = $curlExtensionCheck->run();
+        $result2 = $curlExtensionCheck->run();
 
         // Results should be the same since cURL availability doesn't change during test
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
     }
 
     public function testResultCanBeConvertedToArray(): void
     {
-        $check = new CurlExtensionCheck();
-        $result = $check->run();
+        $curlExtensionCheck = new CurlExtensionCheck();
+        $healthCheckResult = $curlExtensionCheck->run();
 
-        $array = $result->toArray();
+        $array = $healthCheckResult->toArray();
 
         $this->assertIsArray($array);
         $this->assertArrayHasKey('slug', $array);

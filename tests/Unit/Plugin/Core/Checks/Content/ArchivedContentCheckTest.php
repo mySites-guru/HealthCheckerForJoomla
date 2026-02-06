@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ArchivedContentCheck::class)]
 class ArchivedContentCheckTest extends TestCase
 {
-    private ArchivedContentCheck $check;
+    private ArchivedContentCheck $archivedContentCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ArchivedContentCheck();
+        $this->archivedContentCheck = new ArchivedContentCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('content.archived_content', $this->check->getSlug());
+        $this->assertSame('content.archived_content', $this->archivedContentCheck->getSlug());
     }
 
     public function testGetCategoryReturnsContent(): void
     {
-        $this->assertSame('content', $this->check->getCategory());
+        $this->assertSame('content', $this->archivedContentCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->archivedContentCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->archivedContentCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,42 +51,42 @@ class ArchivedContentCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->archivedContentCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWithNoArchivedContent(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->archivedContentCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->archivedContentCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No archived', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No archived', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWithSomeArchivedContent(): void
     {
         $database = MockDatabaseFactory::createWithResult(50);
-        $this->check->setDatabase($database);
+        $this->archivedContentCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->archivedContentCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('50 article(s)', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('50 article(s)', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWithManyArchivedContentButSuggestsReview(): void
     {
         $database = MockDatabaseFactory::createWithResult(150);
-        $this->check->setDatabase($database);
+        $this->archivedContentCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->archivedContentCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('150 articles', $result->description);
-        $this->assertStringContainsString('reviewing', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('150 articles', $healthCheckResult->description);
+        $this->assertStringContainsString('reviewing', $healthCheckResult->description);
     }
 }

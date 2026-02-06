@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(PhpSapiCheck::class)]
 class PhpSapiCheckTest extends TestCase
 {
-    private PhpSapiCheck $check;
+    private PhpSapiCheck $phpSapiCheck;
 
     protected function setUp(): void
     {
-        $this->check = new PhpSapiCheck();
+        $this->phpSapiCheck = new PhpSapiCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.php_sapi', $this->check->getSlug());
+        $this->assertSame('system.php_sapi', $this->phpSapiCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->phpSapiCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->phpSapiCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->phpSapiCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,29 +50,29 @@ class PhpSapiCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
 
-        $this->assertSame('system.php_sapi', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.php_sapi', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
 
         // Can return Good or Warning (CLI warning)
-        $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+        $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
     }
 
     public function testRunDescriptionContainsSapiInfo(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
 
         // Description should mention SAPI or CLI
         $this->assertTrue(
-            str_contains(strtolower($result->description), 'sapi') ||
-            str_contains(strtolower($result->description), 'cli'),
+            str_contains(strtolower($healthCheckResult->description), 'sapi') ||
+            str_contains(strtolower($healthCheckResult->description), 'cli'),
         );
     }
 
@@ -87,38 +87,38 @@ class PhpSapiCheckTest extends TestCase
 
     public function testDescriptionIncludesSapiName(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
         $sapi = PHP_SAPI;
 
         // Description should include the current SAPI name
         $this->assertTrue(
-            str_contains(strtolower($result->description), strtolower($sapi)) ||
-            str_contains($result->description, 'CLI'),
+            str_contains(strtolower($healthCheckResult->description), strtolower($sapi)) ||
+            str_contains($healthCheckResult->description, 'CLI'),
         );
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
         // This check should never return Critical status
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
+        $result2 = $this->phpSapiCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testPhpSapiConstantExists(): void
@@ -132,21 +132,21 @@ class PhpSapiCheckTest extends TestCase
         // Validate that the check recognizes common recommended SAPIs
         $recommendedSapis = ['fpm-fcgi', 'cgi-fcgi', 'litespeed', 'frankenphp'];
 
-        foreach ($recommendedSapis as $sapi) {
-            $this->assertIsString($sapi);
-            $this->assertNotEmpty($sapi);
+        foreach ($recommendedSapis as $recommendedSapi) {
+            $this->assertIsString($recommendedSapi);
+            $this->assertNotEmpty($recommendedSapi);
         }
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
 
-        $this->assertSame('system.php_sapi', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.php_sapi', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testRecommendedSapisArray(): void
@@ -181,22 +181,22 @@ class PhpSapiCheckTest extends TestCase
     public function testCheckNeverReturnsCriticalStatus(): void
     {
         // Based on the source code, this check never returns Critical
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testDescriptionIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
 
-        $this->assertNotEmpty($result->description);
-        $this->assertIsString($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
+        $this->assertIsString($healthCheckResult->description);
     }
 
     public function testSlugFormat(): void
     {
-        $slug = $this->check->getSlug();
+        $slug = $this->phpSapiCheck->getSlug();
 
         // Slug should be lowercase with dot separator
         $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
@@ -204,7 +204,7 @@ class PhpSapiCheckTest extends TestCase
 
     public function testCategoryIsValid(): void
     {
-        $category = $this->check->getCategory();
+        $category = $this->phpSapiCheck->getCategory();
 
         // Should be a valid category
         $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
@@ -213,21 +213,18 @@ class PhpSapiCheckTest extends TestCase
 
     public function testProviderIsCore(): void
     {
-        $provider = $this->check->getProvider();
+        $provider = $this->phpSapiCheck->getProvider();
 
         $this->assertSame('core', $provider);
     }
 
     public function testOtherSapiReturnsGood(): void
     {
-        // If running under an unknown/other SAPI, should return Good with SAPI name
-        $currentSapi = PHP_SAPI;
-
         // For testing purposes, we just verify the actual SAPI gives a valid result
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
 
         // Should always be Good or Warning (for CLI)
-        $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+        $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
     }
 
     public function testInArrayStrictComparison(): void
@@ -243,15 +240,15 @@ class PhpSapiCheckTest extends TestCase
 
     public function testResultStructureIsComplete(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpSapiCheck->run();
 
         // Verify all required properties are set
-        $this->assertNotEmpty($result->slug);
-        $this->assertNotEmpty($result->category);
-        $this->assertNotEmpty($result->provider);
-        $this->assertNotEmpty($result->description);
-        $this->assertNotEmpty($result->title);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertNotEmpty($healthCheckResult->slug);
+        $this->assertNotEmpty($healthCheckResult->category);
+        $this->assertNotEmpty($healthCheckResult->provider);
+        $this->assertNotEmpty($healthCheckResult->description);
+        $this->assertNotEmpty($healthCheckResult->title);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testApache2handlerSuggestsPhpFpm(): void

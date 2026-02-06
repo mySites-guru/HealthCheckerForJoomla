@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TwoFactorAuthCheck::class)]
 class TwoFactorAuthCheckTest extends TestCase
 {
-    private TwoFactorAuthCheck $check;
+    private TwoFactorAuthCheck $twoFactorAuthCheck;
 
     protected function setUp(): void
     {
-        $this->check = new TwoFactorAuthCheck();
+        $this->twoFactorAuthCheck = new TwoFactorAuthCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.two_factor_auth', $this->check->getSlug());
+        $this->assertSame('security.two_factor_auth', $this->twoFactorAuthCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->twoFactorAuthCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->twoFactorAuthCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->twoFactorAuthCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,20 +51,20 @@ class TwoFactorAuthCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->twoFactorAuthCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenNoMfaPluginsEnabled(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->twoFactorAuthCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twoFactorAuthCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('No Multi-Factor', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No Multi-Factor', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenMfaEnabledButNoSuperAdminsHaveMfa(): void
@@ -73,12 +73,12 @@ class TwoFactorAuthCheckTest extends TestCase
         // Query 2: Count total Super Admins (returns 3)
         // Query 3: Count Super Admins with MFA (returns 0)
         $database = MockDatabaseFactory::createWithSequentialResults([2, 3, 0]);
-        $this->check->setDatabase($database);
+        $this->twoFactorAuthCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twoFactorAuthCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('no Super Admins have MFA configured', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('no Super Admins have MFA configured', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSomeSuperAdminsHaveMfa(): void
@@ -87,12 +87,12 @@ class TwoFactorAuthCheckTest extends TestCase
         // Query 2: Count total Super Admins (returns 5)
         // Query 3: Count Super Admins with MFA (returns 2)
         $database = MockDatabaseFactory::createWithSequentialResults([1, 5, 2]);
-        $this->check->setDatabase($database);
+        $this->twoFactorAuthCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twoFactorAuthCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('2 of 5 Super Admins have MFA configured', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 of 5 Super Admins have MFA configured', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenAllSuperAdminsHaveMfa(): void
@@ -101,12 +101,12 @@ class TwoFactorAuthCheckTest extends TestCase
         // Query 2: Count total Super Admins (returns 2)
         // Query 3: Count Super Admins with MFA (returns 2)
         $database = MockDatabaseFactory::createWithSequentialResults([3, 2, 2]);
-        $this->check->setDatabase($database);
+        $this->twoFactorAuthCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twoFactorAuthCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('all 2 Super Admin(s) have MFA configured', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('all 2 Super Admin(s) have MFA configured', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWithSingleSuperAdmin(): void
@@ -115,12 +115,12 @@ class TwoFactorAuthCheckTest extends TestCase
         // Query 2: Count total Super Admins (returns 1)
         // Query 3: Count Super Admins with MFA (returns 1)
         $database = MockDatabaseFactory::createWithSequentialResults([1, 1, 1]);
-        $this->check->setDatabase($database);
+        $this->twoFactorAuthCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twoFactorAuthCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('all 1 Super Admin(s) have MFA configured', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('all 1 Super Admin(s) have MFA configured', $healthCheckResult->description);
     }
 
     public function testRunHandlesZeroSuperAdmins(): void
@@ -129,13 +129,13 @@ class TwoFactorAuthCheckTest extends TestCase
         // Query 2: Count total Super Admins (returns 0)
         // Query 3: Count Super Admins with MFA (returns 0)
         $database = MockDatabaseFactory::createWithSequentialResults([2, 0, 0]);
-        $this->check->setDatabase($database);
+        $this->twoFactorAuthCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twoFactorAuthCheck->run();
 
         // When totalSuperAdmins is 0 and superAdminsWithMFA is 0, condition (0 < 0) is false
         // So it falls through to the good case
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWithMultipleMfaPluginsButNoUsage(): void
@@ -144,11 +144,11 @@ class TwoFactorAuthCheckTest extends TestCase
         // Query 2: Count total Super Admins (returns 10)
         // Query 3: Count Super Admins with MFA (returns 0)
         $database = MockDatabaseFactory::createWithSequentialResults([5, 10, 0]);
-        $this->check->setDatabase($database);
+        $this->twoFactorAuthCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->twoFactorAuthCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('5 MFA plugin(s) enabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('5 MFA plugin(s) enabled', $healthCheckResult->description);
     }
 }

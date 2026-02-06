@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MissingUpdatesCheck::class)]
 class MissingUpdatesCheckTest extends TestCase
 {
-    private MissingUpdatesCheck $check;
+    private MissingUpdatesCheck $missingUpdatesCheck;
 
     protected function setUp(): void
     {
-        $this->check = new MissingUpdatesCheck();
+        $this->missingUpdatesCheck = new MissingUpdatesCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('extensions.missing_updates', $this->check->getSlug());
+        $this->assertSame('extensions.missing_updates', $this->missingUpdatesCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->missingUpdatesCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->missingUpdatesCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->missingUpdatesCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,41 +51,41 @@ class MissingUpdatesCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->missingUpdatesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenNoUpdates(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->missingUpdatesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->missingUpdatesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('up to date', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('up to date', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenFewUpdates(): void
     {
         $database = MockDatabaseFactory::createWithResult(3);
-        $this->check->setDatabase($database);
+        $this->missingUpdatesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->missingUpdatesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('3 extension update', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('3 extension update', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenManyUpdates(): void
     {
         $database = MockDatabaseFactory::createWithResult(10);
-        $this->check->setDatabase($database);
+        $this->missingUpdatesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->missingUpdatesCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('10 extension update', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('10 extension update', $healthCheckResult->description);
     }
 }

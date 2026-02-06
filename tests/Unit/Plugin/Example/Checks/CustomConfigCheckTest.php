@@ -19,131 +19,131 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(CustomConfigCheck::class)]
 class CustomConfigCheckTest extends TestCase
 {
-    private CustomConfigCheck $check;
+    private CustomConfigCheck $customConfigCheck;
 
     protected function setUp(): void
     {
-        $this->check = new CustomConfigCheck();
+        $this->customConfigCheck = new CustomConfigCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('example.custom_config', $this->check->getSlug());
+        $this->assertSame('example.custom_config', $this->customConfigCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->customConfigCheck->getCategory());
     }
 
     public function testGetProviderReturnsExample(): void
     {
-        $this->assertSame('example', $this->check->getProvider());
+        $this->assertSame('example', $this->customConfigCheck->getProvider());
     }
 
     public function testGetTitleReturnsNonEmptyString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->customConfigCheck->getTitle();
 
         $this->assertNotEmpty($title);
     }
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->customConfigCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenExtensionCountIsLow(): void
     {
         $database = MockDatabaseFactory::createWithResult(50);
-        $this->check->setDatabase($database);
+        $this->customConfigCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->customConfigCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         // The extension count is now wrapped in <code> tags for HTML formatting
-        $this->assertStringContainsString('<code>50</code>', $result->description);
-        $this->assertStringContainsString('[EXAMPLE CHECK]', $result->description);
+        $this->assertStringContainsString('<code>50</code>', $healthCheckResult->description);
+        $this->assertStringContainsString('[EXAMPLE CHECK]', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenExtensionCountIsExactly100(): void
     {
         $database = MockDatabaseFactory::createWithResult(100);
-        $this->check->setDatabase($database);
+        $this->customConfigCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->customConfigCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         // The extension count is now wrapped in <code> tags for HTML formatting
-        $this->assertStringContainsString('<code>100</code>', $result->description);
+        $this->assertStringContainsString('<code>100</code>', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenExtensionCountExceeds100(): void
     {
         $database = MockDatabaseFactory::createWithResult(150);
-        $this->check->setDatabase($database);
+        $this->customConfigCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->customConfigCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // The extension count is now wrapped in <code> tags for HTML formatting
-        $this->assertStringContainsString('<code>150</code>', $result->description);
-        $this->assertStringContainsString('[EXAMPLE CHECK]', $result->description);
+        $this->assertStringContainsString('<code>150</code>', $healthCheckResult->description);
+        $this->assertStringContainsString('[EXAMPLE CHECK]', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenExtensionCountIs101(): void
     {
         $database = MockDatabaseFactory::createWithResult(101);
-        $this->check->setDatabase($database);
+        $this->customConfigCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->customConfigCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testResultDescriptionContainsDisableInstructions(): void
     {
         $database = MockDatabaseFactory::createWithResult(50);
-        $this->check->setDatabase($database);
+        $this->customConfigCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->customConfigCheck->run();
 
         // Instructions now use HTML formatting with <strong> tags
-        $this->assertStringContainsString('Health Checker - Example Provider', $result->description);
+        $this->assertStringContainsString('Health Checker - Example Provider', $healthCheckResult->description);
         // Note: The good result no longer includes "Extensions → Plugins" path
         // as it was simplified. The warning result still has it.
-        $this->assertStringContainsString('disable', $result->description);
+        $this->assertStringContainsString('disable', $healthCheckResult->description);
     }
 
     public function testResultHasCorrectSlug(): void
     {
         $database = MockDatabaseFactory::createWithResult(50);
-        $this->check->setDatabase($database);
+        $this->customConfigCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->customConfigCheck->run();
 
-        $this->assertSame('example.custom_config', $result->slug);
+        $this->assertSame('example.custom_config', $healthCheckResult->slug);
     }
 
     public function testResultHasCorrectCategory(): void
     {
         $database = MockDatabaseFactory::createWithResult(50);
-        $this->check->setDatabase($database);
+        $this->customConfigCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->customConfigCheck->run();
 
-        $this->assertSame('extensions', $result->category);
+        $this->assertSame('extensions', $healthCheckResult->category);
     }
 
     public function testResultHasCorrectProvider(): void
     {
         $database = MockDatabaseFactory::createWithResult(50);
-        $this->check->setDatabase($database);
+        $this->customConfigCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->customConfigCheck->run();
 
-        $this->assertSame('example', $result->provider);
+        $this->assertSame('example', $healthCheckResult->provider);
     }
 }

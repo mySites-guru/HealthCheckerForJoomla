@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MediaManagerThumbnailsCheck::class)]
 class MediaManagerThumbnailsCheckTest extends TestCase
 {
-    private MediaManagerThumbnailsCheck $check;
+    private MediaManagerThumbnailsCheck $mediaManagerThumbnailsCheck;
 
     protected function setUp(): void
     {
-        $this->check = new MediaManagerThumbnailsCheck();
+        $this->mediaManagerThumbnailsCheck = new MediaManagerThumbnailsCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('performance.media_manager_thumbnails', $this->check->getSlug());
+        $this->assertSame('performance.media_manager_thumbnails', $this->mediaManagerThumbnailsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsPerformance(): void
     {
-        $this->assertSame('performance', $this->check->getCategory());
+        $this->assertSame('performance', $this->mediaManagerThumbnailsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->mediaManagerThumbnailsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->mediaManagerThumbnailsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,21 +51,21 @@ class MediaManagerThumbnailsCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('database', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('database', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithPluginNotFoundReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithObject(null);
-        $this->check->setDatabase($database);
+        $this->mediaManagerThumbnailsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not found', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not found', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithPluginDisabledReturnsWarning(): void
@@ -77,12 +77,12 @@ class MediaManagerThumbnailsCheckTest extends TestCase
             ]),
         ];
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->mediaManagerThumbnailsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('disabled', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithThumbnailsEnabledReturnsGood(): void
@@ -94,12 +94,12 @@ class MediaManagerThumbnailsCheckTest extends TestCase
             ]),
         ];
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->mediaManagerThumbnailsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('200', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('200', $healthCheckResult->description);
     }
 
     public function testRunWithThumbnailsDisabledReturnsWarning(): void
@@ -111,12 +111,12 @@ class MediaManagerThumbnailsCheckTest extends TestCase
             ]),
         ];
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->mediaManagerThumbnailsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('disabled', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithInvalidParamsReturnsWarning(): void
@@ -126,12 +126,12 @@ class MediaManagerThumbnailsCheckTest extends TestCase
             'params' => 'invalid-json{',
         ];
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->mediaManagerThumbnailsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('read', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('read', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithNegativeThumbnailSizeReturnsWarning(): void
@@ -143,11 +143,11 @@ class MediaManagerThumbnailsCheckTest extends TestCase
             ]),
         ];
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->mediaManagerThumbnailsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithMissingThumbnailSizeParamReturnsWarning(): void
@@ -159,17 +159,17 @@ class MediaManagerThumbnailsCheckTest extends TestCase
             ]),
         ];
         $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->check->setDatabase($database);
+        $this->mediaManagerThumbnailsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 }

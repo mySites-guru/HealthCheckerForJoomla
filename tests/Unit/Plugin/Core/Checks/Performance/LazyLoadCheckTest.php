@@ -22,11 +22,11 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(LazyLoadCheck::class)]
 class LazyLoadCheckTest extends TestCase
 {
-    private LazyLoadCheck $check;
+    private LazyLoadCheck $lazyLoadCheck;
 
     protected function setUp(): void
     {
-        $this->check = new LazyLoadCheck();
+        $this->lazyLoadCheck = new LazyLoadCheck();
         // Reset plugin helper state for test isolation
         PluginHelper::resetEnabled();
     }
@@ -39,22 +39,22 @@ class LazyLoadCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('performance.lazy_load', $this->check->getSlug());
+        $this->assertSame('performance.lazy_load', $this->lazyLoadCheck->getSlug());
     }
 
     public function testGetCategoryReturnsPerformance(): void
     {
-        $this->assertSame('performance', $this->check->getCategory());
+        $this->assertSame('performance', $this->lazyLoadCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->lazyLoadCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->lazyLoadCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -63,9 +63,9 @@ class LazyLoadCheckTest extends TestCase
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
         // PluginHelper::isEnabled returns false by default in stub
-        $result = $this->check->run();
+        $healthCheckResult = $this->lazyLoadCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithLazyLoadEnabledReturnsGood(): void
@@ -77,11 +77,11 @@ class LazyLoadCheckTest extends TestCase
             'lazy_images' => 1,
         ]);
         $database = $this->createDatabaseWithPluginParams($params);
-        $this->check->setDatabase($database);
+        $this->lazyLoadCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->lazyLoadCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithLazyLoadDisabledReturnsWarning(): void
@@ -93,11 +93,11 @@ class LazyLoadCheckTest extends TestCase
             'lazy_images' => 0,
         ]);
         $database = $this->createDatabaseWithPluginParams($params);
-        $this->check->setDatabase($database);
+        $this->lazyLoadCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->lazyLoadCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithEmptyParamsReturnsWarning(): void
@@ -106,11 +106,11 @@ class LazyLoadCheckTest extends TestCase
         PluginHelper::setEnabled('content', 'joomla', true);
 
         $database = MockDatabaseFactory::createWithResult('');
-        $this->check->setDatabase($database);
+        $this->lazyLoadCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->lazyLoadCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithInvalidJsonParamsReturnsWarning(): void
@@ -119,11 +119,11 @@ class LazyLoadCheckTest extends TestCase
         PluginHelper::setEnabled('content', 'joomla', true);
 
         $database = MockDatabaseFactory::createWithResult('invalid-json{');
-        $this->check->setDatabase($database);
+        $this->lazyLoadCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->lazyLoadCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithMissingLazyImagesParamReturnsWarning(): void
@@ -135,18 +135,18 @@ class LazyLoadCheckTest extends TestCase
             'other_setting' => 1,
         ]);
         $database = $this->createDatabaseWithPluginParams($params);
-        $this->check->setDatabase($database);
+        $this->lazyLoadCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->lazyLoadCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->lazyLoadCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNullParamsReturnsWarning(): void
@@ -155,12 +155,12 @@ class LazyLoadCheckTest extends TestCase
         PluginHelper::setEnabled('content', 'joomla', true);
 
         $database = MockDatabaseFactory::createWithResult(null);
-        $this->check->setDatabase($database);
+        $this->lazyLoadCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->lazyLoadCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Unable to determine', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to determine', $healthCheckResult->description);
     }
 
     public function testRunWithLazyImagesStringValueEnabledReturnsGood(): void
@@ -173,11 +173,11 @@ class LazyLoadCheckTest extends TestCase
             'lazy_images' => '1',
         ]);
         $database = $this->createDatabaseWithPluginParams($params);
-        $this->check->setDatabase($database);
+        $this->lazyLoadCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->lazyLoadCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithLazyImagesStringValueDisabledReturnsWarning(): void
@@ -190,12 +190,12 @@ class LazyLoadCheckTest extends TestCase
             'lazy_images' => '0',
         ]);
         $database = $this->createDatabaseWithPluginParams($params);
-        $this->check->setDatabase($database);
+        $this->lazyLoadCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->lazyLoadCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Lazy loading for images is disabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Lazy loading for images is disabled', $healthCheckResult->description);
     }
 
     public function testRunDescriptionMentionsLazyLoadingEnabled(): void
@@ -207,12 +207,12 @@ class LazyLoadCheckTest extends TestCase
             'lazy_images' => 1,
         ]);
         $database = $this->createDatabaseWithPluginParams($params);
-        $this->check->setDatabase($database);
+        $this->lazyLoadCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->lazyLoadCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('enabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled', $healthCheckResult->description);
     }
 
     /**
@@ -275,14 +275,14 @@ class LazyLoadCheckTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string

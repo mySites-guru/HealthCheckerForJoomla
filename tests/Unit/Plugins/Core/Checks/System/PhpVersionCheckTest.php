@@ -20,26 +20,26 @@ class PhpVersionCheckTest extends TestCase
 {
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $check = new PhpVersionCheck();
-        $this->assertSame('system.php_version', $check->getSlug());
+        $phpVersionCheck = new PhpVersionCheck();
+        $this->assertSame('system.php_version', $phpVersionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $check = new PhpVersionCheck();
-        $this->assertSame('system', $check->getCategory());
+        $phpVersionCheck = new PhpVersionCheck();
+        $this->assertSame('system', $phpVersionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $check = new PhpVersionCheck();
-        $this->assertSame('core', $check->getProvider());
+        $phpVersionCheck = new PhpVersionCheck();
+        $this->assertSame('core', $phpVersionCheck->getProvider());
     }
 
     public function testGetTitleReturnsFallbackSlug(): void
     {
-        $check = new PhpVersionCheck();
-        $title = $check->getTitle();
+        $phpVersionCheck = new PhpVersionCheck();
+        $title = $phpVersionCheck->getTitle();
 
         // Our mock returns the slug as fallback when translation doesn't exist
         // In production, this would return the translated title
@@ -49,12 +49,12 @@ class PhpVersionCheckTest extends TestCase
     public function testRunReturnsGoodForCurrentPhpVersion(): void
     {
         // This test assumes we're running PHP 8.1+ (which is required for this codebase)
-        $check = new PhpVersionCheck();
-        $result = $check->run();
+        $phpVersionCheck = new PhpVersionCheck();
+        $healthCheckResult = $phpVersionCheck->run();
 
         // Current PHP version should be at least 8.1
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning],
             'PHP version check should return Good or Warning for PHP 8.1+',
         );
@@ -62,58 +62,58 @@ class PhpVersionCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $check = new PhpVersionCheck();
-        $result = $check->run();
+        $phpVersionCheck = new PhpVersionCheck();
+        $healthCheckResult = $phpVersionCheck->run();
 
-        $this->assertSame('system.php_version', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertNotEmpty($result->description);
-        $this->assertNotEmpty($result->title);
+        $this->assertSame('system.php_version', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertNotEmpty($healthCheckResult->description);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultDescriptionContainsPhpVersion(): void
     {
-        $check = new PhpVersionCheck();
-        $result = $check->run();
+        $phpVersionCheck = new PhpVersionCheck();
+        $healthCheckResult = $phpVersionCheck->run();
 
         // The description should mention the PHP version
-        $this->assertStringContainsString('PHP', $result->description);
+        $this->assertStringContainsString('PHP', $healthCheckResult->description);
     }
 
     public function testResultDescriptionContainsVersionNumber(): void
     {
-        $check = new PhpVersionCheck();
-        $result = $check->run();
+        $phpVersionCheck = new PhpVersionCheck();
+        $healthCheckResult = $phpVersionCheck->run();
 
         // Should contain a version number pattern (e.g., "8.1", "8.2", "8.3")
-        $this->assertMatchesRegularExpression('/\d+\.\d+/', $result->description);
+        $this->assertMatchesRegularExpression('/\d+\.\d+/', $healthCheckResult->description);
     }
 
     public function testCheckIsConsistentOnMultipleRuns(): void
     {
-        $check = new PhpVersionCheck();
+        $phpVersionCheck = new PhpVersionCheck();
 
-        $result1 = $check->run();
-        $result2 = $check->run();
+        $healthCheckResult = $phpVersionCheck->run();
+        $result2 = $phpVersionCheck->run();
 
         // Results should be the same since PHP version doesn't change during test
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testCheckDoesNotRequireDatabase(): void
     {
-        $check = new PhpVersionCheck();
+        $phpVersionCheck = new PhpVersionCheck();
 
         // Database should be null (not injected)
-        $this->assertNull($check->getDatabase());
+        $this->assertNull($phpVersionCheck->getDatabase());
 
         // Check should still work without database
-        $result = $check->run();
+        $healthCheckResult = $phpVersionCheck->run();
         $this->assertInstanceOf(
             \MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult::class,
-            $result,
+            $healthCheckResult,
         );
     }
 }

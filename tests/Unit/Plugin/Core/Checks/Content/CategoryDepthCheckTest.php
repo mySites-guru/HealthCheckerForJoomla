@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(CategoryDepthCheck::class)]
 class CategoryDepthCheckTest extends TestCase
 {
-    private CategoryDepthCheck $check;
+    private CategoryDepthCheck $categoryDepthCheck;
 
     protected function setUp(): void
     {
-        $this->check = new CategoryDepthCheck();
+        $this->categoryDepthCheck = new CategoryDepthCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('content.category_depth', $this->check->getSlug());
+        $this->assertSame('content.category_depth', $this->categoryDepthCheck->getSlug());
     }
 
     public function testGetCategoryReturnsContent(): void
     {
-        $this->assertSame('content', $this->check->getCategory());
+        $this->assertSame('content', $this->categoryDepthCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->categoryDepthCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->categoryDepthCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,59 +51,59 @@ class CategoryDepthCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->categoryDepthCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenNoDeepCategories(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->categoryDepthCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->categoryDepthCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No categories', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No categories', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenDeepCategoriesExist(): void
     {
         // First query returns count of deep categories (5), second query returns max level (8)
         $database = MockDatabaseFactory::createWithSequentialResults([5, 8]);
-        $this->check->setDatabase($database);
+        $this->categoryDepthCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->categoryDepthCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('5 categories are', $result->description);
-        $this->assertStringContainsString('max depth: 8', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('5 categories are', $healthCheckResult->description);
+        $this->assertStringContainsString('max depth: 8', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningSingularWhenOneCategoryDeep(): void
     {
         // First query returns count of deep categories (1), second query returns max level (7)
         $database = MockDatabaseFactory::createWithSequentialResults([1, 7]);
-        $this->check->setDatabase($database);
+        $this->categoryDepthCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->categoryDepthCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('1 category is', $result->description);
-        $this->assertStringContainsString('max depth: 7', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 category is', $healthCheckResult->description);
+        $this->assertStringContainsString('max depth: 7', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWithHighMaxDepth(): void
     {
         // First query returns count of deep categories (10), second query returns max level (15)
         $database = MockDatabaseFactory::createWithSequentialResults([10, 15]);
-        $this->check->setDatabase($database);
+        $this->categoryDepthCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->categoryDepthCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('10 categories are', $result->description);
-        $this->assertStringContainsString('max depth: 15', $result->description);
-        $this->assertStringContainsString('UX issues', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('10 categories are', $healthCheckResult->description);
+        $this->assertStringContainsString('max depth: 15', $healthCheckResult->description);
+        $this->assertStringContainsString('UX issues', $healthCheckResult->description);
     }
 }

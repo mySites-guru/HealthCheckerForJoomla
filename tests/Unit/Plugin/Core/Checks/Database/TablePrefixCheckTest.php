@@ -20,15 +20,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TablePrefixCheck::class)]
 class TablePrefixCheckTest extends TestCase
 {
-    private TablePrefixCheck $check;
+    private TablePrefixCheck $tablePrefixCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new TablePrefixCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->tablePrefixCheck = new TablePrefixCheck();
     }
 
     protected function tearDown(): void
@@ -38,22 +38,22 @@ class TablePrefixCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.table_prefix', $this->check->getSlug());
+        $this->assertSame('database.table_prefix', $this->tablePrefixCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->tablePrefixCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->tablePrefixCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->tablePrefixCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -61,50 +61,50 @@ class TablePrefixCheckTest extends TestCase
 
     public function testRunWithUniquePrefixReturnsGood(): void
     {
-        $this->app->set('dbprefix', 'mysite_');
+        $this->cmsApplication->set('dbprefix', 'mysite_');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tablePrefixCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('mysite_', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('mysite_', $healthCheckResult->description);
     }
 
     public function testRunWithEmptyPrefixReturnsWarning(): void
     {
-        $this->app->set('dbprefix', '');
+        $this->cmsApplication->set('dbprefix', '');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tablePrefixCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('conflicts', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('conflicts', $healthCheckResult->description);
     }
 
     public function testRunWithDefaultPrefixReturnsWarning(): void
     {
-        $this->app->set('dbprefix', 'jos_');
+        $this->cmsApplication->set('dbprefix', 'jos_');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tablePrefixCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('default', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('default', $healthCheckResult->description);
     }
 
     public function testRunWithShortPrefixReturnsWarning(): void
     {
-        $this->app->set('dbprefix', 'ab');
+        $this->cmsApplication->set('dbprefix', 'ab');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tablePrefixCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('short', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('short', $healthCheckResult->description);
     }
 
     public function testRunWithThreeCharPrefixReturnsGood(): void
     {
-        $this->app->set('dbprefix', 'abc');
+        $this->cmsApplication->set('dbprefix', 'abc');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tablePrefixCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 }

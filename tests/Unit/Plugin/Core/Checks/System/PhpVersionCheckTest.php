@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(PhpVersionCheck::class)]
 class PhpVersionCheckTest extends TestCase
 {
-    private PhpVersionCheck $check;
+    private PhpVersionCheck $phpVersionCheck;
 
     protected function setUp(): void
     {
-        $this->check = new PhpVersionCheck();
+        $this->phpVersionCheck = new PhpVersionCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.php_version', $this->check->getSlug());
+        $this->assertSame('system.php_version', $this->phpVersionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->phpVersionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->phpVersionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->phpVersionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,29 +50,29 @@ class PhpVersionCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
-        $this->assertSame('system.php_version', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.php_version', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsGoodForCurrentPhp(): void
     {
         // Current PHP version should be 8.2+ which is good
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
         // For PHP 8.2+ we expect Good, otherwise Warning
-        $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
-        $this->assertStringContainsString(PHP_VERSION, $result->description);
+        $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+        $this->assertStringContainsString(PHP_VERSION, $healthCheckResult->description);
     }
 
     public function testRunDescriptionContainsVersionInfo(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
         // Should contain PHP version information
-        $this->assertMatchesRegularExpression('/\d+\.\d+/', $result->description);
+        $this->assertMatchesRegularExpression('/\d+\.\d+/', $healthCheckResult->description);
     }
 
     public function testPhpVersionConstantIsAvailable(): void
@@ -83,50 +83,50 @@ class PhpVersionCheckTest extends TestCase
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
+        $result2 = $this->phpVersionCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testDescriptionIncludesCurrentPhpVersion(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
         // The description should include the actual PHP version
-        $this->assertStringContainsString(PHP_VERSION, $result->description);
+        $this->assertStringContainsString(PHP_VERSION, $healthCheckResult->description);
     }
 
     public function testCurrentPhpVersionMeetsMinimumRequirement(): void
     {
         // The check requires PHP 8.1+, and we know tests require PHP 8.1+
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
         // Should never be Critical since our test environment requires PHP 8.1+
         $this->assertNotSame(
             HealthStatus::Critical,
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             'PHP version should meet minimum requirement of 8.1',
         );
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
-        $this->assertSame('system.php_version', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.php_version', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testVersionComparisonLogic(): void
@@ -208,17 +208,17 @@ class PhpVersionCheckTest extends TestCase
 
     public function testRunReturnsConsistentProvider(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultDescriptionIncludesVersionNumber(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
         // Description should contain a version number
-        $this->assertMatchesRegularExpression('/\d+\.\d+/', $result->description);
+        $this->assertMatchesRegularExpression('/\d+\.\d+/', $healthCheckResult->description);
     }
 
     public function testVersionCompareWithDevelopmentVersions(): void
@@ -250,11 +250,11 @@ class PhpVersionCheckTest extends TestCase
     public function testRunNeverThrowsException(): void
     {
         // The run() method should always return a result, never throw
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
         $this->assertInstanceOf(
             \MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult::class,
-            $result,
+            $healthCheckResult,
         );
     }
 
@@ -274,7 +274,7 @@ class PhpVersionCheckTest extends TestCase
 
     public function testSlugFormat(): void
     {
-        $slug = $this->check->getSlug();
+        $slug = $this->phpVersionCheck->getSlug();
 
         // Slug should be lowercase with dot separator
         $this->assertMatchesRegularExpression('/^[a-z]+\.[a-z_]+$/', $slug);
@@ -282,7 +282,7 @@ class PhpVersionCheckTest extends TestCase
 
     public function testCategoryIsValid(): void
     {
-        $category = $this->check->getCategory();
+        $category = $this->phpVersionCheck->getCategory();
 
         // Should be a valid category
         $validCategories = ['system', 'database', 'security', 'users', 'extensions', 'performance', 'seo', 'content'];
@@ -291,19 +291,19 @@ class PhpVersionCheckTest extends TestCase
 
     public function testResultDescriptionFormatting(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
         // Description should be properly formatted
-        $this->assertIsString($result->description);
-        $this->assertGreaterThan(10, strlen($result->description));
-        $this->assertStringContainsString('PHP', $result->description);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertGreaterThan(10, strlen($healthCheckResult->description));
+        $this->assertStringContainsString('PHP', $healthCheckResult->description);
     }
 
     public function testCheckHandlesAllThreeVersionComparisonCases(): void
     {
         // Document the three possible outcomes based on PHP_VERSION
         $currentVersion = PHP_VERSION;
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpVersionCheck->run();
 
         // Case 1: Below minimum (Critical) - cannot test as CI requires PHP 8.1+
         // Case 2: Between minimum and recommended (Warning)
@@ -311,11 +311,12 @@ class PhpVersionCheckTest extends TestCase
 
         if (version_compare($currentVersion, '8.2.0', '>=')) {
             // Case 3: Good
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         } elseif (version_compare($currentVersion, '8.1.0', '>=')) {
             // Case 2: Warning
-            $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+            $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         }
+
         // Case 1 cannot be tested in CI environment
     }
 }

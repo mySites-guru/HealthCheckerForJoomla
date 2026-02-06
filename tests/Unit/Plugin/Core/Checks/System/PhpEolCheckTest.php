@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(PhpEolCheck::class)]
 class PhpEolCheckTest extends TestCase
 {
-    private PhpEolCheck $check;
+    private PhpEolCheck $phpEolCheck;
 
     protected function setUp(): void
     {
-        $this->check = new PhpEolCheck();
+        $this->phpEolCheck = new PhpEolCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.php_eol', $this->check->getSlug());
+        $this->assertSame('system.php_eol', $this->phpEolCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->phpEolCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->phpEolCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->phpEolCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -65,12 +65,12 @@ class PhpEolCheckTest extends TestCase
         ];
 
         $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('active support', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('active support', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenApproachingSupportEnd(): void
@@ -89,12 +89,12 @@ class PhpEolCheckTest extends TestCase
         ];
 
         $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('ends in', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('ends in', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenInSecurityOnlyMode(): void
@@ -113,12 +113,12 @@ class PhpEolCheckTest extends TestCase
         ];
 
         $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('security-only', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('security-only', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenPastEol(): void
@@ -137,35 +137,35 @@ class PhpEolCheckTest extends TestCase
         ];
 
         $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('end-of-life', $result->description);
-        $this->assertStringContainsString('immediately', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('end-of-life', $healthCheckResult->description);
+        $this->assertStringContainsString('immediately', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenApiError(): void
     {
         $httpClient = MockHttpFactory::createWithGetResponse(500, '');
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Unable to fetch', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to fetch', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenConnectionFails(): void
     {
         $httpClient = MockHttpFactory::createThatThrows('Connection refused');
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Unable to fetch', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to fetch', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenVersionNotFoundInApi(): void
@@ -180,22 +180,22 @@ class PhpEolCheckTest extends TestCase
         ];
 
         $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not found', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not found', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenInvalidJsonResponse(): void
     {
         $httpClient = MockHttpFactory::createWithGetResponse(200, 'not valid json');
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testResultDescriptionContainsPhpVersion(): void
@@ -213,23 +213,23 @@ class PhpEolCheckTest extends TestCase
         ];
 
         $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
-        $this->assertStringContainsString(PHP_VERSION, $result->description);
+        $this->assertStringContainsString(PHP_VERSION, $healthCheckResult->description);
     }
 
     public function testResultMetadata(): void
     {
         $httpClient = MockHttpFactory::createThatThrows('Network error');
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
-        $this->assertSame('system.php_eol', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.php_eol', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsWarningWhenDateParsingFails(): void
@@ -245,12 +245,12 @@ class PhpEolCheckTest extends TestCase
         ];
 
         $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('could not be parsed', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('could not be parsed', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenBooleanEolDate(): void
@@ -266,15 +266,15 @@ class PhpEolCheckTest extends TestCase
         ];
 
         $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
         // Should return warning because false cannot be parsed as a date
         // The warning message will contain the underlying TypeError message from DateTime
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // The error message contains 'DateTime' from the TypeError
-        $this->assertStringContainsString('DateTime', $result->description);
+        $this->assertStringContainsString('DateTime', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSupportDateBoolean(): void
@@ -290,14 +290,14 @@ class PhpEolCheckTest extends TestCase
         ];
 
         $httpClient = MockHttpFactory::createWithJsonResponse(200, $eolData);
-        $this->check->setHttpClient($httpClient);
+        $this->phpEolCheck->setHttpClient($httpClient);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->phpEolCheck->run();
 
         // Should return warning because false cannot be parsed as a date
         // The warning message will contain the underlying TypeError message from DateTime
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // The error message contains 'DateTime' from the TypeError
-        $this->assertStringContainsString('DateTime', $result->description);
+        $this->assertStringContainsString('DateTime', $healthCheckResult->description);
     }
 }

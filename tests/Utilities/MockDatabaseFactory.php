@@ -36,7 +36,7 @@ class MockDatabaseFactory
 
             public function getQuery(bool $new = false): QueryInterface
             {
-                return self::createMockQuery();
+                return $this->createMockQuery();
             }
 
             public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
@@ -79,14 +79,14 @@ class MockDatabaseFactory
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -104,12 +104,12 @@ class MockDatabaseFactory
                 return [];
             }
 
-            private static function createMockQuery(): QueryInterface
+            private function createMockQuery(): QueryInterface
             {
-                return self::buildMockQuery();
+                return $this->buildMockQuery();
             }
 
-            private static function buildMockQuery(): QueryInterface
+            private function buildMockQuery(): QueryInterface
             {
                 return new class implements QueryInterface {
                     public function select(array|string $columns): self
@@ -192,7 +192,7 @@ class MockDatabaseFactory
 
             public function getQuery(bool $new = false): QueryInterface
             {
-                return self::createMockQuery();
+                return $this->createMockQuery();
             }
 
             public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
@@ -235,14 +235,14 @@ class MockDatabaseFactory
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -260,7 +260,7 @@ class MockDatabaseFactory
                 return [];
             }
 
-            private static function createMockQuery(): QueryInterface
+            private function createMockQuery(): QueryInterface
             {
                 return new class implements QueryInterface {
                     public function select(array|string $columns): self
@@ -335,7 +335,7 @@ class MockDatabaseFactory
 
             public function getQuery(bool $new = false): QueryInterface
             {
-                return self::createMockQuery();
+                return $this->createMockQuery();
             }
 
             public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
@@ -378,14 +378,14 @@ class MockDatabaseFactory
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -403,7 +403,7 @@ class MockDatabaseFactory
                 return [];
             }
 
-            private static function createMockQuery(): QueryInterface
+            private function createMockQuery(): QueryInterface
             {
                 return new class implements QueryInterface {
                     public function select(array|string $columns): self
@@ -485,7 +485,7 @@ class MockDatabaseFactory
 
             public function getQuery(bool $new = false): QueryInterface
             {
-                return self::createMockQuery();
+                return $this->createMockQuery();
             }
 
             public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
@@ -528,14 +528,14 @@ class MockDatabaseFactory
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -553,7 +553,7 @@ class MockDatabaseFactory
                 return [];
             }
 
-            private static function createMockQuery(): QueryInterface
+            private function createMockQuery(): QueryInterface
             {
                 return new class implements QueryInterface {
                     public function select(array|string $columns): self
@@ -669,7 +669,7 @@ class MockDatabaseFactory
 
             public function getQuery(bool $new = false): QueryInterface
             {
-                return self::createMockQuery();
+                return $this->createMockQuery();
             }
 
             public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
@@ -722,14 +722,14 @@ class MockDatabaseFactory
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -747,7 +747,7 @@ class MockDatabaseFactory
                 return [];
             }
 
-            private static function createMockQuery(): QueryInterface
+            private function createMockQuery(): QueryInterface
             {
                 return new class implements QueryInterface {
                     public function select(array|string $columns): self
@@ -864,7 +864,7 @@ class MockDatabaseFactory
 
             public function getQuery(bool $new = false): QueryInterface
             {
-                return self::createMockQuery();
+                return $this->createMockQuery();
             }
 
             public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
@@ -917,14 +917,14 @@ class MockDatabaseFactory
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -942,7 +942,7 @@ class MockDatabaseFactory
                 return $this->tableList;
             }
 
-            private static function createMockQuery(): QueryInterface
+            private function createMockQuery(): QueryInterface
             {
                 return new class implements QueryInterface {
                     public function select(array|string $columns): self
@@ -1017,7 +1017,7 @@ class MockDatabaseFactory
 
             public function getQuery(bool $new = false): QueryInterface
             {
-                return self::createMockQuery();
+                return $this->createMockQuery();
             }
 
             public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
@@ -1060,14 +1060,14 @@ class MockDatabaseFactory
                 throw $this->exception;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -1085,7 +1085,7 @@ class MockDatabaseFactory
                 throw $this->exception;
             }
 
-            private static function createMockQuery(): QueryInterface
+            private function createMockQuery(): QueryInterface
             {
                 return new class implements QueryInterface {
                     public function select(array|string $columns): self
@@ -1160,7 +1160,7 @@ class MockDatabaseFactory
 
             public function getQuery(bool $new = false): QueryInterface
             {
-                return self::createMockQuery();
+                return $this->createMockQuery();
             }
 
             public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
@@ -1203,14 +1203,14 @@ class MockDatabaseFactory
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -1228,7 +1228,7 @@ class MockDatabaseFactory
                 return [];
             }
 
-            private static function createMockQuery(): QueryInterface
+            private function createMockQuery(): QueryInterface
             {
                 return new class implements QueryInterface {
                     public function select(array|string $columns): self
@@ -1303,7 +1303,7 @@ class MockDatabaseFactory
 
             public function getQuery(bool $new = false): QueryInterface
             {
-                return self::createMockQuery();
+                return $this->createMockQuery();
             }
 
             public function setQuery(QueryInterface|string $query, int $offset = 0, int $limit = 0): self
@@ -1346,14 +1346,14 @@ class MockDatabaseFactory
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -1371,7 +1371,7 @@ class MockDatabaseFactory
                 return [];
             }
 
-            private static function createMockQuery(): QueryInterface
+            private function createMockQuery(): QueryInterface
             {
                 return new class implements QueryInterface {
                     public function select(array|string $columns): self

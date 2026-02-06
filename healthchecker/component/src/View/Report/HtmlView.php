@@ -101,13 +101,13 @@ class HtmlView extends BaseHtmlView
         $jsonUrl = Route::_('index.php?option=com_healthchecker&view=report&format=json&' . $token . '=1', false);
         $htmlUrl = Route::_('index.php?option=com_healthchecker&view=report&format=htmlexport&' . $token . '=1', false);
 
-        $dropdown = $toolbar->dropdownButton('export')
+        $toolbarDropdownButton = $toolbar->dropdownButton('export')
             ->text('COM_HEALTHCHECKER_EXPORT')
             ->toggleSplit(false)
             ->icon('icon-download')
             ->buttonClass('btn btn-action');
 
-        $childBar = $dropdown->getChildToolbar();
+        $childBar = $toolbarDropdownButton->getChildToolbar();
 
         $childBar->linkButton('export-json')
             ->text('COM_HEALTHCHECKER_EXPORT_JSON')
@@ -147,7 +147,7 @@ class HtmlView extends BaseHtmlView
 
         $user = $cmsApplication->getIdentity();
 
-        if ($user !== null && $user->authorise('core.admin', 'com_healthchecker')) {
+        if ($user instanceof \Joomla\CMS\User\User && $user->authorise('core.admin', 'com_healthchecker')) {
             ToolbarHelper::preferences('com_healthchecker');
         }
     }

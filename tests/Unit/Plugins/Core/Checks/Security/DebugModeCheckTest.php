@@ -21,42 +21,42 @@ class DebugModeCheckTest extends TestCase
 {
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $check = new DebugModeCheck();
-        $this->assertSame('security.debug_mode', $check->getSlug());
+        $debugModeCheck = new DebugModeCheck();
+        $this->assertSame('security.debug_mode', $debugModeCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $check = new DebugModeCheck();
-        $this->assertSame('security', $check->getCategory());
+        $debugModeCheck = new DebugModeCheck();
+        $this->assertSame('security', $debugModeCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $check = new DebugModeCheck();
-        $this->assertSame('core', $check->getProvider());
+        $debugModeCheck = new DebugModeCheck();
+        $this->assertSame('core', $debugModeCheck->getProvider());
     }
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $check = new DebugModeCheck();
-        $result = $check->run();
+        $debugModeCheck = new DebugModeCheck();
+        $healthCheckResult = $debugModeCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame('security.debug_mode', $result->slug);
-        $this->assertSame('security', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame('security.debug_mode', $healthCheckResult->slug);
+        $this->assertSame('security', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsGoodOrWarningStatus(): void
     {
-        $check = new DebugModeCheck();
-        $result = $check->run();
+        $debugModeCheck = new DebugModeCheck();
+        $healthCheckResult = $debugModeCheck->run();
 
         // The check returns Good when debug is disabled, Warning when enabled
         // In our test environment, it should return one of these
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning],
             'Debug mode check should return Good or Warning status',
         );
@@ -64,40 +64,40 @@ class DebugModeCheckTest extends TestCase
 
     public function testResultDescriptionIsNotEmpty(): void
     {
-        $check = new DebugModeCheck();
-        $result = $check->run();
+        $debugModeCheck = new DebugModeCheck();
+        $healthCheckResult = $debugModeCheck->run();
 
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testResultDescriptionMentionsDebugMode(): void
     {
-        $check = new DebugModeCheck();
-        $result = $check->run();
+        $debugModeCheck = new DebugModeCheck();
+        $healthCheckResult = $debugModeCheck->run();
 
-        $this->assertStringContainsStringIgnoringCase('debug', $result->description);
+        $this->assertStringContainsStringIgnoringCase('debug', $healthCheckResult->description);
     }
 
     public function testCheckDoesNotRequireDatabase(): void
     {
-        $check = new DebugModeCheck();
+        $debugModeCheck = new DebugModeCheck();
 
         // Database should be null (not injected)
-        $this->assertNull($check->getDatabase());
+        $this->assertNull($debugModeCheck->getDatabase());
 
         // Check should still work without database
-        $result = $check->run();
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
+        $healthCheckResult = $debugModeCheck->run();
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
     }
 
     public function testCheckIsConsistentOnMultipleRuns(): void
     {
-        $check = new DebugModeCheck();
+        $debugModeCheck = new DebugModeCheck();
 
-        $result1 = $check->run();
-        $result2 = $check->run();
+        $healthCheckResult = $debugModeCheck->run();
+        $result2 = $debugModeCheck->run();
 
         // Results should be the same since debug config doesn't change during test
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
     }
 }

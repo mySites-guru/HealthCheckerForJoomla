@@ -20,31 +20,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(UnusedModulesCheck::class)]
 class UnusedModulesCheckTest extends TestCase
 {
-    private UnusedModulesCheck $check;
+    private UnusedModulesCheck $unusedModulesCheck;
 
     protected function setUp(): void
     {
-        $this->check = new UnusedModulesCheck();
+        $this->unusedModulesCheck = new UnusedModulesCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('extensions.unused_modules', $this->check->getSlug());
+        $this->assertSame('extensions.unused_modules', $this->unusedModulesCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->unusedModulesCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->unusedModulesCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->unusedModulesCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -52,21 +52,21 @@ class UnusedModulesCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->unusedModulesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('database', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('database', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithNoUnusedModulesReturnsGood(): void
     {
         $database = $this->createDatabaseWithUnusedModules([], []);
-        $this->check->setDatabase($database);
+        $this->unusedModulesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->unusedModulesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('menu assignments', strtolower($result->description));
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('menu assignments', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithFewUnusedModulesReturnsWarning(): void
@@ -82,12 +82,12 @@ class UnusedModulesCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithUnusedModules($unusedModules, []);
-        $this->check->setDatabase($database);
+        $this->unusedModulesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->unusedModulesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('2', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2', $healthCheckResult->description);
     }
 
     public function testRunWithManyUnusedModulesReturnsWarningWithNames(): void
@@ -97,19 +97,19 @@ class UnusedModulesCheckTest extends TestCase
         for ($i = 1; $i <= 8; $i++) {
             $unusedModules[] = (object) [
                 'id' => $i,
-                'title' => "Unused Module {$i}",
+                'title' => 'Unused Module ' . $i,
             ];
         }
 
         $database = $this->createDatabaseWithUnusedModules($unusedModules, []);
-        $this->check->setDatabase($database);
+        $this->unusedModulesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->unusedModulesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // Verify module names are included in warning message
-        $this->assertStringContainsString('Unused Module 1', $result->description);
-        $this->assertStringContainsString('Unused Module 8', $result->description);
+        $this->assertStringContainsString('Unused Module 1', $healthCheckResult->description);
+        $this->assertStringContainsString('Unused Module 8', $healthCheckResult->description);
     }
 
     public function testRunWithNoPageModulesReturnsWarning(): void
@@ -122,11 +122,11 @@ class UnusedModulesCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithUnusedModules([], $noPageModules);
-        $this->check->setDatabase($database);
+        $this->unusedModulesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->unusedModulesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithBothTypesOfUnusedModulesReturnsWarning(): void
@@ -144,19 +144,19 @@ class UnusedModulesCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithUnusedModules($unusedModules, $noPageModules);
-        $this->check->setDatabase($database);
+        $this->unusedModulesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->unusedModulesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('2', $result->description); // Total = 2
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2', $healthCheckResult->description); // Total = 2
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->unusedModulesCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testWarningMessageSuggestsUnpublishing(): void
@@ -168,11 +168,11 @@ class UnusedModulesCheckTest extends TestCase
             ],
         ];
         $database = $this->createDatabaseWithUnusedModules($unusedModules, []);
-        $this->check->setDatabase($database);
+        $this->unusedModulesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->unusedModulesCheck->run();
 
-        $this->assertStringContainsString('no menu assignment', strtolower($result->description));
+        $this->assertStringContainsString('no menu assignment', strtolower($healthCheckResult->description));
     }
 
     /**
@@ -243,14 +243,14 @@ class UnusedModulesCheckTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string

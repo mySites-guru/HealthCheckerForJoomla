@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(OpenGraphCheck::class)]
 class OpenGraphCheckTest extends TestCase
 {
-    private OpenGraphCheck $check;
+    private OpenGraphCheck $openGraphCheck;
 
     protected function setUp(): void
     {
-        $this->check = new OpenGraphCheck();
+        $this->openGraphCheck = new OpenGraphCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.open_graph', $this->check->getSlug());
+        $this->assertSame('seo.open_graph', $this->openGraphCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->openGraphCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->openGraphCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->openGraphCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,43 +51,43 @@ class OpenGraphCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->openGraphCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNoOpenGraphPluginsReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->openGraphCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->openGraphCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('No Open Graph plugin', $result->description);
-        $this->assertStringContainsString('Consider installing', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No Open Graph plugin', $healthCheckResult->description);
+        $this->assertStringContainsString('Consider installing', $healthCheckResult->description);
     }
 
     public function testRunWithOpenGraphPluginReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(1);
-        $this->check->setDatabase($database);
+        $this->openGraphCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->openGraphCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('1 enabled plugin', $result->description);
-        $this->assertStringContainsString('Open Graph', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 enabled plugin', $healthCheckResult->description);
+        $this->assertStringContainsString('Open Graph', $healthCheckResult->description);
     }
 
     public function testRunWithMultipleOpenGraphPluginsReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(3);
-        $this->check->setDatabase($database);
+        $this->openGraphCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->openGraphCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('3 enabled plugin', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('3 enabled plugin', $healthCheckResult->description);
     }
 }

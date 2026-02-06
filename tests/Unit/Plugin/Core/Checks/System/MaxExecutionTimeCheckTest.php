@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MaxExecutionTimeCheck::class)]
 class MaxExecutionTimeCheckTest extends TestCase
 {
-    private MaxExecutionTimeCheck $check;
+    private MaxExecutionTimeCheck $maxExecutionTimeCheck;
 
     protected function setUp(): void
     {
-        $this->check = new MaxExecutionTimeCheck();
+        $this->maxExecutionTimeCheck = new MaxExecutionTimeCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.max_execution_time', $this->check->getSlug());
+        $this->assertSame('system.max_execution_time', $this->maxExecutionTimeCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->maxExecutionTimeCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->maxExecutionTimeCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->maxExecutionTimeCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,39 +50,39 @@ class MaxExecutionTimeCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxExecutionTimeCheck->run();
 
-        $this->assertSame('system.max_execution_time', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.max_execution_time', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunResultHasDescription(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxExecutionTimeCheck->run();
 
-        $this->assertIsString($result->description);
-        $this->assertNotEmpty($result->description);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxExecutionTimeCheck->run();
 
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
 
     public function testRunDescriptionContainsTimeInfo(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxExecutionTimeCheck->run();
 
         // Description should mention execution time or unlimited
         $this->assertTrue(
-            str_contains($result->description, 'execution time') ||
-            str_contains($result->description, 'unlimited'),
+            str_contains($healthCheckResult->description, 'execution time') ||
+            str_contains($healthCheckResult->description, 'unlimited'),
         );
     }
 
@@ -91,38 +91,38 @@ class MaxExecutionTimeCheckTest extends TestCase
         // Set max_execution_time to 0 (unlimited) - only possible in CLI
         ini_set('max_execution_time', '0');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxExecutionTimeCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('unlimited', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('unlimited', $healthCheckResult->description);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxExecutionTimeCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->maxExecutionTimeCheck->run();
+        $result2 = $this->maxExecutionTimeCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testDescriptionIncludesCurrentValue(): void
     {
         $currentValue = (int) ini_get('max_execution_time');
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxExecutionTimeCheck->run();
 
         // If not unlimited (0), description should include the current value
         if ($currentValue !== 0) {
-            $this->assertStringContainsString((string) $currentValue, $result->description);
+            $this->assertStringContainsString((string) $currentValue, $healthCheckResult->description);
         } else {
-            $this->assertStringContainsString('unlimited', $result->description);
+            $this->assertStringContainsString('unlimited', $healthCheckResult->description);
         }
     }
 }

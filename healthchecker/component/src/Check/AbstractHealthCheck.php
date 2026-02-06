@@ -214,13 +214,13 @@ abstract class AbstractHealthCheck implements HealthCheckInterface
      * Default implementation returns null (row not clickable).
      * Override this method to make the result row link to an action page.
      *
-     * @param HealthStatus|null $status The result status (Critical/Warning/Good), or null for backwards compatibility
+     * @param HealthStatus|null $healthStatus The result status (Critical/Warning/Good), or null for backwards compatibility
      *
      * @return string|null The action URL or null if not clickable
      *
      * @since 3.0.36
      */
-    public function getActionUrl(?HealthStatus $status = null): ?string
+    public function getActionUrl(?HealthStatus $healthStatus = null): ?string
     {
         return null;
     }

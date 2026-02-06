@@ -18,13 +18,13 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(HtaccessProtectionCheck::class)]
 class HtaccessProtectionCheckTest extends TestCase
 {
-    private HtaccessProtectionCheck $check;
+    private HtaccessProtectionCheck $htaccessProtectionCheck;
 
     private string $htaccessPath;
 
     protected function setUp(): void
     {
-        $this->check = new HtaccessProtectionCheck();
+        $this->htaccessProtectionCheck = new HtaccessProtectionCheck();
         $this->htaccessPath = JPATH_ROOT . '/.htaccess';
 
         // Ensure JPATH_ROOT exists
@@ -50,22 +50,22 @@ class HtaccessProtectionCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.htaccess_protection', $this->check->getSlug());
+        $this->assertSame('security.htaccess_protection', $this->htaccessProtectionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->htaccessProtectionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->htaccessProtectionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->htaccessProtectionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -74,11 +74,11 @@ class HtaccessProtectionCheckTest extends TestCase
     public function testRunReturnsWarningWhenHtaccessMissing(): void
     {
         // No .htaccess file exists
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not found', $result->description);
-        $this->assertStringContainsString('htaccess.txt', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not found', $healthCheckResult->description);
+        $this->assertStringContainsString('htaccess.txt', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenHtaccessIsEmpty(): void
@@ -86,10 +86,10 @@ class HtaccessProtectionCheckTest extends TestCase
         // Create an empty .htaccess file
         file_put_contents($this->htaccessPath, '');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('empty', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('empty', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenHtaccessHasNoRewriteEngine(): void
@@ -104,10 +104,10 @@ Options -Indexes
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('rewriting', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('rewriting', strtolower($healthCheckResult->description));
     }
 
     public function testRunReturnsGoodWhenHtaccessHasRewriteEngine(): void
@@ -123,11 +123,11 @@ RewriteRule ^(.*)$ index.php [L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('present', $result->description);
-        $this->assertStringContainsString('configured', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('present', $healthCheckResult->description);
+        $this->assertStringContainsString('configured', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenRewriteEngineIsCaseInsensitive(): void
@@ -136,9 +136,9 @@ HTACCESS;
         $htaccessContent = 'rewriteengine on';
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenRewriteEngineUpperCase(): void
@@ -146,9 +146,9 @@ HTACCESS;
         $htaccessContent = 'REWRITEENGINE ON';
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenRewriteEngineMixedCase(): void
@@ -156,45 +156,45 @@ HTACCESS;
         $htaccessContent = 'ReWriteEnGiNe On';
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunResultContainsSlug(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame('security.htaccess_protection', $result->slug);
+        $this->assertSame('security.htaccess_protection', $healthCheckResult->slug);
     }
 
     public function testRunResultContainsTitle(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testRunResultHasProvider(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunResultHasCategory(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame('security', $result->category);
+        $this->assertSame('security', $healthCheckResult->category);
     }
 
     public function testRunNeverReturnsCritical(): void
     {
         // Per the docblock, this check does not return critical
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenOnlyZeroContent(): void
@@ -202,10 +202,10 @@ HTACCESS;
         // '0' is in the empty check array
         file_put_contents($this->htaccessPath, '0');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('empty', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('empty', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWithFullJoomlaHtaccess(): void
@@ -245,9 +245,9 @@ RewriteRule .* index.php [L]
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWithMinimalRewriteEngine(): void
@@ -255,9 +255,9 @@ HTACCESS;
         // Just having RewriteEngine is enough
         file_put_contents($this->htaccessPath, 'RewriteEngine');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenFileContainsOnlyComments(): void
@@ -269,9 +269,9 @@ HTACCESS;
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWithOtherDirectivesButNoRewrite(): void
@@ -284,34 +284,34 @@ ErrorDocument 404 /index.php
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+        $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
     }
 
     public function testRunResultDescriptionIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testWarningDescriptionMentionsHtaccess(): void
     {
         // When .htaccess is missing
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         $this->assertTrue(
-            str_contains($result->description, 'htaccess') ||
-            str_contains($result->description, '.htaccess'),
+            str_contains($healthCheckResult->description, 'htaccess') ||
+            str_contains($healthCheckResult->description, '.htaccess'),
         );
     }
 
@@ -324,11 +324,11 @@ HTACCESS;
 HTACCESS;
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
         // The check uses stripos which will still find the commented RewriteEngine
         // This is a known limitation - it's checking for presence not active state
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testGoodDescriptionMentionsConfigured(): void
@@ -336,9 +336,9 @@ HTACCESS;
         $htaccessContent = 'RewriteEngine On';
         file_put_contents($this->htaccessPath, $htaccessContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->htaccessProtectionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('configured', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('configured', $healthCheckResult->description);
     }
 }

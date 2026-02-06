@@ -128,8 +128,8 @@ class HtmlexportView extends BaseHtmlView
      */
     private function renderHtmlReport(
         $results,
-        $categories,
-        $providers,
+        array $categories,
+        array $providers,
         $siteName,
         string $reportDate,
         string $joomlaVersion,
@@ -432,7 +432,7 @@ class HtmlexportView extends BaseHtmlView
                 <div class="category">
                     <div class="category-header">
                         <h2><?php
-                echo htmlspecialchars($categoryTitle);
+                echo htmlspecialchars((string) $categoryTitle);
                 ?></h2>
                     </div>
 
@@ -442,20 +442,20 @@ class HtmlexportView extends BaseHtmlView
                         <div class="check-header">
                             <span class="status-badge <?php echo $categoryResult->healthStatus->value; ?>">
                                 <?php echo $categoryResult->healthStatus === HealthStatus::Critical ? '🔴 ' : ($categoryResult->healthStatus === HealthStatus::Warning ? '🟡 ' : '🟢 '); ?>
-                                    <?php echo strtoupper($categoryResult->healthStatus->value); ?>
+                                    <?php echo strtoupper((string) $categoryResult->healthStatus->value); ?>
                                 </span>
-                            <span class="check-title"><?php echo htmlspecialchars($categoryResult->title); ?></span>
+                            <span class="check-title"><?php echo htmlspecialchars((string) $categoryResult->title); ?></span>
                             <?php if ($categoryResult->provider !== 'core'): ?>
                                     <?php
                                         $provider = $providers[$categoryResult->provider] ?? null;
                                 $providerName = $provider ? $provider->name : $categoryResult->provider;
                                 ?>
-                                    <span class="check-provider"><?php echo htmlspecialchars($providerName); ?></span>
+                                    <span class="check-provider"><?php echo htmlspecialchars((string) $providerName); ?></span>
                             <?php endif;
                     ?>
                             </div>
                         <div class="check-description">
-                            <?php echo nl2br(htmlspecialchars($categoryResult->description)); ?>
+                            <?php echo nl2br(htmlspecialchars((string) $categoryResult->description)); ?>
                             </div>
                     </div>
 <?php endforeach;

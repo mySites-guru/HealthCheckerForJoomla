@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(JoomlaCoreVersionCheck::class)]
 class JoomlaCoreVersionCheckTest extends TestCase
 {
-    private JoomlaCoreVersionCheck $check;
+    private JoomlaCoreVersionCheck $joomlaCoreVersionCheck;
 
     protected function setUp(): void
     {
-        $this->check = new JoomlaCoreVersionCheck();
+        $this->joomlaCoreVersionCheck = new JoomlaCoreVersionCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('extensions.joomla_core_version', $this->check->getSlug());
+        $this->assertSame('extensions.joomla_core_version', $this->joomlaCoreVersionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->joomlaCoreVersionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->joomlaCoreVersionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->joomlaCoreVersionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,34 +51,34 @@ class JoomlaCoreVersionCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->joomlaCoreVersionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenNoUpdateAvailable(): void
     {
         // Version stub returns 5.0.0
         $database = MockDatabaseFactory::createWithResult(null);
-        $this->check->setDatabase($database);
+        $this->joomlaCoreVersionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->joomlaCoreVersionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('5.0.0', $result->description);
-        $this->assertStringContainsString('latest', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('5.0.0', $healthCheckResult->description);
+        $this->assertStringContainsString('latest', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenUpdateAvailable(): void
     {
         // Current version from stub is 5.0.0, newer version available
         $database = MockDatabaseFactory::createWithResult('5.1.0');
-        $this->check->setDatabase($database);
+        $this->joomlaCoreVersionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->joomlaCoreVersionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('5.0.0', $result->description);
-        $this->assertStringContainsString('5.1.0', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('5.0.0', $healthCheckResult->description);
+        $this->assertStringContainsString('5.1.0', $healthCheckResult->description);
     }
 }

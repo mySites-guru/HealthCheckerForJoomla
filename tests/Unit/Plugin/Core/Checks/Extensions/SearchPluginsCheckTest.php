@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(SearchPluginsCheck::class)]
 class SearchPluginsCheckTest extends TestCase
 {
-    private SearchPluginsCheck $check;
+    private SearchPluginsCheck $searchPluginsCheck;
 
     protected function setUp(): void
     {
-        $this->check = new SearchPluginsCheck();
+        $this->searchPluginsCheck = new SearchPluginsCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('extensions.search_plugins', $this->check->getSlug());
+        $this->assertSame('extensions.search_plugins', $this->searchPluginsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->searchPluginsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->searchPluginsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->searchPluginsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,79 +51,79 @@ class SearchPluginsCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchPluginsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('database', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('database', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithSmartSearchDisabledReturnsGood(): void
     {
         // Finder disabled (enabled = 0), plugins count = 0, total plugins = 0
         $database = MockDatabaseFactory::createWithSequentialResults([0, 0, 0]);
-        $this->check->setDatabase($database);
+        $this->searchPluginsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchPluginsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('not enabled', strtolower($result->description));
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not enabled', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithSmartSearchEnabledButNoPluginsReturnsWarning(): void
     {
         // Finder enabled (enabled = 1), plugins enabled = 0, total plugins = 5
         $database = MockDatabaseFactory::createWithSequentialResults([1, 0, 5]);
-        $this->check->setDatabase($database);
+        $this->searchPluginsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchPluginsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('no search plugins', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('no search plugins', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithPluginsEnabledButEmptyIndexReturnsWarning(): void
     {
         // Finder enabled, 3 plugins enabled, 5 total plugins, 0 indexed items
         $database = MockDatabaseFactory::createWithSequentialResults([1, 3, 5, 0]);
-        $this->check->setDatabase($database);
+        $this->searchPluginsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchPluginsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('empty', strtolower($result->description));
-        $this->assertStringContainsString('indexer', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('empty', strtolower($healthCheckResult->description));
+        $this->assertStringContainsString('indexer', strtolower($healthCheckResult->description));
     }
 
     public function testRunWithPluginsEnabledAndPopulatedIndexReturnsGood(): void
     {
         // Finder enabled, 3 plugins enabled, 5 total plugins, 150 indexed items
         $database = MockDatabaseFactory::createWithSequentialResults([1, 3, 5, 150]);
-        $this->check->setDatabase($database);
+        $this->searchPluginsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchPluginsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('3', $result->description);
-        $this->assertStringContainsString('5', $result->description);
-        $this->assertStringContainsString('150', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('3', $healthCheckResult->description);
+        $this->assertStringContainsString('5', $healthCheckResult->description);
+        $this->assertStringContainsString('150', $healthCheckResult->description);
     }
 
     public function testRunWithAllPluginsEnabledReturnsGood(): void
     {
         // Finder enabled, all 5 plugins enabled, 5 total plugins, 500 indexed items
         $database = MockDatabaseFactory::createWithSequentialResults([1, 5, 5, 500]);
-        $this->check->setDatabase($database);
+        $this->searchPluginsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchPluginsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('5 of 5', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('5 of 5', $healthCheckResult->description);
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchPluginsCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 }

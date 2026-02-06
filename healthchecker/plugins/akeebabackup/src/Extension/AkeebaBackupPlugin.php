@@ -241,7 +241,7 @@ final class AkeebaBackupPlugin extends CMSPlugin implements SubscriberInterface
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebabackup/src/Extension/AkeebaBackupPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_akeebabackup';
             }
@@ -356,7 +356,7 @@ final class AkeebaBackupPlugin extends CMSPlugin implements SubscriberInterface
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebabackup/src/Extension/AkeebaBackupPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_akeebabackup';
             }
@@ -515,7 +515,7 @@ final class AkeebaBackupPlugin extends CMSPlugin implements SubscriberInterface
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebabackup/src/Extension/AkeebaBackupPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_akeebabackup';
             }
@@ -679,7 +679,7 @@ final class AkeebaBackupPlugin extends CMSPlugin implements SubscriberInterface
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebabackup/src/Extension/AkeebaBackupPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_akeebabackup';
             }
@@ -825,7 +825,7 @@ final class AkeebaBackupPlugin extends CMSPlugin implements SubscriberInterface
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebabackup/src/Extension/AkeebaBackupPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_akeebabackup';
             }
@@ -956,7 +956,7 @@ final class AkeebaBackupPlugin extends CMSPlugin implements SubscriberInterface
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebabackup/src/Extension/AkeebaBackupPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_akeebabackup';
             }
@@ -1103,7 +1103,7 @@ final class AkeebaBackupPlugin extends CMSPlugin implements SubscriberInterface
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebabackup/src/Extension/AkeebaBackupPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_akeebabackup';
             }
@@ -1233,7 +1233,7 @@ final class AkeebaBackupPlugin extends CMSPlugin implements SubscriberInterface
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebabackup/src/Extension/AkeebaBackupPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_akeebabackup';
             }
@@ -1366,7 +1366,7 @@ final class AkeebaBackupPlugin extends CMSPlugin implements SubscriberInterface
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebabackup/src/Extension/AkeebaBackupPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_akeebabackup';
             }
@@ -1506,7 +1506,7 @@ final class AkeebaBackupPlugin extends CMSPlugin implements SubscriberInterface
                 return 'https://github.com/mySites-guru/HealthCheckerForJoomla/blob/main/healthchecker/plugins/akeebabackup/src/Extension/AkeebaBackupPlugin.php';
             }
 
-            public function getActionUrl(?HealthStatus $status = null): string
+            public function getActionUrl(?HealthStatus $healthStatus = null): string
             {
                 return '/administrator/index.php?option=com_akeebabackup';
             }

@@ -20,11 +20,11 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(DefaultSecretCheck::class)]
 class DefaultSecretCheckTest extends TestCase
 {
-    private DefaultSecretCheck $check;
+    private DefaultSecretCheck $defaultSecretCheck;
 
     protected function setUp(): void
     {
-        $this->check = new DefaultSecretCheck();
+        $this->defaultSecretCheck = new DefaultSecretCheck();
     }
 
     protected function tearDown(): void
@@ -35,22 +35,22 @@ class DefaultSecretCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.default_secret', $this->check->getSlug());
+        $this->assertSame('security.default_secret', $this->defaultSecretCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->defaultSecretCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->defaultSecretCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->defaultSecretCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -58,334 +58,334 @@ class DefaultSecretCheckTest extends TestCase
 
     public function testRunReturnsCriticalWhenSecretIsEmpty(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', '');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', '');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('empty', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('empty', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenSecretIsKnownDefault(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'FBVtggIk5lAXBMqz');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'FBVtggIk5lAXBMqz');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('default', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('default', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSecretIsTooShort(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'abc123xyz'); // 9 characters, less than 16
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'abc123xyz'); // 9 characters, less than 16
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('shorter', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('shorter', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSecretIs15Characters(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'abc123xyzABC012'); // exactly 15 characters
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'abc123xyzABC012'); // exactly 15 characters
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenSecretIsUniqueAndLongEnough(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'myUniqueSecretKey123456'); // 22 characters, unique
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'myUniqueSecretKey123456'); // 22 characters, unique
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('unique', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('unique', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenSecretIsExactly16Characters(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'abc123xyzABC0123'); // exactly 16 characters
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'abc123xyzABC0123'); // exactly 16 characters
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsCriticalWhenSecretNotSet(): void
     {
-        $app = new CMSApplication();
+        $cmsApplication = new CMSApplication();
         // Don't set secret, it will use the default empty string
-        Factory::setApplication($app);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
         // The default is empty string which triggers critical
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunResultContainsSlug(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'myUniqueSecretKey123456');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'myUniqueSecretKey123456');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame('security.default_secret', $result->slug);
+        $this->assertSame('security.default_secret', $healthCheckResult->slug);
     }
 
     public function testRunResultContainsTitle(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'myUniqueSecretKey123456');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'myUniqueSecretKey123456');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testRunResultHasProvider(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'myUniqueSecretKey123456');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'myUniqueSecretKey123456');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunResultHasCategory(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'myUniqueSecretKey123456');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'myUniqueSecretKey123456');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame('security', $result->category);
+        $this->assertSame('security', $healthCheckResult->category);
     }
 
     public function testRunResultDescriptionIsNotEmpty(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'myUniqueSecretKey123456');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'myUniqueSecretKey123456');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'test');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'test');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
 
     public function testRunReturnsWarningWithSingleCharacter(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'a');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'a');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWithLongSecret(): void
     {
-        $app = new CMSApplication();
+        $cmsApplication = new CMSApplication();
         // 64 character secret
-        $app->set('secret', 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ab');
-        Factory::setApplication($app);
+        $cmsApplication->set('secret', 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ab');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testCriticalForEmptyMentionsCriticalSecurityIssue(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', '');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', '');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('critical', strtolower($result->description));
-        $this->assertStringContainsString('security', strtolower($result->description));
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('critical', strtolower($healthCheckResult->description));
+        $this->assertStringContainsString('security', strtolower($healthCheckResult->description));
     }
 
     public function testCriticalForDefaultMentionsGenerate(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'FBVtggIk5lAXBMqz');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'FBVtggIk5lAXBMqz');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
         $this->assertTrue(
-            stripos($result->description, 'generate') !== false ||
-            stripos($result->description, 'Generate') !== false,
+            stripos($healthCheckResult->description, 'generate') !== false ||
+            stripos($healthCheckResult->description, 'Generate') !== false,
         );
     }
 
     public function testWarningMentionsRecommended(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'shortkey'); // 8 chars
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'shortkey'); // 8 chars
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('recommended', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('recommended', $healthCheckResult->description);
     }
 
     public function testGoodMentionsConfigured(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', 'secureRandomKey12345');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 'secureRandomKey12345');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('configured', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('configured', $healthCheckResult->description);
     }
 
     public function testRunWithIntegerSecretValue(): void
     {
         // Edge case: secret stored as integer
-        $app = new CMSApplication();
-        $app->set('secret', 123456789012345678);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', 123456789012345678);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
         // strlen on integer is cast to string, so it's 18 chars
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNumericStringSecret(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', '1234567890123456'); // 16 digit numeric string
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', '1234567890123456'); // 16 digit numeric string
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithSpecialCharactersInSecret(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', '!@#$%^&*()_+-=[]{}'); // 18 special characters
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', '!@#$%^&*()_+-=[]{}'); // 18 special characters
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithUnicodeSecret(): void
     {
-        $app = new CMSApplication();
+        $cmsApplication = new CMSApplication();
         // Unicode secret - strlen will count bytes, not characters
-        $app->set('secret', 'SecretKey' . "\u{1F511}" . 'Test12345');
-        Factory::setApplication($app);
+        $cmsApplication->set('secret', 'SecretKey' . "\u{1F511}" . 'Test12345');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
         // The emoji takes 4 bytes, so total is 9 + 4 + 9 = 22 bytes
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithWhitespaceOnlySecret(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', '                '); // 16 spaces
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', '                '); // 16 spaces
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
         // While technically 16 characters, empty() returns false for whitespace string
         // The check uses empty() first, which returns false for whitespace
         // So it passes the empty check and proceeds to length check
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNullSecret(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', null);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', null);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
         // empty(null) returns true, so should be critical
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testBoundaryAt15Characters(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', '123456789012345'); // exactly 15 characters
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', '123456789012345'); // exactly 15 characters
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testBoundaryAt16Characters(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', '1234567890123456'); // exactly 16 characters
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', '1234567890123456'); // exactly 16 characters
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testBoundaryAt17Characters(): void
     {
-        $app = new CMSApplication();
-        $app->set('secret', '12345678901234567'); // exactly 17 characters
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('secret', '12345678901234567'); // exactly 17 characters
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultSecretCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 }

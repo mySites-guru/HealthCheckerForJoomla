@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(StructuredDataCheck::class)]
 class StructuredDataCheckTest extends TestCase
 {
-    private StructuredDataCheck $check;
+    private StructuredDataCheck $structuredDataCheck;
 
     protected function setUp(): void
     {
-        $this->check = new StructuredDataCheck();
+        $this->structuredDataCheck = new StructuredDataCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.structured_data', $this->check->getSlug());
+        $this->assertSame('seo.structured_data', $this->structuredDataCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->structuredDataCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->structuredDataCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->structuredDataCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,54 +51,54 @@ class StructuredDataCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->structuredDataCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNoStructuredDataPluginsReturnsGood(): void
     {
         // This check returns Good even when no plugins found (informational only)
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->structuredDataCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->structuredDataCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No structured data plugin', $result->description);
-        $this->assertStringContainsString('Consider adding', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No structured data plugin', $healthCheckResult->description);
+        $this->assertStringContainsString('Consider adding', $healthCheckResult->description);
     }
 
     public function testRunWithStructuredDataPluginReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(1);
-        $this->check->setDatabase($database);
+        $this->structuredDataCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->structuredDataCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('1 enabled plugin', $result->description);
-        $this->assertStringContainsString('Schema.org', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 enabled plugin', $healthCheckResult->description);
+        $this->assertStringContainsString('Schema.org', $healthCheckResult->description);
     }
 
     public function testRunWithMultipleStructuredDataPluginsReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(2);
-        $this->check->setDatabase($database);
+        $this->structuredDataCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->structuredDataCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('2 enabled plugin', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 enabled plugin', $healthCheckResult->description);
     }
 
     public function testRunAlwaysReturnsGood(): void
     {
         // This check never returns warning/critical - it's purely informational
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->structuredDataCheck->setDatabase($database);
 
-        $result = $this->check->run();
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $healthCheckResult = $this->structuredDataCheck->run();
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 }

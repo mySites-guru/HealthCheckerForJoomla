@@ -18,13 +18,13 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(SitemapCheck::class)]
 class SitemapCheckTest extends TestCase
 {
-    private SitemapCheck $check;
+    private SitemapCheck $sitemapCheck;
 
     private string $sitemapPath;
 
     protected function setUp(): void
     {
-        $this->check = new SitemapCheck();
+        $this->sitemapCheck = new SitemapCheck();
         $this->sitemapPath = JPATH_ROOT . '/sitemap.xml';
 
         // Ensure JPATH_ROOT exists
@@ -48,22 +48,22 @@ class SitemapCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.sitemap', $this->check->getSlug());
+        $this->assertSame('seo.sitemap', $this->sitemapCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->sitemapCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->sitemapCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->sitemapCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -72,10 +72,10 @@ class SitemapCheckTest extends TestCase
     public function testRunReturnsWarningWhenSitemapNotFound(): void
     {
         // No sitemap.xml exists
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not found', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not found', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenValidUrlsetSitemapExists(): void
@@ -91,10 +91,10 @@ class SitemapCheckTest extends TestCase
 SITEMAP;
         file_put_contents($this->sitemapPath, $sitemapContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('present', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('present', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenValidSitemapIndexExists(): void
@@ -110,29 +110,29 @@ SITEMAP;
 SITEMAP;
         file_put_contents($this->sitemapPath, $sitemapContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenSitemapIsEmpty(): void
     {
         file_put_contents($this->sitemapPath, '');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('empty', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('empty', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSitemapIsWhitespaceOnly(): void
     {
         file_put_contents($this->sitemapPath, "   \n\t  \n");
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('empty', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('empty', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenSitemapHasInvalidXml(): void
@@ -146,10 +146,10 @@ SITEMAP;
 SITEMAP;
         file_put_contents($this->sitemapPath, $invalidXml);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('invalid XML', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('invalid XML', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenXmlLacksSitemapStructure(): void
@@ -165,10 +165,10 @@ SITEMAP;
 XML;
         file_put_contents($this->sitemapPath, $nonSitemapXml);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('valid sitemap structure', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('valid sitemap structure', $healthCheckResult->description);
     }
 
     public function testRunHandlesCaseInsensitiveUrlset(): void
@@ -184,27 +184,27 @@ XML;
 SITEMAP;
         file_put_contents($this->sitemapPath, $sitemapContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesCaseInsensitiveSitemapindex(): void
     {
         // Test that we detect sitemapindex regardless of case
-        $sitemapContent = <<<'SITEMAP'
-<?xml version="1.0" encoding="UTF-8"?>
-<SITEMAPINDEX xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <sitemap>
-        <loc>https://example.com/sitemap-posts.xml</loc>
-    </sitemap>
-</SITEMAPINDEX>
-SITEMAP;
+        $sitemapContent = <<<'SITEMAP_WRAP'
+        <?xml version="1.0" encoding="UTF-8"?>
+        <SITEMAPINDEX xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <sitemap>
+                <loc>https://example.com/sitemap-posts.xml</loc>
+            </sitemap>
+        </SITEMAPINDEX>
+        SITEMAP_WRAP;
         file_put_contents($this->sitemapPath, $sitemapContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunNeverReturnsCritical(): void
@@ -212,9 +212,9 @@ SITEMAP;
         // Even with invalid sitemap, should only return warning
         file_put_contents($this->sitemapPath, 'completely invalid content');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesMinimalValidSitemap(): void
@@ -223,9 +223,9 @@ SITEMAP;
         $sitemapContent = '<?xml version="1.0"?><urlset></urlset>';
         file_put_contents($this->sitemapPath, $sitemapContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesSitemapWithBom(): void
@@ -235,9 +235,9 @@ SITEMAP;
         $sitemapContent = $bom . '<?xml version="1.0"?><urlset></urlset>';
         file_put_contents($this->sitemapPath, $sitemapContent);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->sitemapCheck->run();
 
         // Should handle BOM gracefully
-        $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+        $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
     }
 }

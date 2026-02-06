@@ -21,91 +21,91 @@ class MemoryLimitCheckTest extends TestCase
 {
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $check = new MemoryLimitCheck();
-        $this->assertSame('system.memory_limit', $check->getSlug());
+        $memoryLimitCheck = new MemoryLimitCheck();
+        $this->assertSame('system.memory_limit', $memoryLimitCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $check = new MemoryLimitCheck();
-        $this->assertSame('system', $check->getCategory());
+        $memoryLimitCheck = new MemoryLimitCheck();
+        $this->assertSame('system', $memoryLimitCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $check = new MemoryLimitCheck();
-        $this->assertSame('core', $check->getProvider());
+        $memoryLimitCheck = new MemoryLimitCheck();
+        $this->assertSame('core', $memoryLimitCheck->getProvider());
     }
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $check = new MemoryLimitCheck();
-        $result = $check->run();
+        $memoryLimitCheck = new MemoryLimitCheck();
+        $healthCheckResult = $memoryLimitCheck->run();
 
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
-        $this->assertSame('system.memory_limit', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
+        $this->assertSame('system.memory_limit', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultDescriptionIsNotEmpty(): void
     {
-        $check = new MemoryLimitCheck();
-        $result = $check->run();
+        $memoryLimitCheck = new MemoryLimitCheck();
+        $healthCheckResult = $memoryLimitCheck->run();
 
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testResultDescriptionMentionsMemory(): void
     {
-        $check = new MemoryLimitCheck();
-        $result = $check->run();
+        $memoryLimitCheck = new MemoryLimitCheck();
+        $healthCheckResult = $memoryLimitCheck->run();
 
-        $this->assertStringContainsStringIgnoringCase('memory', $result->description);
+        $this->assertStringContainsStringIgnoringCase('memory', $healthCheckResult->description);
     }
 
     public function testCheckDoesNotRequireDatabase(): void
     {
-        $check = new MemoryLimitCheck();
+        $memoryLimitCheck = new MemoryLimitCheck();
 
         // Database should be null (not injected)
-        $this->assertNull($check->getDatabase());
+        $this->assertNull($memoryLimitCheck->getDatabase());
 
         // Check should still work without database
-        $result = $check->run();
-        $this->assertInstanceOf(HealthCheckResult::class, $result);
+        $healthCheckResult = $memoryLimitCheck->run();
+        $this->assertInstanceOf(HealthCheckResult::class, $healthCheckResult);
     }
 
     public function testCheckIsConsistentOnMultipleRuns(): void
     {
-        $check = new MemoryLimitCheck();
+        $memoryLimitCheck = new MemoryLimitCheck();
 
-        $result1 = $check->run();
-        $result2 = $check->run();
+        $healthCheckResult = $memoryLimitCheck->run();
+        $result2 = $memoryLimitCheck->run();
 
         // Results should be the same since memory_limit doesn't change during test
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testCheckReturnsValidStatusForCurrentEnvironment(): void
     {
-        $check = new MemoryLimitCheck();
-        $result = $check->run();
+        $memoryLimitCheck = new MemoryLimitCheck();
+        $healthCheckResult = $memoryLimitCheck->run();
 
         // Check can return Good, Warning, or Critical based on memory_limit
         $this->assertContains(
-            $result->healthStatus,
+            $healthCheckResult->healthStatus,
             [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
         );
     }
 
     public function testResultCanBeConvertedToArray(): void
     {
-        $check = new MemoryLimitCheck();
-        $result = $check->run();
+        $memoryLimitCheck = new MemoryLimitCheck();
+        $healthCheckResult = $memoryLimitCheck->run();
 
-        $array = $result->toArray();
+        $array = $healthCheckResult->toArray();
 
         $this->assertIsArray($array);
         $this->assertArrayHasKey('slug', $array);
@@ -121,17 +121,17 @@ class MemoryLimitCheckTest extends TestCase
         // In most test environments, memory limit should be adequate
         $memoryLimit = ini_get('memory_limit');
 
-        $check = new MemoryLimitCheck();
-        $result = $check->run();
+        $memoryLimitCheck = new MemoryLimitCheck();
+        $healthCheckResult = $memoryLimitCheck->run();
 
         if ($memoryLimit === '-1') {
             // Unlimited memory
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
-            $this->assertStringContainsStringIgnoringCase('unlimited', $result->description);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+            $this->assertStringContainsStringIgnoringCase('unlimited', $healthCheckResult->description);
         } else {
             // Memory is limited, check that a valid status is returned
             $this->assertContains(
-                $result->healthStatus,
+                $healthCheckResult->healthStatus,
                 [HealthStatus::Good, HealthStatus::Warning, HealthStatus::Critical],
             );
         }

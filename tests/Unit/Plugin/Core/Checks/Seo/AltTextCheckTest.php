@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(AltTextCheck::class)]
 class AltTextCheckTest extends TestCase
 {
-    private AltTextCheck $check;
+    private AltTextCheck $altTextCheck;
 
     protected function setUp(): void
     {
-        $this->check = new AltTextCheck();
+        $this->altTextCheck = new AltTextCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.alt_text', $this->check->getSlug());
+        $this->assertSame('seo.alt_text', $this->altTextCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->altTextCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->altTextCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->altTextCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,20 +51,20 @@ class AltTextCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->altTextCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNoArticlesReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithObjectList([]);
-        $this->check->setDatabase($database);
+        $this->altTextCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->altTextCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No images with missing alt text', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No images with missing alt text', $healthCheckResult->description);
     }
 
     public function testRunWithArticlesWithNoImagesReturnsGood(): void
@@ -78,11 +78,11 @@ class AltTextCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($articles);
-        $this->check->setDatabase($database);
+        $this->altTextCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->altTextCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithAllImagesHavingAltTextReturnsGood(): void
@@ -96,11 +96,11 @@ class AltTextCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($articles);
-        $this->check->setDatabase($database);
+        $this->altTextCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->altTextCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithFewMissingAltTextsReturnsWarning(): void
@@ -114,12 +114,12 @@ class AltTextCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($articles);
-        $this->check->setDatabase($database);
+        $this->altTextCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->altTextCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('may be missing', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('may be missing', $healthCheckResult->description);
     }
 
     public function testRunWithManyMissingAltTextsReturnsWarning(): void
@@ -129,19 +129,20 @@ class AltTextCheckTest extends TestCase
         for ($i = 1; $i <= 15; $i++) {
             $articles[] = (object) [
                 'id' => $i,
-                'title' => "Article {$i}",
+                'title' => 'Article ' . $i,
                 'introtext' => '<img src="image.jpg">',
                 'fulltext' => '',
             ];
         }
+
         $database = MockDatabaseFactory::createWithObjectList($articles);
-        $this->check->setDatabase($database);
+        $this->altTextCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->altTextCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('approximately', $result->description);
-        $this->assertStringContainsString('accessibility', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('approximately', $healthCheckResult->description);
+        $this->assertStringContainsString('accessibility', $healthCheckResult->description);
     }
 
     public function testRunWithEmptyAltTextReturnsWarning(): void
@@ -155,11 +156,11 @@ class AltTextCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($articles);
-        $this->check->setDatabase($database);
+        $this->altTextCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->altTextCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithWhitespaceOnlyAltTextReturnsWarning(): void
@@ -173,10 +174,10 @@ class AltTextCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($articles);
-        $this->check->setDatabase($database);
+        $this->altTextCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->altTextCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 }

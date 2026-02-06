@@ -21,31 +21,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(ConnectionCheck::class)]
 class ConnectionCheckTest extends TestCase
 {
-    private ConnectionCheck $check;
+    private ConnectionCheck $connectionCheck;
 
     protected function setUp(): void
     {
-        $this->check = new ConnectionCheck();
+        $this->connectionCheck = new ConnectionCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.connection', $this->check->getSlug());
+        $this->assertSame('database.connection', $this->connectionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->connectionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->connectionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->connectionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -53,20 +53,20 @@ class ConnectionCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->connectionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithWorkingConnectionReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(1);
-        $this->check->setDatabase($database);
+        $this->connectionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->connectionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('working correctly', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('working correctly', $healthCheckResult->description);
     }
 
     public function testRunWithFailedConnectionReturnsCritical(): void
@@ -173,12 +173,12 @@ class ConnectionCheckTest extends TestCase
                 throw new \Exception('Connection refused');
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return '';
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
                 return '';
             }
@@ -199,11 +199,11 @@ class ConnectionCheckTest extends TestCase
             }
         };
 
-        $this->check->setDatabase($database);
+        $this->connectionCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->connectionCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('failed', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('failed', $healthCheckResult->description);
     }
 }

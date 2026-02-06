@@ -30,50 +30,50 @@ class AfterToolbarBuildEventTest extends TestCase
     public function testEventConstruction(): void
     {
         $toolbar = Toolbar::getInstance('toolbar');
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
-        $this->assertInstanceOf(AfterToolbarBuildEvent::class, $event);
+        $this->assertInstanceOf(AfterToolbarBuildEvent::class, $afterToolbarBuildEvent);
     }
 
     public function testEventHasCorrectName(): void
     {
         $toolbar = Toolbar::getInstance('toolbar');
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
-        $this->assertSame(HealthCheckerEvents::AFTER_TOOLBAR_BUILD->value, $event->getName());
+        $this->assertSame(HealthCheckerEvents::AFTER_TOOLBAR_BUILD->value, $afterToolbarBuildEvent->getName());
     }
 
     public function testEventNameMatchesExpectedValue(): void
     {
         $toolbar = Toolbar::getInstance('toolbar');
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
-        $this->assertSame('onHealthCheckerAfterToolbarBuild', $event->getName());
+        $this->assertSame('onHealthCheckerAfterToolbarBuild', $afterToolbarBuildEvent->getName());
     }
 
     public function testGetToolbarReturnsSameInstance(): void
     {
         $toolbar = Toolbar::getInstance('toolbar');
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
-        $this->assertSame($toolbar, $event->getToolbar());
+        $this->assertSame($toolbar, $afterToolbarBuildEvent->getToolbar());
     }
 
     public function testGetToolbarReturnsToolbarInstance(): void
     {
         $toolbar = Toolbar::getInstance('toolbar');
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
-        $this->assertInstanceOf(Toolbar::class, $event->getToolbar());
+        $this->assertInstanceOf(Toolbar::class, $afterToolbarBuildEvent->getToolbar());
     }
 
     public function testToolbarCanBeModifiedThroughEvent(): void
     {
         $toolbar = Toolbar::getInstance('toolbar');
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
         // Add a button via the event's toolbar
-        $event->getToolbar()
+        $afterToolbarBuildEvent->getToolbar()
             ->standardButton('test', 'Test Button');
 
         // Verify button was added
@@ -84,9 +84,9 @@ class AfterToolbarBuildEventTest extends TestCase
     public function testToolbarCanAddMultipleButtonsThroughEvent(): void
     {
         $toolbar = Toolbar::getInstance('toolbar');
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
-        $eventToolbar = $event->getToolbar();
+        $eventToolbar = $afterToolbarBuildEvent->getToolbar();
         $eventToolbar->standardButton('button1', 'Button 1');
         $eventToolbar->standardButton('button2', 'Button 2');
         $eventToolbar->linkButton('link1')
@@ -99,22 +99,22 @@ class AfterToolbarBuildEventTest extends TestCase
     public function testEventExtendsJoomlaEvent(): void
     {
         $toolbar = Toolbar::getInstance('toolbar');
-        $event = new AfterToolbarBuildEvent($toolbar);
+        $afterToolbarBuildEvent = new AfterToolbarBuildEvent($toolbar);
 
-        $this->assertInstanceOf(\Joomla\Event\Event::class, $event);
+        $this->assertInstanceOf(\Joomla\Event\Event::class, $afterToolbarBuildEvent);
     }
 
     public function testEventIsFinal(): void
     {
-        $reflection = new \ReflectionClass(AfterToolbarBuildEvent::class);
+        $reflectionClass = new \ReflectionClass(AfterToolbarBuildEvent::class);
 
-        $this->assertTrue($reflection->isFinal());
+        $this->assertTrue($reflectionClass->isFinal());
     }
 
     public function testToolbarPropertyIsReadonly(): void
     {
-        $reflection = new \ReflectionClass(AfterToolbarBuildEvent::class);
-        $constructor = $reflection->getConstructor();
+        $reflectionClass = new \ReflectionClass(AfterToolbarBuildEvent::class);
+        $constructor = $reflectionClass->getConstructor();
 
         $this->assertNotNull($constructor);
 

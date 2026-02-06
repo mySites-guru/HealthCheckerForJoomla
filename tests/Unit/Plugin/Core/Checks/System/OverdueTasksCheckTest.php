@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(OverdueTasksCheck::class)]
 class OverdueTasksCheckTest extends TestCase
 {
-    private OverdueTasksCheck $check;
+    private OverdueTasksCheck $overdueTasksCheck;
 
     protected function setUp(): void
     {
-        $this->check = new OverdueTasksCheck();
+        $this->overdueTasksCheck = new OverdueTasksCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.overdue_tasks', $this->check->getSlug());
+        $this->assertSame('system.overdue_tasks', $this->overdueTasksCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->overdueTasksCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->overdueTasksCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->overdueTasksCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -52,86 +52,86 @@ class OverdueTasksCheckTest extends TestCase
     public function testRunReturnsHealthCheckResult(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->overdueTasksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overdueTasksCheck->run();
 
-        $this->assertSame('system.overdue_tasks', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.overdue_tasks', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunWithoutDatabaseThrowsException(): void
     {
         // When no database is set, run() should catch the exception and return warning
-        $result = $this->check->run();
+        $healthCheckResult = $this->overdueTasksCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNoOverdueTasksReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->overdueTasksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overdueTasksCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No overdue', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No overdue', $healthCheckResult->description);
     }
 
     public function testRunWithOneOverdueTaskReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithResult(1);
-        $this->check->setDatabase($database);
+        $this->overdueTasksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overdueTasksCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('1 scheduled task(s) are overdue', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 scheduled task(s) are overdue', $healthCheckResult->description);
     }
 
     public function testRunWithTenOverdueTasksReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithResult(10);
-        $this->check->setDatabase($database);
+        $this->overdueTasksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overdueTasksCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('cron configuration', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('cron configuration', $healthCheckResult->description);
     }
 
     public function testRunWithMoreThanTenOverdueTasksReturnsCritical(): void
     {
         $database = MockDatabaseFactory::createWithResult(15);
-        $this->check->setDatabase($database);
+        $this->overdueTasksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overdueTasksCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('15 scheduled tasks are overdue', $result->description);
-        $this->assertStringContainsString('may not be running', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('15 scheduled tasks are overdue', $healthCheckResult->description);
+        $this->assertStringContainsString('may not be running', $healthCheckResult->description);
     }
 
     public function testRunWithExactlyElevenOverdueTasksReturnsCritical(): void
     {
         $database = MockDatabaseFactory::createWithResult(11);
-        $this->check->setDatabase($database);
+        $this->overdueTasksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overdueTasksCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testWarningMessageSuggestsCronCheck(): void
     {
         $database = MockDatabaseFactory::createWithResult(5);
-        $this->check->setDatabase($database);
+        $this->overdueTasksCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->overdueTasksCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('cron', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('cron', strtolower($healthCheckResult->description));
     }
 }

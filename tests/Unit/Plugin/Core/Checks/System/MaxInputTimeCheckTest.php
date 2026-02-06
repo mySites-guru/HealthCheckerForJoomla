@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MaxInputTimeCheck::class)]
 class MaxInputTimeCheckTest extends TestCase
 {
-    private MaxInputTimeCheck $check;
+    private MaxInputTimeCheck $maxInputTimeCheck;
 
     protected function setUp(): void
     {
-        $this->check = new MaxInputTimeCheck();
+        $this->maxInputTimeCheck = new MaxInputTimeCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.max_input_time', $this->check->getSlug());
+        $this->assertSame('system.max_input_time', $this->maxInputTimeCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->maxInputTimeCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->maxInputTimeCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->maxInputTimeCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,66 +50,66 @@ class MaxInputTimeCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputTimeCheck->run();
 
-        $this->assertSame('system.max_input_time', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.max_input_time', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputTimeCheck->run();
 
         // Result depends on PHP configuration - never returns Critical
-        $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+        $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
     }
 
     public function testNeverReturnsCritical(): void
     {
         // This check never returns Critical status according to source code
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputTimeCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputTimeCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->maxInputTimeCheck->run();
+        $result2 = $this->maxInputTimeCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testDescriptionIncludesCurrentValue(): void
     {
         $currentValue = (int) ini_get('max_input_time');
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputTimeCheck->run();
 
         // If not unlimited, description should include the current value
         if ($currentValue !== -1 && $currentValue !== 0) {
-            $this->assertStringContainsString((string) $currentValue, $result->description);
+            $this->assertStringContainsString((string) $currentValue, $healthCheckResult->description);
         } else {
-            $this->assertStringContainsString('unlimited', $result->description);
+            $this->assertStringContainsString('unlimited', $healthCheckResult->description);
         }
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->maxInputTimeCheck->run();
 
-        $this->assertSame('system.max_input_time', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.max_input_time', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 }

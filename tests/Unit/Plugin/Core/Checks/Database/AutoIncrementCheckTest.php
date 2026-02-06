@@ -21,16 +21,16 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(AutoIncrementCheck::class)]
 class AutoIncrementCheckTest extends TestCase
 {
-    private AutoIncrementCheck $check;
+    private AutoIncrementCheck $autoIncrementCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        $this->app->set('dbprefix', 'jos_');
-        Factory::setApplication($this->app);
-        $this->check = new AutoIncrementCheck();
+        $this->cmsApplication = new CMSApplication();
+        $this->cmsApplication->set('dbprefix', 'jos_');
+        Factory::setApplication($this->cmsApplication);
+        $this->autoIncrementCheck = new AutoIncrementCheck();
     }
 
     protected function tearDown(): void
@@ -40,22 +40,22 @@ class AutoIncrementCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.auto_increment', $this->check->getSlug());
+        $this->assertSame('database.auto_increment', $this->autoIncrementCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->autoIncrementCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->autoIncrementCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->autoIncrementCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -63,9 +63,9 @@ class AutoIncrementCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->autoIncrementCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenAutoIncrementValuesLow(): void
@@ -81,12 +81,12 @@ class AutoIncrementCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($tables);
-        $this->check->setDatabase($database);
+        $this->autoIncrementCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->autoIncrementCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('sufficient headroom', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('sufficient headroom', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenAutoIncrementValuesHigh(): void
@@ -99,12 +99,12 @@ class AutoIncrementCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($tables);
-        $this->check->setDatabase($database);
+        $this->autoIncrementCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->autoIncrementCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('high', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('high', $healthCheckResult->description);
     }
 
     public function testRunSkipsTablesWithNullAutoIncrement(): void
@@ -120,10 +120,10 @@ class AutoIncrementCheckTest extends TestCase
             ],
         ];
         $database = MockDatabaseFactory::createWithObjectList($tables);
-        $this->check->setDatabase($database);
+        $this->autoIncrementCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->autoIncrementCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 }

@@ -20,15 +20,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MetaKeywordsCheck::class)]
 class MetaKeywordsCheckTest extends TestCase
 {
-    private MetaKeywordsCheck $check;
+    private MetaKeywordsCheck $metaKeywordsCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new MetaKeywordsCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->metaKeywordsCheck = new MetaKeywordsCheck();
     }
 
     protected function tearDown(): void
@@ -38,22 +38,22 @@ class MetaKeywordsCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('seo.meta_keywords', $this->check->getSlug());
+        $this->assertSame('seo.meta_keywords', $this->metaKeywordsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSeo(): void
     {
-        $this->assertSame('seo', $this->check->getCategory());
+        $this->assertSame('seo', $this->metaKeywordsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->metaKeywordsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->metaKeywordsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -61,24 +61,24 @@ class MetaKeywordsCheckTest extends TestCase
 
     public function testRunWithEmptyMetaKeywordsReturnsGood(): void
     {
-        $this->app->set('MetaKeys', '');
+        $this->cmsApplication->set('MetaKeys', '');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->metaKeywordsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('not set', $result->description);
-        $this->assertStringContainsString('2009', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not set', $healthCheckResult->description);
+        $this->assertStringContainsString('2009', $healthCheckResult->description);
     }
 
     public function testRunWithMetaKeywordsSetReturnsGood(): void
     {
-        $this->app->set('MetaKeys', 'joomla, cms, website');
+        $this->cmsApplication->set('MetaKeys', 'joomla, cms, website');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->metaKeywordsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Meta keywords are set', $result->description);
-        $this->assertStringContainsString('no longer use', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Meta keywords are set', $healthCheckResult->description);
+        $this->assertStringContainsString('no longer use', $healthCheckResult->description);
     }
 
     public function testRunAlwaysReturnsGood(): void
@@ -86,22 +86,22 @@ class MetaKeywordsCheckTest extends TestCase
         // This check always returns good status since meta keywords
         // are neither helpful nor harmful to SEO
 
-        $this->app->set('MetaKeys', 'test, keywords');
-        $result = $this->check->run();
+        $this->cmsApplication->set('MetaKeys', 'test, keywords');
+        $result = $this->metaKeywordsCheck->run();
         $this->assertSame(HealthStatus::Good, $result->healthStatus);
 
-        $this->app->set('MetaKeys', '');
-        $result = $this->check->run();
+        $this->cmsApplication->set('MetaKeys', '');
+        $result = $this->metaKeywordsCheck->run();
         $this->assertSame(HealthStatus::Good, $result->healthStatus);
     }
 
     public function testRunWithWhitespaceOnlyMetaKeywordsReturnsGoodAsNotSet(): void
     {
-        $this->app->set('MetaKeys', '   ');
+        $this->cmsApplication->set('MetaKeys', '   ');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->metaKeywordsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('not set', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not set', $healthCheckResult->description);
     }
 }

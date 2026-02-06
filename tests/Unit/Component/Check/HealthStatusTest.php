@@ -127,9 +127,9 @@ class HealthStatusTest extends TestCase
     }
 
     #[DataProvider('statusValueProvider')]
-    public function testEnumBackedByString(HealthStatus $status, string $expectedValue): void
+    public function testEnumBackedByString(HealthStatus $healthStatus, string $expectedValue): void
     {
-        $this->assertSame($expectedValue, $status->value);
+        $this->assertSame($expectedValue, $healthStatus->value);
     }
 
     /**
@@ -148,11 +148,11 @@ class HealthStatusTest extends TestCase
 
     public function testCanCreateFromString(): void
     {
-        $critical = HealthStatus::from('critical');
+        $healthStatus = HealthStatus::from('critical');
         $warning = HealthStatus::from('warning');
         $good = HealthStatus::from('good');
 
-        $this->assertSame(HealthStatus::Critical, $critical);
+        $this->assertSame(HealthStatus::Critical, $healthStatus);
         $this->assertSame(HealthStatus::Warning, $warning);
         $this->assertSame(HealthStatus::Good, $good);
     }

@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(PdoMysqlExtensionCheck::class)]
 class PdoMysqlExtensionCheckTest extends TestCase
 {
-    private PdoMysqlExtensionCheck $check;
+    private PdoMysqlExtensionCheck $pdoMysqlExtensionCheck;
 
     protected function setUp(): void
     {
-        $this->check = new PdoMysqlExtensionCheck();
+        $this->pdoMysqlExtensionCheck = new PdoMysqlExtensionCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.pdo_mysql_extension', $this->check->getSlug());
+        $this->assertSame('system.pdo_mysql_extension', $this->pdoMysqlExtensionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->pdoMysqlExtensionCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->pdoMysqlExtensionCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->pdoMysqlExtensionCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,57 +50,57 @@ class PdoMysqlExtensionCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->pdoMysqlExtensionCheck->run();
 
-        $this->assertSame('system.pdo_mysql_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.pdo_mysql_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->pdoMysqlExtensionCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->pdoMysqlExtensionCheck->run();
 
-        $this->assertSame('system.pdo_mysql_extension', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.pdo_mysql_extension', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsWarning(): void
     {
         // PDO MySQL check returns Critical or Good, never Warning per documentation
-        $result = $this->check->run();
+        $healthCheckResult = $this->pdoMysqlExtensionCheck->run();
 
-        $this->assertNotSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->pdoMysqlExtensionCheck->run();
+        $result2 = $this->pdoMysqlExtensionCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testRunReturnsValidStatusBasedOnExtensionAvailability(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->pdoMysqlExtensionCheck->run();
 
         // Based on whether pdo_mysql extension is loaded
         if (extension_loaded('pdo_mysql')) {
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         } else {
-            $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+            $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
         }
     }
 

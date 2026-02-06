@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(EmptyArticlesCheck::class)]
 class EmptyArticlesCheckTest extends TestCase
 {
-    private EmptyArticlesCheck $check;
+    private EmptyArticlesCheck $emptyArticlesCheck;
 
     protected function setUp(): void
     {
-        $this->check = new EmptyArticlesCheck();
+        $this->emptyArticlesCheck = new EmptyArticlesCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('content.empty_articles', $this->check->getSlug());
+        $this->assertSame('content.empty_articles', $this->emptyArticlesCheck->getSlug());
     }
 
     public function testGetCategoryReturnsContent(): void
     {
-        $this->assertSame('content', $this->check->getCategory());
+        $this->assertSame('content', $this->emptyArticlesCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->emptyArticlesCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->emptyArticlesCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,41 +51,41 @@ class EmptyArticlesCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->emptyArticlesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNoEmptyArticlesReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->emptyArticlesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->emptyArticlesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('substantial content', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('substantial content', $healthCheckResult->description);
     }
 
     public function testRunWithFewEmptyArticlesReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(3);
-        $this->check->setDatabase($database);
+        $this->emptyArticlesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->emptyArticlesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('3 published article(s)', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('3 published article(s)', $healthCheckResult->description);
     }
 
     public function testRunWithManyEmptyArticlesReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithResult(10);
-        $this->check->setDatabase($database);
+        $this->emptyArticlesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->emptyArticlesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('10 published articles', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('10 published articles', $healthCheckResult->description);
     }
 }

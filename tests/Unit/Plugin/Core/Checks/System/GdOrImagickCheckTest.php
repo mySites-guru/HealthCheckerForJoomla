@@ -18,31 +18,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(GdOrImagickCheck::class)]
 class GdOrImagickCheckTest extends TestCase
 {
-    private GdOrImagickCheck $check;
+    private GdOrImagickCheck $gdOrImagickCheck;
 
     protected function setUp(): void
     {
-        $this->check = new GdOrImagickCheck();
+        $this->gdOrImagickCheck = new GdOrImagickCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('system.gd_or_imagick', $this->check->getSlug());
+        $this->assertSame('system.gd_or_imagick', $this->gdOrImagickCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSystem(): void
     {
-        $this->assertSame('system', $this->check->getCategory());
+        $this->assertSame('system', $this->gdOrImagickCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->gdOrImagickCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->gdOrImagickCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -50,60 +50,60 @@ class GdOrImagickCheckTest extends TestCase
 
     public function testRunReturnsHealthCheckResult(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->gdOrImagickCheck->run();
 
-        $this->assertSame('system.gd_or_imagick', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('system.gd_or_imagick', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testResultTitleIsNotEmpty(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->gdOrImagickCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testResultHasCorrectStructure(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->gdOrImagickCheck->run();
 
-        $this->assertSame('system.gd_or_imagick', $result->slug);
-        $this->assertSame('system', $result->category);
-        $this->assertSame('core', $result->provider);
-        $this->assertIsString($result->description);
-        $this->assertInstanceOf(HealthStatus::class, $result->healthStatus);
+        $this->assertSame('system.gd_or_imagick', $healthCheckResult->slug);
+        $this->assertSame('system', $healthCheckResult->category);
+        $this->assertSame('core', $healthCheckResult->provider);
+        $this->assertIsString($healthCheckResult->description);
+        $this->assertInstanceOf(HealthStatus::class, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsWarning(): void
     {
         // GD/Imagick check returns Critical or Good, never Warning per documentation
-        $result = $this->check->run();
+        $healthCheckResult = $this->gdOrImagickCheck->run();
 
-        $this->assertNotSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testMultipleRunsReturnConsistentResults(): void
     {
-        $result1 = $this->check->run();
-        $result2 = $this->check->run();
+        $healthCheckResult = $this->gdOrImagickCheck->run();
+        $result2 = $this->gdOrImagickCheck->run();
 
-        $this->assertSame($result1->healthStatus, $result2->healthStatus);
-        $this->assertSame($result1->description, $result2->description);
+        $this->assertSame($healthCheckResult->healthStatus, $result2->healthStatus);
+        $this->assertSame($healthCheckResult->description, $result2->description);
     }
 
     public function testRunReturnsValidStatusBasedOnExtensionAvailability(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->gdOrImagickCheck->run();
 
         $hasGd = extension_loaded('gd');
         $hasImagick = extension_loaded('imagick');
 
         // Based on whether at least one image extension is loaded
         if ($hasGd || $hasImagick) {
-            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+            $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         } else {
-            $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+            $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
         }
     }
 
@@ -127,7 +127,7 @@ class GdOrImagickCheckTest extends TestCase
         if (extension_loaded('gd')) {
             $this->assertTrue(true, 'GD is loaded - Imagick-only branch not testable');
         } else {
-            $result = $this->check->run();
+            $result = $this->gdOrImagickCheck->run();
             if (extension_loaded('imagick')) {
                 $this->assertSame(HealthStatus::Good, $result->healthStatus);
                 $this->assertStringContainsString('Imagick', $result->description);

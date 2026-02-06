@@ -21,11 +21,11 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(DefaultUserGroupCheck::class)]
 class DefaultUserGroupCheckTest extends TestCase
 {
-    private DefaultUserGroupCheck $check;
+    private DefaultUserGroupCheck $defaultUserGroupCheck;
 
     protected function setUp(): void
     {
-        $this->check = new DefaultUserGroupCheck();
+        $this->defaultUserGroupCheck = new DefaultUserGroupCheck();
     }
 
     protected function tearDown(): void
@@ -35,22 +35,22 @@ class DefaultUserGroupCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('users.default_user_group', $this->check->getSlug());
+        $this->assertSame('users.default_user_group', $this->defaultUserGroupCheck->getSlug());
     }
 
     public function testGetCategoryReturnsUsers(): void
     {
-        $this->assertSame('users', $this->check->getCategory());
+        $this->assertSame('users', $this->defaultUserGroupCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->defaultUserGroupCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->defaultUserGroupCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -58,100 +58,100 @@ class DefaultUserGroupCheckTest extends TestCase
 
     public function testRunWithDangerousAdministratorGroupReturnsCritical(): void
     {
-        $params = new Registry([
+        $registry = new Registry([
             'new_usertype' => 7,
         ]); // Administrator group
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultUserGroupCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('Administrator or Super Users', $result->description);
-        $this->assertStringContainsString('critical security risk', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Administrator or Super Users', $healthCheckResult->description);
+        $this->assertStringContainsString('critical security risk', $healthCheckResult->description);
     }
 
     public function testRunWithDangerousSuperUsersGroupReturnsCritical(): void
     {
-        $params = new Registry([
+        $registry = new Registry([
             'new_usertype' => 8,
         ]); // Super Users group
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultUserGroupCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('Administrator or Super Users', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Administrator or Super Users', $healthCheckResult->description);
     }
 
     public function testRunWithSafeRegisteredGroupReturnsGood(): void
     {
-        $params = new Registry([
+        $registry = new Registry([
             'new_usertype' => 2,
         ]); // Registered group
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
         $database = MockDatabaseFactory::createWithResult('Registered');
-        $this->check->setDatabase($database);
+        $this->defaultUserGroupCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultUserGroupCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Default user group: Registered', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Default user group: Registered', $healthCheckResult->description);
     }
 
     public function testRunWithSafeGroupReturnsGroupName(): void
     {
-        $params = new Registry([
+        $registry = new Registry([
             'new_usertype' => 3,
         ]); // Author group
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
         $database = MockDatabaseFactory::createWithResult('Author');
-        $this->check->setDatabase($database);
+        $this->defaultUserGroupCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultUserGroupCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('Author', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Author', $healthCheckResult->description);
     }
 
     public function testRunWithSafeGroupNoNameShowsGroupId(): void
     {
-        $params = new Registry([
+        $registry = new Registry([
             'new_usertype' => 5,
         ]); // Custom group
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
         $database = MockDatabaseFactory::createWithResult(null); // Group name not found
-        $this->check->setDatabase($database);
+        $this->defaultUserGroupCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultUserGroupCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('ID 5', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('ID 5', $healthCheckResult->description);
     }
 
     public function testRunWithDefaultGroupValueReturnsGood(): void
     {
         // No params set, should use default value of 2 (Registered)
         $database = MockDatabaseFactory::createWithResult('Registered');
-        $this->check->setDatabase($database);
+        $this->defaultUserGroupCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultUserGroupCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $params = new Registry([
+        $registry = new Registry([
             'new_usertype' => 2,
         ]);
-        ComponentHelper::setParams('com_users', $params);
+        ComponentHelper::setParams('com_users', $registry);
 
         // No database set - should fail with warning for safe group
-        $result = $this->check->run();
+        $healthCheckResult = $this->defaultUserGroupCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 }

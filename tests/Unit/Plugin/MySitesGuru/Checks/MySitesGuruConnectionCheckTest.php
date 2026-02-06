@@ -18,13 +18,13 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(MySitesGuruConnectionCheck::class)]
 class MySitesGuruConnectionCheckTest extends TestCase
 {
-    private MySitesGuruConnectionCheck $check;
+    private MySitesGuruConnectionCheck $mySitesGuruConnectionCheck;
 
     private string $tempDir;
 
     protected function setUp(): void
     {
-        $this->check = new MySitesGuruConnectionCheck();
+        $this->mySitesGuruConnectionCheck = new MySitesGuruConnectionCheck();
         $this->tempDir = sys_get_temp_dir() . '/healthchecker_test_' . uniqid();
     }
 
@@ -38,22 +38,22 @@ class MySitesGuruConnectionCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('mysitesguru.connection', $this->check->getSlug());
+        $this->assertSame('mysitesguru.connection', $this->mySitesGuruConnectionCheck->getSlug());
     }
 
     public function testGetCategoryReturnsMySitesGuru(): void
     {
-        $this->assertSame('mysitesguru', $this->check->getCategory());
+        $this->assertSame('mysitesguru', $this->mySitesGuruConnectionCheck->getCategory());
     }
 
     public function testGetProviderReturnsMySitesGuru(): void
     {
-        $this->assertSame('mysitesguru', $this->check->getProvider());
+        $this->assertSame('mysitesguru', $this->mySitesGuruConnectionCheck->getProvider());
     }
 
     public function testGetTitleReturnsNonEmptyString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->mySitesGuruConnectionCheck->getTitle();
 
         $this->assertNotEmpty($title);
     }
@@ -61,72 +61,72 @@ class MySitesGuruConnectionCheckTest extends TestCase
     public function testRunReturnsWarningWhenBfnetworkFolderNotFound(): void
     {
         // Point to a non-existent directory
-        $this->check->setBfnetworkPath('/non/existent/path/bfnetwork');
+        $this->mySitesGuruConnectionCheck->setBfnetworkPath('/non/existent/path/bfnetwork');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mySitesGuruConnectionCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('not connected', $result->description);
-        $this->assertStringContainsString('mysites.guru', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('not connected', $healthCheckResult->description);
+        $this->assertStringContainsString('mysites.guru', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenBfnetworkFolderExists(): void
     {
         // Create temp directory to simulate bfnetwork folder
         mkdir($this->tempDir, 0755, true);
-        $this->check->setBfnetworkPath($this->tempDir);
+        $this->mySitesGuruConnectionCheck->setBfnetworkPath($this->tempDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mySitesGuruConnectionCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('connected', $result->description);
-        $this->assertStringContainsString('24/7', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('connected', $healthCheckResult->description);
+        $this->assertStringContainsString('24/7', $healthCheckResult->description);
     }
 
     public function testResultHasCorrectSlug(): void
     {
-        $this->check->setBfnetworkPath('/non/existent/path');
+        $this->mySitesGuruConnectionCheck->setBfnetworkPath('/non/existent/path');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mySitesGuruConnectionCheck->run();
 
-        $this->assertSame('mysitesguru.connection', $result->slug);
+        $this->assertSame('mysitesguru.connection', $healthCheckResult->slug);
     }
 
     public function testResultHasCorrectCategory(): void
     {
-        $this->check->setBfnetworkPath('/non/existent/path');
+        $this->mySitesGuruConnectionCheck->setBfnetworkPath('/non/existent/path');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mySitesGuruConnectionCheck->run();
 
-        $this->assertSame('mysitesguru', $result->category);
+        $this->assertSame('mysitesguru', $healthCheckResult->category);
     }
 
     public function testResultHasCorrectProvider(): void
     {
-        $this->check->setBfnetworkPath('/non/existent/path');
+        $this->mySitesGuruConnectionCheck->setBfnetworkPath('/non/existent/path');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mySitesGuruConnectionCheck->run();
 
-        $this->assertSame('mysitesguru', $result->provider);
+        $this->assertSame('mysitesguru', $healthCheckResult->provider);
     }
 
     public function testWarningDescriptionContainsLearnMoreLink(): void
     {
-        $this->check->setBfnetworkPath('/non/existent/path');
+        $this->mySitesGuruConnectionCheck->setBfnetworkPath('/non/existent/path');
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mySitesGuruConnectionCheck->run();
 
-        $this->assertStringContainsString('https://mysites.guru', $result->description);
+        $this->assertStringContainsString('https://mysites.guru', $healthCheckResult->description);
     }
 
     public function testGoodDescriptionMentionsAutomatedMonitoring(): void
     {
         mkdir($this->tempDir, 0755, true);
-        $this->check->setBfnetworkPath($this->tempDir);
+        $this->mySitesGuruConnectionCheck->setBfnetworkPath($this->tempDir);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->mySitesGuruConnectionCheck->run();
 
-        $this->assertStringContainsString('automatically', $result->description);
-        $this->assertStringContainsString('alerts', $result->description);
+        $this->assertStringContainsString('automatically', $healthCheckResult->description);
+        $this->assertStringContainsString('alerts', $healthCheckResult->description);
     }
 }

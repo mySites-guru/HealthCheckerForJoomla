@@ -21,16 +21,16 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TableStatusCheck::class)]
 class TableStatusCheckTest extends TestCase
 {
-    private TableStatusCheck $check;
+    private TableStatusCheck $tableStatusCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        $this->app->set('dbprefix', 'test_');
-        Factory::setApplication($this->app);
-        $this->check = new TableStatusCheck();
+        $this->cmsApplication = new CMSApplication();
+        $this->cmsApplication->set('dbprefix', 'test_');
+        Factory::setApplication($this->cmsApplication);
+        $this->tableStatusCheck = new TableStatusCheck();
     }
 
     protected function tearDown(): void
@@ -40,22 +40,22 @@ class TableStatusCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.table_status', $this->check->getSlug());
+        $this->assertSame('database.table_status', $this->tableStatusCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->tableStatusCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->tableStatusCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->tableStatusCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -63,9 +63,9 @@ class TableStatusCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->tableStatusCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenTablesAreHealthy(): void
@@ -85,12 +85,12 @@ class TableStatusCheckTest extends TestCase
         $table2->Index_length = 1048576;
 
         $database = MockDatabaseFactory::createWithObjectList([$table1, $table2]);
-        $this->check->setDatabase($database);
+        $this->tableStatusCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tableStatusCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('2 tables', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 tables', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenTableIsCorrupted(): void
@@ -103,12 +103,12 @@ class TableStatusCheckTest extends TestCase
         $table1->Index_length = 524288;
 
         $database = MockDatabaseFactory::createWithObjectList([$table1]);
-        $this->check->setDatabase($database);
+        $this->tableStatusCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tableStatusCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('corrupted', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('corrupted', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenEngineIsNull(): void
@@ -121,10 +121,10 @@ class TableStatusCheckTest extends TestCase
         $table1->Index_length = 524288;
 
         $database = MockDatabaseFactory::createWithObjectList([$table1]);
-        $this->check->setDatabase($database);
+        $this->tableStatusCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->tableStatusCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 }

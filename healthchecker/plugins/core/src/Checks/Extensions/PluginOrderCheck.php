@@ -85,20 +85,20 @@ final class PluginOrderCheck extends AbstractHealthCheck
      */
     protected function performCheck(): HealthCheckResult
     {
-        $db = $this->requireDatabase();
+        $database = $this->requireDatabase();
         $issues = [];
 
         // Get all enabled system plugins ordered by their execution order
         // folder = 'system' filters to system event plugins only
-        $query = $db->getQuery(true)
+        $query = $database->getQuery(true)
             ->select(['element', 'ordering'])
-            ->from($db->quoteName('#__extensions'))
-            ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
-            ->where($db->quoteName('folder') . ' = ' . $db->quote('system'))
-            ->where($db->quoteName('enabled') . ' = 1')
-            ->order($db->quoteName('ordering') . ' ASC');
+            ->from($database->quoteName('#__extensions'))
+            ->where($database->quoteName('type') . ' = ' . $database->quote('plugin'))
+            ->where($database->quoteName('folder') . ' = ' . $database->quote('system'))
+            ->where($database->quoteName('enabled') . ' = 1')
+            ->order($database->quoteName('ordering') . ' ASC');
 
-        $systemPlugins = $db->setQuery($query)
+        $systemPlugins = $database->setQuery($query)
             ->loadObjectList();
         $pluginOrder = [];
 

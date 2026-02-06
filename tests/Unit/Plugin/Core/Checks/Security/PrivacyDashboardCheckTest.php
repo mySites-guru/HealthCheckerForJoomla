@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(PrivacyDashboardCheck::class)]
 class PrivacyDashboardCheckTest extends TestCase
 {
-    private PrivacyDashboardCheck $check;
+    private PrivacyDashboardCheck $privacyDashboardCheck;
 
     protected function setUp(): void
     {
-        $this->check = new PrivacyDashboardCheck();
+        $this->privacyDashboardCheck = new PrivacyDashboardCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.privacy_dashboard', $this->check->getSlug());
+        $this->assertSame('security.privacy_dashboard', $this->privacyDashboardCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->privacyDashboardCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->privacyDashboardCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->privacyDashboardCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,21 +51,21 @@ class PrivacyDashboardCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->privacyDashboardCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenPrivacyComponentDisabled(): void
     {
         // First query: check if privacy component is enabled (returns 0)
         $database = MockDatabaseFactory::createWithSequentialResults([0]);
-        $this->check->setDatabase($database);
+        $this->privacyDashboardCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->privacyDashboardCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Privacy component is disabled', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Privacy component is disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenPendingRequestsExist(): void
@@ -73,12 +73,12 @@ class PrivacyDashboardCheckTest extends TestCase
         // First query: privacy component enabled (returns 1)
         // Second query: pending privacy requests count (returns 3)
         $database = MockDatabaseFactory::createWithSequentialResults([1, 3]);
-        $this->check->setDatabase($database);
+        $this->privacyDashboardCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->privacyDashboardCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('3 pending privacy request', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('3 pending privacy request', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenEnabledAndNoPendingRequests(): void
@@ -86,12 +86,12 @@ class PrivacyDashboardCheckTest extends TestCase
         // First query: privacy component enabled (returns 1)
         // Second query: no pending privacy requests (returns 0)
         $database = MockDatabaseFactory::createWithSequentialResults([1, 0]);
-        $this->check->setDatabase($database);
+        $this->privacyDashboardCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->privacyDashboardCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('enabled with no pending requests', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled with no pending requests', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWithSinglePendingRequest(): void
@@ -99,11 +99,11 @@ class PrivacyDashboardCheckTest extends TestCase
         // First query: privacy component enabled (returns 1)
         // Second query: 1 pending privacy request
         $database = MockDatabaseFactory::createWithSequentialResults([1, 1]);
-        $this->check->setDatabase($database);
+        $this->privacyDashboardCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->privacyDashboardCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('1 pending privacy request', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 pending privacy request', $healthCheckResult->description);
     }
 }

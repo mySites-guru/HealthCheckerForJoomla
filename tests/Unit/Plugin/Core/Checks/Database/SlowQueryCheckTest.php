@@ -21,15 +21,15 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(SlowQueryCheck::class)]
 class SlowQueryCheckTest extends TestCase
 {
-    private SlowQueryCheck $check;
+    private SlowQueryCheck $slowQueryCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        Factory::setApplication($this->app);
-        $this->check = new SlowQueryCheck();
+        $this->cmsApplication = new CMSApplication();
+        Factory::setApplication($this->cmsApplication);
+        $this->slowQueryCheck = new SlowQueryCheck();
     }
 
     protected function tearDown(): void
@@ -39,22 +39,22 @@ class SlowQueryCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.slow_query', $this->check->getSlug());
+        $this->assertSame('database.slow_query', $this->slowQueryCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->slowQueryCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->slowQueryCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->slowQueryCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -62,38 +62,38 @@ class SlowQueryCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->slowQueryCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenSlowQueryLogDisabled(): void
     {
         // Mock returns 0 for loadResult, meaning slow query log is disabled
         $database = MockDatabaseFactory::createWithResult('0');
-        $this->check->setDatabase($database);
+        $this->slowQueryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->slowQueryCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenSlowQueryLogDisabledWithOffString(): void
     {
         $database = MockDatabaseFactory::createWithResult('OFF');
-        $this->check->setDatabase($database);
+        $this->slowQueryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->slowQueryCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenEnabledWithDebugMode(): void
     {
         // Enable debug mode in the app
-        $this->app->set('debug', true);
+        $this->cmsApplication->set('debug', true);
 
         $database = MockDatabaseFactory::createWithSequentialQueries([
             [
@@ -112,20 +112,20 @@ class SlowQueryCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->slowQueryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->slowQueryCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('enabled', $result->description);
-        $this->assertStringContainsString('10 seconds', $result->description);
-        $this->assertStringContainsString('acceptable during active debugging', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled', $healthCheckResult->description);
+        $this->assertStringContainsString('10 seconds', $healthCheckResult->description);
+        $this->assertStringContainsString('acceptable during active debugging', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenEnabledWithoutDebugMode(): void
     {
         // Debug mode off (production)
-        $this->app->set('debug', false);
+        $this->cmsApplication->set('debug', false);
 
         $database = MockDatabaseFactory::createWithSequentialQueries([
             [
@@ -141,19 +141,19 @@ class SlowQueryCheckTest extends TestCase
                 'return' => null,
             ], // No slow query count available
         ]);
-        $this->check->setDatabase($database);
+        $this->slowQueryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->slowQueryCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('enabled', $result->description);
-        $this->assertStringContainsString('2 seconds', $result->description);
-        $this->assertStringContainsString('Disable slow query logging in production', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled', $healthCheckResult->description);
+        $this->assertStringContainsString('2 seconds', $healthCheckResult->description);
+        $this->assertStringContainsString('Disable slow query logging in production', $healthCheckResult->description);
     }
 
     public function testRunIncludesSlowQueryCountWhenAvailable(): void
     {
-        $this->app->set('debug', false);
+        $this->cmsApplication->set('debug', false);
 
         $database = MockDatabaseFactory::createWithSequentialQueries([
             [
@@ -172,17 +172,17 @@ class SlowQueryCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->slowQueryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->slowQueryCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('42 slow queries recorded', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('42 slow queries recorded', $healthCheckResult->description);
     }
 
     public function testRunHandlesZeroSlowQueryCount(): void
     {
-        $this->app->set('debug', true);
+        $this->cmsApplication->set('debug', true);
 
         $database = MockDatabaseFactory::createWithSequentialQueries([
             [
@@ -201,31 +201,31 @@ class SlowQueryCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->slowQueryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->slowQueryCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // Zero slow queries should not be mentioned
-        $this->assertStringNotContainsString('slow queries recorded', $result->description);
+        $this->assertStringNotContainsString('slow queries recorded', $healthCheckResult->description);
     }
 
     public function testRunHandlesExceptionGracefully(): void
     {
         $database = MockDatabaseFactory::createWithException(new \RuntimeException('Connection failed'));
-        $this->check->setDatabase($database);
+        $this->slowQueryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->slowQueryCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('Unable to check slow query log status', $result->description);
-        $this->assertStringContainsString('Connection failed', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('Unable to check slow query log status', $healthCheckResult->description);
+        $this->assertStringContainsString('Connection failed', $healthCheckResult->description);
     }
 
     public function testRunContinuesWhenSlowQueryCountFails(): void
     {
         // Test that exceptions during SHOW GLOBAL STATUS are caught and the check continues
-        $this->app->set('debug', true);
+        $this->cmsApplication->set('debug', true);
 
         $database = MockDatabaseFactory::createWithSequentialQueries([
             [
@@ -241,15 +241,15 @@ class SlowQueryCheckTest extends TestCase
                 'exception' => new \Exception('Access denied for SHOW GLOBAL STATUS'),
             ], // Exception when getting slow query count
         ]);
-        $this->check->setDatabase($database);
+        $this->slowQueryCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->slowQueryCheck->run();
 
         // Should still return Warning, just without the slow query count
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('enabled', $result->description);
-        $this->assertStringContainsString('5 seconds', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('enabled', $healthCheckResult->description);
+        $this->assertStringContainsString('5 seconds', $healthCheckResult->description);
         // Should NOT contain slow query count since the query failed
-        $this->assertStringNotContainsString('slow queries recorded', $result->description);
+        $this->assertStringNotContainsString('slow queries recorded', $healthCheckResult->description);
     }
 }

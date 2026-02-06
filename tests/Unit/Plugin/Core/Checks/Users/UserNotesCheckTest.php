@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(UserNotesCheck::class)]
 class UserNotesCheckTest extends TestCase
 {
-    private UserNotesCheck $check;
+    private UserNotesCheck $userNotesCheck;
 
     protected function setUp(): void
     {
-        $this->check = new UserNotesCheck();
+        $this->userNotesCheck = new UserNotesCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('users.user_notes', $this->check->getSlug());
+        $this->assertSame('users.user_notes', $this->userNotesCheck->getSlug());
     }
 
     public function testGetCategoryReturnsUsers(): void
     {
-        $this->assertSame('users', $this->check->getCategory());
+        $this->assertSame('users', $this->userNotesCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->userNotesCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->userNotesCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,9 +51,9 @@ class UserNotesCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->userNotesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNoNotesReturnsGood(): void
@@ -61,12 +61,12 @@ class UserNotesCheckTest extends TestCase
         // First query: total notes = 0
         // Second query: users with notes = 0
         $database = MockDatabaseFactory::createWithSequentialResults([0, 0]);
-        $this->check->setDatabase($database);
+        $this->userNotesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userNotesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('No user notes', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('No user notes', $healthCheckResult->description);
     }
 
     public function testRunWithNotesReturnsGood(): void
@@ -74,13 +74,13 @@ class UserNotesCheckTest extends TestCase
         // First query: total notes = 10
         // Second query: users with notes = 5
         $database = MockDatabaseFactory::createWithSequentialResults([10, 5]);
-        $this->check->setDatabase($database);
+        $this->userNotesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userNotesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('10 user note', $result->description);
-        $this->assertStringContainsString('5 user', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('10 user note', $healthCheckResult->description);
+        $this->assertStringContainsString('5 user', $healthCheckResult->description);
     }
 
     public function testRunWithSingleNoteReturnsGood(): void
@@ -88,13 +88,13 @@ class UserNotesCheckTest extends TestCase
         // First query: total notes = 1
         // Second query: users with notes = 1
         $database = MockDatabaseFactory::createWithSequentialResults([1, 1]);
-        $this->check->setDatabase($database);
+        $this->userNotesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userNotesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('1 user note', $result->description);
-        $this->assertStringContainsString('1 user', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('1 user note', $healthCheckResult->description);
+        $this->assertStringContainsString('1 user', $healthCheckResult->description);
     }
 
     public function testRunWithManyNotesForFewUsersReturnsGood(): void
@@ -103,12 +103,12 @@ class UserNotesCheckTest extends TestCase
         // First query: total notes = 50
         // Second query: users with notes = 3
         $database = MockDatabaseFactory::createWithSequentialResults([50, 3]);
-        $this->check->setDatabase($database);
+        $this->userNotesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userNotesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('50 user note', $result->description);
-        $this->assertStringContainsString('3 user', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('50 user note', $healthCheckResult->description);
+        $this->assertStringContainsString('3 user', $healthCheckResult->description);
     }
 }

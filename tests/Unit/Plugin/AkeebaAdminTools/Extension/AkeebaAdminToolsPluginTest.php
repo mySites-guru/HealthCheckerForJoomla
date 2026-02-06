@@ -25,18 +25,18 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(AkeebaAdminToolsPlugin::class)]
 class AkeebaAdminToolsPluginTest extends TestCase
 {
-    private AkeebaAdminToolsPlugin $plugin;
+    private AkeebaAdminToolsPlugin $akeebaAdminToolsPlugin;
 
     protected function setUp(): void
     {
-        $this->plugin = new AkeebaAdminToolsPlugin(new \stdClass());
+        $this->akeebaAdminToolsPlugin = new AkeebaAdminToolsPlugin(new \stdClass());
 
         // Set up params as a Registry object (required for ->get() method)
-        $this->plugin->params = new \Joomla\Registry\Registry();
+        $this->akeebaAdminToolsPlugin->params = new \Joomla\Registry\Registry();
 
         // Set up database
         $database = $this->createMockDatabase();
-        $this->plugin->setDatabase($database);
+        $this->akeebaAdminToolsPlugin->setDatabase($database);
     }
 
     public function testGetSubscribedEventsReturnsExpectedEvents(): void
@@ -54,11 +54,11 @@ class AkeebaAdminToolsPluginTest extends TestCase
 
     public function testOnCollectProvidersRegistersProviderMetadata(): void
     {
-        $event = new CollectProvidersEvent();
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $this->plugin->onCollectProviders($event);
+        $this->akeebaAdminToolsPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertCount(1, $providers);
         $this->assertInstanceOf(ProviderMetadata::class, $providers[0]);
         $this->assertSame('akeeba_admintools', $providers[0]->slug);
@@ -69,11 +69,11 @@ class AkeebaAdminToolsPluginTest extends TestCase
 
     public function testOnCollectCategoriesRegistersAkeebaAdminToolsCategory(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->akeebaAdminToolsPlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertCount(1, $categories);
         $this->assertInstanceOf(HealthCategory::class, $categories[0]);
         $this->assertSame('akeeba_admintools', $categories[0]->slug);
@@ -83,11 +83,11 @@ class AkeebaAdminToolsPluginTest extends TestCase
 
     public function testOnCollectChecksRegistersSecurityChecks(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
         $this->assertNotEmpty($checks);
 
         // Verify all checks implement HealthCheckInterface
@@ -100,12 +100,12 @@ class AkeebaAdminToolsPluginTest extends TestCase
 
     public function testOnCollectChecksRegistersExpectedCheckSlugs(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
-        $slugs = array_map(static fn(HealthCheckInterface $check) => $check->getSlug(), $checks);
+        $checks = $collectChecksEvent->getChecks();
+        $slugs = array_map(static fn(HealthCheckInterface $healthCheck): string => $healthCheck->getSlug(), $checks);
 
         $expectedSlugs = [
             'akeeba_admintools.installed',
@@ -126,34 +126,37 @@ class AkeebaAdminToolsPluginTest extends TestCase
         ];
 
         foreach ($expectedSlugs as $expectedSlug) {
-            $this->assertContains($expectedSlug, $slugs, "Expected check slug '{$expectedSlug}' not found");
+            $this->assertContains($expectedSlug, $slugs, sprintf("Expected check slug '%s' not found", $expectedSlug));
         }
     }
 
     public function testAllChecksHaveTitles(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        foreach ($event->getChecks() as $check) {
-            $title = $check->getTitle();
+        foreach ($collectChecksEvent->getChecks() as $healthCheck) {
+            $title = $healthCheck->getTitle();
             $this->assertIsString($title);
-            $this->assertNotEmpty($title, "Check {$check->getSlug()} has empty title");
+            $this->assertNotEmpty($title, sprintf('Check %s has empty title', $healthCheck->getSlug()));
         }
     }
 
     public function testAllChecksCanRun(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        foreach ($event->getChecks() as $check) {
+        foreach ($collectChecksEvent->getChecks() as $healthCheck) {
             // Each check should run without throwing exceptions
-            $result = $check->run();
-            $this->assertNotNull($result, "Check {$check->getSlug()} returned null result");
-            $this->assertNotEmpty($result->description, "Check {$check->getSlug()} has empty description");
+            $result = $healthCheck->run();
+            $this->assertNotNull($result, sprintf('Check %s returned null result', $healthCheck->getSlug()));
+            $this->assertNotEmpty(
+                $result->description,
+                sprintf('Check %s has empty description', $healthCheck->getSlug()),
+            );
         }
     }
 
@@ -161,48 +164,48 @@ class AkeebaAdminToolsPluginTest extends TestCase
     {
         // Create database that returns empty array for SHOW TABLES query
         $database = $this->createMockDatabaseWithEmptyTables();
-        $this->plugin->setDatabase($database);
+        $this->akeebaAdminToolsPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $installedCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.installed');
+        $installedCheck = $this->findCheckBySlug($collectChecksEvent->getChecks(), 'akeeba_admintools.installed');
         $this->assertNotNull($installedCheck);
 
-        $result = $installedCheck->run();
-        $this->assertSame('warning', $result->healthStatus->value);
-        $this->assertStringContainsString('not installed', $result->description);
+        $healthCheckResult = $installedCheck->run();
+        $this->assertSame('warning', $healthCheckResult->healthStatus->value);
+        $this->assertStringContainsString('not installed', $healthCheckResult->description);
     }
 
     public function testProviderMetadataHasLogoUrl(): void
     {
-        $event = new CollectProvidersEvent();
+        $collectProvidersEvent = new CollectProvidersEvent();
 
-        $this->plugin->onCollectProviders($event);
+        $this->akeebaAdminToolsPlugin->onCollectProviders($collectProvidersEvent);
 
-        $providers = $event->getProviders();
+        $providers = $collectProvidersEvent->getProviders();
         $this->assertNotNull($providers[0]->logoUrl);
         $this->assertStringContainsString('plg_healthchecker_akeebaadmintools', $providers[0]->logoUrl);
     }
 
     public function testCategoryHasLogoUrl(): void
     {
-        $event = new CollectCategoriesEvent();
+        $collectCategoriesEvent = new CollectCategoriesEvent();
 
-        $this->plugin->onCollectCategories($event);
+        $this->akeebaAdminToolsPlugin->onCollectCategories($collectCategoriesEvent);
 
-        $categories = $event->getCategories();
+        $categories = $collectCategoriesEvent->getCategories();
         $this->assertNotNull($categories[0]->logoUrl);
         $this->assertStringContainsString('plg_healthchecker_akeebaadmintools', $categories[0]->logoUrl);
     }
 
     public function testRegisters15SecurityChecks(): void
     {
-        $event = new CollectChecksEvent();
+        $collectChecksEvent = new CollectChecksEvent();
 
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
         $this->assertCount(15, $checks);
     }
 
@@ -210,29 +213,29 @@ class AkeebaAdminToolsPluginTest extends TestCase
     {
         // Create database that simulates WAF table existing but no enabled rules
         $database = $this->createMockDatabaseWithWafTableButNoRules();
-        $this->plugin->setDatabase($database);
+        $this->akeebaAdminToolsPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $wafCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.waf_enabled');
+        $wafCheck = $this->findCheckBySlug($collectChecksEvent->getChecks(), 'akeeba_admintools.waf_enabled');
         $this->assertNotNull($wafCheck);
 
-        $result = $wafCheck->run();
-        $this->assertSame('warning', $result->healthStatus->value);
-        $this->assertStringContainsString('No WAF rules', $result->description);
+        $healthCheckResult = $wafCheck->run();
+        $this->assertSame('warning', $healthCheckResult->healthStatus->value);
+        $this->assertStringContainsString('No WAF rules', $healthCheckResult->description);
     }
 
     public function testAllChecksReturnWarningWhenAdminToolsNotInstalled(): void
     {
         // Create database that returns empty array for SHOW TABLES query (Admin Tools not installed)
         $database = $this->createMockDatabaseWithEmptyTables();
-        $this->plugin->setDatabase($database);
+        $this->akeebaAdminToolsPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $checks = $event->getChecks();
+        $checks = $collectChecksEvent->getChecks();
 
         // Test each check returns warning when Admin Tools is not installed
         foreach ($checks as $check) {
@@ -240,12 +243,12 @@ class AkeebaAdminToolsPluginTest extends TestCase
             $this->assertSame(
                 'warning',
                 $result->healthStatus->value,
-                "Check {$check->getSlug()} should return warning when Admin Tools not installed",
+                sprintf('Check %s should return warning when Admin Tools not installed', $check->getSlug()),
             );
             $this->assertStringContainsString(
                 'not installed',
                 $result->description,
-                "Check {$check->getSlug()} should mention 'not installed'",
+                sprintf("Check %s should mention 'not installed'", $check->getSlug()),
             );
         }
     }
@@ -256,13 +259,14 @@ class AkeebaAdminToolsPluginTest extends TestCase
         // Slug is 'akeeba_admintools.installed' so param is 'check_akeeba_admintools_installed'
         $params = new \Joomla\Registry\Registry();
         $params->set('check_akeeba_admintools_installed', 0);
-        $this->plugin->params = $params;
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $this->akeebaAdminToolsPlugin->params = $params;
 
-        $checks = $event->getChecks();
-        $slugs = array_map(static fn(HealthCheckInterface $check) => $check->getSlug(), $checks);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
+
+        $checks = $collectChecksEvent->getChecks();
+        $slugs = array_map(static fn(HealthCheckInterface $healthCheck): string => $healthCheck->getSlug(), $checks);
 
         $this->assertNotContains('akeeba_admintools.installed', $slugs);
     }
@@ -271,119 +275,119 @@ class AkeebaAdminToolsPluginTest extends TestCase
     {
         // Create database where scan table exists but no completed scans
         $database = $this->createMockDatabaseWithScanTableButNoScans();
-        $this->plugin->setDatabase($database);
+        $this->akeebaAdminToolsPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $scanCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.scan_age');
+        $scanCheck = $this->findCheckBySlug($collectChecksEvent->getChecks(), 'akeeba_admintools.scan_age');
         $this->assertNotNull($scanCheck);
 
-        $result = $scanCheck->run();
-        $this->assertSame('critical', $result->healthStatus->value);
-        $this->assertStringContainsString('No file integrity scans', $result->description);
+        $healthCheckResult = $scanCheck->run();
+        $this->assertSame('critical', $healthCheckResult->healthStatus->value);
+        $this->assertStringContainsString('No file integrity scans', $healthCheckResult->description);
     }
 
     public function testScanAgeCheckReturnsCriticalWhenScanOlderThan30Days(): void
     {
         // Create database where last scan was over 30 days ago
         $database = $this->createMockDatabaseWithOldScan(35);
-        $this->plugin->setDatabase($database);
+        $this->akeebaAdminToolsPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $scanCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.scan_age');
+        $scanCheck = $this->findCheckBySlug($collectChecksEvent->getChecks(), 'akeeba_admintools.scan_age');
         $this->assertNotNull($scanCheck);
 
-        $result = $scanCheck->run();
-        $this->assertSame('critical', $result->healthStatus->value);
-        $this->assertStringContainsString('days ago', $result->description);
+        $healthCheckResult = $scanCheck->run();
+        $this->assertSame('critical', $healthCheckResult->healthStatus->value);
+        $this->assertStringContainsString('days ago', $healthCheckResult->description);
     }
 
     public function testScanAgeCheckReturnsWarningWhenScanBetween7And30Days(): void
     {
         // Create database where last scan was 15 days ago
         $database = $this->createMockDatabaseWithOldScan(15);
-        $this->plugin->setDatabase($database);
+        $this->akeebaAdminToolsPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $scanCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.scan_age');
+        $scanCheck = $this->findCheckBySlug($collectChecksEvent->getChecks(), 'akeeba_admintools.scan_age');
         $this->assertNotNull($scanCheck);
 
-        $result = $scanCheck->run();
-        $this->assertSame('warning', $result->healthStatus->value);
-        $this->assertStringContainsString('days ago', $result->description);
+        $healthCheckResult = $scanCheck->run();
+        $this->assertSame('warning', $healthCheckResult->healthStatus->value);
+        $this->assertStringContainsString('days ago', $healthCheckResult->description);
     }
 
     public function testFileAlertsCheckReturnsCriticalWhenHighThreatAlerts(): void
     {
         // Create database with high threat alerts
         $database = $this->createMockDatabaseWithHighThreatAlerts();
-        $this->plugin->setDatabase($database);
+        $this->akeebaAdminToolsPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $alertsCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.file_alerts');
+        $alertsCheck = $this->findCheckBySlug($collectChecksEvent->getChecks(), 'akeeba_admintools.file_alerts');
         $this->assertNotNull($alertsCheck);
 
-        $result = $alertsCheck->run();
-        $this->assertSame('critical', $result->healthStatus->value);
-        $this->assertStringContainsString('high-threat', $result->description);
+        $healthCheckResult = $alertsCheck->run();
+        $this->assertSame('critical', $healthCheckResult->healthStatus->value);
+        $this->assertStringContainsString('high-threat', $healthCheckResult->description);
     }
 
     public function testFileAlertsCheckReturnsWarningWhenLowThreatAlerts(): void
     {
         // Create database with low threat alerts
         $database = $this->createMockDatabaseWithLowThreatAlerts();
-        $this->plugin->setDatabase($database);
+        $this->akeebaAdminToolsPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $alertsCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.file_alerts');
+        $alertsCheck = $this->findCheckBySlug($collectChecksEvent->getChecks(), 'akeeba_admintools.file_alerts');
         $this->assertNotNull($alertsCheck);
 
-        $result = $alertsCheck->run();
-        $this->assertSame('warning', $result->healthStatus->value);
-        $this->assertStringContainsString('require review', $result->description);
+        $healthCheckResult = $alertsCheck->run();
+        $this->assertSame('warning', $healthCheckResult->healthStatus->value);
+        $this->assertStringContainsString('require review', $healthCheckResult->description);
     }
 
     public function testLoginFailuresCheckReturnsWarningWhenHighFailures(): void
     {
         // Create database with more than 10 login failures
         $database = $this->createMockDatabaseWithLoginFailures(15);
-        $this->plugin->setDatabase($database);
+        $this->akeebaAdminToolsPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $loginCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.login_failures');
+        $loginCheck = $this->findCheckBySlug($collectChecksEvent->getChecks(), 'akeeba_admintools.login_failures');
         $this->assertNotNull($loginCheck);
 
-        $result = $loginCheck->run();
-        $this->assertSame('warning', $result->healthStatus->value);
-        $this->assertStringContainsString('15 login failures', $result->description);
+        $healthCheckResult = $loginCheck->run();
+        $this->assertSame('warning', $healthCheckResult->healthStatus->value);
+        $this->assertStringContainsString('15 login failures', $healthCheckResult->description);
     }
 
     public function testTempSuperUsersCheckReturnsWarningWhenExpiredFound(): void
     {
         // Create database with expired temporary super users
         $database = $this->createMockDatabaseWithExpiredTempSuperUsers();
-        $this->plugin->setDatabase($database);
+        $this->akeebaAdminToolsPlugin->setDatabase($database);
 
-        $event = new CollectChecksEvent();
-        $this->plugin->onCollectChecks($event);
+        $collectChecksEvent = new CollectChecksEvent();
+        $this->akeebaAdminToolsPlugin->onCollectChecks($collectChecksEvent);
 
-        $tempCheck = $this->findCheckBySlug($event->getChecks(), 'akeeba_admintools.temp_superusers');
+        $tempCheck = $this->findCheckBySlug($collectChecksEvent->getChecks(), 'akeeba_admintools.temp_superusers');
         $this->assertNotNull($tempCheck);
 
-        $result = $tempCheck->run();
-        $this->assertSame('warning', $result->healthStatus->value);
-        $this->assertStringContainsString('expired', $result->description);
+        $healthCheckResult = $tempCheck->run();
+        $this->assertSame('warning', $healthCheckResult->healthStatus->value);
+        $this->assertStringContainsString('expired', $healthCheckResult->description);
     }
 
     /**
@@ -468,14 +472,14 @@ class AkeebaAdminToolsPluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -620,14 +624,14 @@ class AkeebaAdminToolsPluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -769,14 +773,14 @@ class AkeebaAdminToolsPluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -914,14 +918,14 @@ class AkeebaAdminToolsPluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -1008,7 +1012,7 @@ class AkeebaAdminToolsPluginTest extends TestCase
     {
         return new class ($daysAgo) implements DatabaseInterface {
             public function __construct(
-                private int $daysAgo,
+                private readonly int $daysAgo,
             ) {}
 
             public function getVersion(): string
@@ -1029,7 +1033,7 @@ class AkeebaAdminToolsPluginTest extends TestCase
             public function loadResult(): mixed
             {
                 // Return scan date from X days ago
-                return date('Y-m-d H:i:s', strtotime("-{$this->daysAgo} days"));
+                return date('Y-m-d H:i:s', strtotime(sprintf('-%d days', $this->daysAgo)));
             }
 
             public function loadColumn(): array
@@ -1062,14 +1066,14 @@ class AkeebaAdminToolsPluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -1210,14 +1214,14 @@ class AkeebaAdminToolsPluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -1361,14 +1365,14 @@ class AkeebaAdminToolsPluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -1455,7 +1459,7 @@ class AkeebaAdminToolsPluginTest extends TestCase
     {
         return new class ($count) implements DatabaseInterface {
             public function __construct(
-                private int $failureCount,
+                private readonly int $failureCount,
             ) {}
 
             public function getVersion(): string
@@ -1508,14 +1512,14 @@ class AkeebaAdminToolsPluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string
@@ -1652,14 +1656,14 @@ class AkeebaAdminToolsPluginTest extends TestCase
                 return true;
             }
 
-            public function quoteName(array|string $name, ?string $as = null): array|string
+            public function quoteName(array|string $name, ?string $as = null): string
             {
                 return is_array($name) ? '' : $name;
             }
 
-            public function quote(array|string $text, bool $escape = true): array|string
+            public function quote(array|string $text, bool $escape = true): string
             {
-                return is_string($text) ? "'{$text}'" : '';
+                return is_string($text) ? sprintf("'%s'", $text) : '';
             }
 
             public function getPrefix(): string

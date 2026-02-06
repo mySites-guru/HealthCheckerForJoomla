@@ -21,17 +21,17 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(OrphanedTablesCheck::class)]
 class OrphanedTablesCheckTest extends TestCase
 {
-    private OrphanedTablesCheck $check;
+    private OrphanedTablesCheck $orphanedTablesCheck;
 
-    private CMSApplication $app;
+    private CMSApplication $cmsApplication;
 
     protected function setUp(): void
     {
-        $this->app = new CMSApplication();
-        $this->app->set('dbprefix', 'test_');
-        $this->app->set('db', 'test_database');
-        Factory::setApplication($this->app);
-        $this->check = new OrphanedTablesCheck();
+        $this->cmsApplication = new CMSApplication();
+        $this->cmsApplication->set('dbprefix', 'test_');
+        $this->cmsApplication->set('db', 'test_database');
+        Factory::setApplication($this->cmsApplication);
+        $this->orphanedTablesCheck = new OrphanedTablesCheck();
     }
 
     protected function tearDown(): void
@@ -41,22 +41,22 @@ class OrphanedTablesCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('database.orphaned_tables', $this->check->getSlug());
+        $this->assertSame('database.orphaned_tables', $this->orphanedTablesCheck->getSlug());
     }
 
     public function testGetCategoryReturnsDatabase(): void
     {
-        $this->assertSame('database', $this->check->getCategory());
+        $this->assertSame('database', $this->orphanedTablesCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->orphanedTablesCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->orphanedTablesCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -64,9 +64,9 @@ class OrphanedTablesCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenNoOrphanedTables(): void
@@ -91,13 +91,13 @@ class OrphanedTablesCheckTest extends TestCase
                 ],
             ], // Extensions list
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('no orphaned tables detected', $result->description);
-        $this->assertStringContainsString('test_', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('no orphaned tables detected', $healthCheckResult->description);
+        $this->assertStringContainsString('test_', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenFewOrphanedTablesFound(): void
@@ -124,12 +124,12 @@ class OrphanedTablesCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('may be orphaned', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('may be orphaned', $healthCheckResult->description);
     }
 
     public function testRunReturnsCriticalWhenManyOrphanedTablesFound(): void
@@ -157,13 +157,13 @@ class OrphanedTablesCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('potential orphaned tables found', $result->description);
-        $this->assertStringContainsString('Review and clean up', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('potential orphaned tables found', $healthCheckResult->description);
+        $this->assertStringContainsString('Review and clean up', $healthCheckResult->description);
     }
 
     public function testRunRecognizesCoreJoomlaTables(): void
@@ -257,13 +257,13 @@ class OrphanedTablesCheckTest extends TestCase
                 'return' => [], // No extensions
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
         // All tables are recognized as core Joomla tables, so no orphans
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('no orphaned tables detected', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('no orphaned tables detected', $healthCheckResult->description);
     }
 
     public function testRunRecognizesKnownSharedTables(): void
@@ -284,12 +284,12 @@ class OrphanedTablesCheckTest extends TestCase
                 'return' => [],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
         // akeeba_common should be recognized and not flagged as orphaned
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunMatchesExtensionTablesByPrefix(): void
@@ -317,12 +317,12 @@ class OrphanedTablesCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
         // All admintools tables should be recognized via prefix matching
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunHandlesExtensionsWithDotsAndDashes(): void
@@ -347,12 +347,12 @@ class OrphanedTablesCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
         // Special characters in element names should be converted to underscores
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunIgnoresNonComponentExtensions(): void
@@ -381,13 +381,13 @@ class OrphanedTablesCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
         // mymodule table should be flagged as orphaned since only components are checked
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('test_mymodule', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('test_mymodule', $healthCheckResult->description);
     }
 
     public function testRunWithEmptyTableList(): void
@@ -403,12 +403,12 @@ class OrphanedTablesCheckTest extends TestCase
                 'return' => [],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('0 tables', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('0 tables', $healthCheckResult->description);
     }
 
     public function testRunReportsCorrectOrphanedTableCount(): void
@@ -424,14 +424,14 @@ class OrphanedTablesCheckTest extends TestCase
                 'return' => [],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         // Should report 4 total tables and 3 orphaned (content is core)
-        $this->assertStringContainsString('4 tables', $result->description);
-        $this->assertStringContainsString('3 may be orphaned', $result->description);
+        $this->assertStringContainsString('4 tables', $healthCheckResult->description);
+        $this->assertStringContainsString('3 may be orphaned', $healthCheckResult->description);
     }
 
     public function testRunListsOrphanedTableNamesInMessage(): void
@@ -447,13 +447,13 @@ class OrphanedTablesCheckTest extends TestCase
                 'return' => [],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('test_legacy_extension', $result->description);
-        $this->assertStringContainsString('test_old_plugin_data', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('test_legacy_extension', $healthCheckResult->description);
+        $this->assertStringContainsString('test_old_plugin_data', $healthCheckResult->description);
     }
 
     public function testRunExactTableMatchAndPrefixMatch(): void
@@ -480,12 +480,12 @@ class OrphanedTablesCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
         // All customcomp tables should be matched
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testCriticalStatusListsAllOrphanedTables(): void
@@ -511,16 +511,16 @@ class OrphanedTablesCheckTest extends TestCase
                 'return' => [],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
-        $this->assertStringContainsString('15 potential orphaned tables', $result->description);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('15 potential orphaned tables', $healthCheckResult->description);
 
         // Verify some of the orphaned table names are in the message
-        $this->assertStringContainsString('test_orphan_table_1', $result->description);
-        $this->assertStringContainsString('test_orphan_table_15', $result->description);
+        $this->assertStringContainsString('test_orphan_table_1', $healthCheckResult->description);
+        $this->assertStringContainsString('test_orphan_table_15', $healthCheckResult->description);
     }
 
     public function testRunDeduplicatesExpectedTables(): void
@@ -548,13 +548,13 @@ class OrphanedTablesCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
         // Should still be good - tables matched via multiple sources don't cause duplicates
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('2 tables', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('2 tables', $healthCheckResult->description);
     }
 
     public function testRunHandlesTablesWithUnderscoresInName(): void
@@ -580,11 +580,11 @@ class OrphanedTablesCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testBoundaryConditionExactlyTenOrphanedTables(): void
@@ -607,12 +607,12 @@ class OrphanedTablesCheckTest extends TestCase
                 'return' => [],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
         // Exactly 10 should be WARNING (> 10 is CRITICAL)
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testBoundaryConditionElevenOrphanedTables(): void
@@ -635,12 +635,12 @@ class OrphanedTablesCheckTest extends TestCase
                 'return' => [],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->orphanedTablesCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->orphanedTablesCheck->run();
 
         // 11 should be CRITICAL (> 10)
-        $this->assertSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     // ========================================================================
@@ -657,18 +657,18 @@ class OrphanedTablesCheckTest extends TestCase
         @mkdir($sqlPath, 0777, true);
 
         // Create SQL install file with CREATE TABLE statements
-        $sqlContent = <<<'SQL'
--- Test component install SQL
-CREATE TABLE IF NOT EXISTS `#__testextension_items` (
-    id INT PRIMARY KEY,
-    title VARCHAR(255)
-);
-
-CREATE TABLE `#__testextension_categories` (
-    id INT PRIMARY KEY,
-    name VARCHAR(255)
-);
-SQL;
+        $sqlContent = <<<'SQL_WRAP'
+        -- Test component install SQL
+        CREATE TABLE IF NOT EXISTS `#__testextension_items` (
+            id INT PRIMARY KEY,
+            title VARCHAR(255)
+        );
+        
+        CREATE TABLE `#__testextension_categories` (
+            id INT PRIMARY KEY,
+            name VARCHAR(255)
+        );
+        SQL_WRAP;
 
         file_put_contents($sqlPath . '/install.mysql.sql', $sqlContent);
 
@@ -689,9 +689,9 @@ SQL;
                     'return' => [],
                 ],
             ]);
-            $this->check->setDatabase($database);
+            $this->orphanedTablesCheck->setDatabase($database);
 
-            $result = $this->check->run();
+            $result = $this->orphanedTablesCheck->run();
 
             // Tables from SQL file should be recognized
             $this->assertSame(HealthStatus::Good, $result->healthStatus);
@@ -742,9 +742,9 @@ SQL;
                     'return' => [],
                 ],
             ]);
-            $this->check->setDatabase($database);
+            $this->orphanedTablesCheck->setDatabase($database);
 
-            $result = $this->check->run();
+            $result = $this->orphanedTablesCheck->run();
 
             $this->assertSame(HealthStatus::Good, $result->healthStatus);
         } finally {
@@ -775,9 +775,9 @@ SQL;
                     'return' => [],
                 ],
             ]);
-            $this->check->setDatabase($database);
+            $this->orphanedTablesCheck->setDatabase($database);
 
-            $result = $this->check->run();
+            $result = $this->orphanedTablesCheck->run();
 
             $this->assertSame(HealthStatus::Good, $result->healthStatus);
         } finally {
@@ -808,9 +808,9 @@ SQL;
                     'return' => [],
                 ],
             ]);
-            $this->check->setDatabase($database);
+            $this->orphanedTablesCheck->setDatabase($database);
 
-            $result = $this->check->run();
+            $result = $this->orphanedTablesCheck->run();
 
             $this->assertSame(HealthStatus::Good, $result->healthStatus);
         } finally {
@@ -842,9 +842,9 @@ SQL;
                     'return' => [],
                 ],
             ]);
-            $this->check->setDatabase($database);
+            $this->orphanedTablesCheck->setDatabase($database);
 
-            $result = $this->check->run();
+            $result = $this->orphanedTablesCheck->run();
 
             $this->assertSame(HealthStatus::Good, $result->healthStatus);
         } finally {
@@ -879,9 +879,9 @@ SQL;
                     'return' => [],
                 ],
             ]);
-            $this->check->setDatabase($database);
+            $this->orphanedTablesCheck->setDatabase($database);
 
-            $result = $this->check->run();
+            $result = $this->orphanedTablesCheck->run();
 
             // Should still work but table won't be recognized from SQL
             // So it will be flagged as orphaned
@@ -919,9 +919,9 @@ SQL;
                     'return' => [],
                 ],
             ]);
-            $this->check->setDatabase($database);
+            $this->orphanedTablesCheck->setDatabase($database);
 
-            $result = $this->check->run();
+            $result = $this->orphanedTablesCheck->run();
 
             // Should still work, just won't parse any SQL files
             $this->assertSame(HealthStatus::Warning, $result->healthStatus);
@@ -956,9 +956,9 @@ SQL;
                     'return' => [],
                 ],
             ]);
-            $this->check->setDatabase($database);
+            $this->orphanedTablesCheck->setDatabase($database);
 
-            $result = $this->check->run();
+            $result = $this->orphanedTablesCheck->run();
 
             // Table should be recognized (deduplication happens internally)
             $this->assertSame(HealthStatus::Good, $result->healthStatus);
@@ -991,9 +991,9 @@ SQL;
                     'return' => [],
                 ],
             ]);
-            $this->check->setDatabase($database);
+            $this->orphanedTablesCheck->setDatabase($database);
 
-            $result = $this->check->run();
+            $result = $this->orphanedTablesCheck->run();
 
             // Empty SQL file shouldn't cause errors
             $this->assertSame(HealthStatus::Warning, $result->healthStatus);
@@ -1027,9 +1027,9 @@ SQL;
                     'return' => [],
                 ],
             ]);
-            $this->check->setDatabase($database);
+            $this->orphanedTablesCheck->setDatabase($database);
 
-            $result = $this->check->run();
+            $result = $this->orphanedTablesCheck->run();
 
             // Should work fine, just no SQL files to parse from non-component dirs
             $this->assertSame(HealthStatus::Good, $result->healthStatus);

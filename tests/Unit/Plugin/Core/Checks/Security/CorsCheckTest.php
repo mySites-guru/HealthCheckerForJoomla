@@ -20,11 +20,11 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(CorsCheck::class)]
 class CorsCheckTest extends TestCase
 {
-    private CorsCheck $check;
+    private CorsCheck $corsCheck;
 
     protected function setUp(): void
     {
-        $this->check = new CorsCheck();
+        $this->corsCheck = new CorsCheck();
     }
 
     protected function tearDown(): void
@@ -35,22 +35,22 @@ class CorsCheckTest extends TestCase
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('security.cors', $this->check->getSlug());
+        $this->assertSame('security.cors', $this->corsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsSecurity(): void
     {
-        $this->assertSame('security', $this->check->getCategory());
+        $this->assertSame('security', $this->corsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->corsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->corsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -58,293 +58,293 @@ class CorsCheckTest extends TestCase
 
     public function testRunReturnsGoodWhenCorsDisabled(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', false);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', false);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenCorsEnabledWithWildcard(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', true);
-        $app->set('cors_allow_origin', '*');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', true);
+        $cmsApplication->set('cors_allow_origin', '*');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('wildcard', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('wildcard', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenCorsEnabledWithRestrictedOrigin(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', true);
-        $app->set('cors_allow_origin', 'https://example.com');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', true);
+        $cmsApplication->set('cors_allow_origin', 'https://example.com');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('restricted', $result->description);
-        $this->assertStringContainsString('example.com', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('restricted', $healthCheckResult->description);
+        $this->assertStringContainsString('example.com', $healthCheckResult->description);
     }
 
     public function testRunReturnsWarningWhenCorsEnabledAsString1(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', '1');
-        $app->set('cors_allow_origin', '*');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', '1');
+        $cmsApplication->set('cors_allow_origin', '*');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenCorsEnabledAsInteger1(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', 1);
-        $app->set('cors_allow_origin', '*');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', 1);
+        $cmsApplication->set('cors_allow_origin', '*');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenCorsDisabledWithString0(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', '0');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', '0');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('disabled', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('disabled', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenCorsDisabledWithIntegerZero(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', 0);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', 0);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenCorsNotSet(): void
     {
-        $app = new CMSApplication();
+        $cmsApplication = new CMSApplication();
         // Don't set cors, should default to false
-        Factory::setApplication($app);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunResultContainsSlug(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', false);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', false);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame('security.cors', $result->slug);
+        $this->assertSame('security.cors', $healthCheckResult->slug);
     }
 
     public function testRunResultContainsTitle(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', false);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', false);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertNotEmpty($result->title);
+        $this->assertNotEmpty($healthCheckResult->title);
     }
 
     public function testRunResultHasProvider(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', false);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', false);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame('core', $result->provider);
+        $this->assertSame('core', $healthCheckResult->provider);
     }
 
     public function testRunResultHasCategory(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', false);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', false);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame('security', $result->category);
+        $this->assertSame('security', $healthCheckResult->category);
     }
 
     public function testRunNeverReturnsCritical(): void
     {
         // Per the docblock, this check does not return critical
-        $app = new CMSApplication();
-        $app->set('cors', true);
-        $app->set('cors_allow_origin', '*');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', true);
+        $cmsApplication->set('cors_allow_origin', '*');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsGoodWhenCorsEnabledWithHttpsDomain(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', true);
-        $app->set('cors_allow_origin', 'https://api.example.com');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', true);
+        $cmsApplication->set('cors_allow_origin', 'https://api.example.com');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('api.example.com', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('api.example.com', $healthCheckResult->description);
     }
 
     public function testRunReturnsGoodWhenCorsEnabledWithMultipleDomains(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', true);
-        $app->set('cors_allow_origin', 'https://example.com,https://app.example.com');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', true);
+        $cmsApplication->set('cors_allow_origin', 'https://example.com,https://app.example.com');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunReturnsWarningWhenCorsEnabledWithDefaultWildcard(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', true);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', true);
         // Don't set cors_allow_origin, should default to '*'
-        Factory::setApplication($app);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testWarningDescriptionMentionsSecurity(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', true);
-        $app->set('cors_allow_origin', '*');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', true);
+        $cmsApplication->set('cors_allow_origin', '*');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('security', strtolower($result->description));
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('security', strtolower($healthCheckResult->description));
     }
 
     public function testWarningDescriptionMentionsTrustedDomains(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', true);
-        $app->set('cors_allow_origin', '*');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', true);
+        $cmsApplication->set('cors_allow_origin', '*');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('trusted domains', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('trusted domains', $healthCheckResult->description);
     }
 
     public function testGoodDescriptionMentionsCrossOrigin(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', false);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', false);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
         $this->assertTrue(
-            stripos($result->description, 'cross-origin') !== false ||
-            stripos($result->description, 'Cross-origin') !== false,
+            stripos($healthCheckResult->description, 'cross-origin') !== false ||
+            stripos($healthCheckResult->description, 'Cross-origin') !== false,
         );
     }
 
     public function testRunResultDescriptionIsNotEmpty(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', false);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', false);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertNotEmpty($result->description);
+        $this->assertNotEmpty($healthCheckResult->description);
     }
 
     public function testRunReturnsValidStatus(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', true);
-        $app->set('cors_allow_origin', '*');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', true);
+        $cmsApplication->set('cors_allow_origin', '*');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertContains($result->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
+        $this->assertContains($healthCheckResult->healthStatus, [HealthStatus::Good, HealthStatus::Warning]);
     }
 
     public function testRunWithCorsEnabledAsNull(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', null);
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', null);
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
         // null is not in [true, '1', 1] so should be treated as disabled
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithCorsEnabledAsEmptyString(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', '');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', '');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
         // Empty string is not in [true, '1', 1] so should be treated as disabled
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testGoodWithRestrictedOriginShowsOriginInDescription(): void
     {
-        $app = new CMSApplication();
-        $app->set('cors', true);
-        $app->set('cors_allow_origin', 'https://myapp.example.com');
-        Factory::setApplication($app);
+        $cmsApplication = new CMSApplication();
+        $cmsApplication->set('cors', true);
+        $cmsApplication->set('cors_allow_origin', 'https://myapp.example.com');
+        Factory::setApplication($cmsApplication);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->corsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('myapp.example.com', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('myapp.example.com', $healthCheckResult->description);
     }
 }

@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(TrashedContentCheck::class)]
 class TrashedContentCheckTest extends TestCase
 {
-    private TrashedContentCheck $check;
+    private TrashedContentCheck $trashedContentCheck;
 
     protected function setUp(): void
     {
-        $this->check = new TrashedContentCheck();
+        $this->trashedContentCheck = new TrashedContentCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('content.trashed_content', $this->check->getSlug());
+        $this->assertSame('content.trashed_content', $this->trashedContentCheck->getSlug());
     }
 
     public function testGetCategoryReturnsContent(): void
     {
-        $this->assertSame('content', $this->check->getCategory());
+        $this->assertSame('content', $this->trashedContentCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->trashedContentCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->trashedContentCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,41 +51,41 @@ class TrashedContentCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->trashedContentCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithNoTrashedContentReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(0);
-        $this->check->setDatabase($database);
+        $this->trashedContentCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->trashedContentCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('0 article(s) in trash', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('0 article(s) in trash', $healthCheckResult->description);
     }
 
     public function testRunWithSomeTrashedContentReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(25);
-        $this->check->setDatabase($database);
+        $this->trashedContentCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->trashedContentCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithManyTrashedContentReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithResult(75);
-        $this->check->setDatabase($database);
+        $this->trashedContentCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->trashedContentCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('75 articles', $result->description);
-        $this->assertStringContainsString('trash', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('75 articles', $healthCheckResult->description);
+        $this->assertStringContainsString('trash', $healthCheckResult->description);
     }
 }

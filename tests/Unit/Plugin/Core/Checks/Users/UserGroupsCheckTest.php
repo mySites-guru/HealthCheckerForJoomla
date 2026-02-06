@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(UserGroupsCheck::class)]
 class UserGroupsCheckTest extends TestCase
 {
-    private UserGroupsCheck $check;
+    private UserGroupsCheck $userGroupsCheck;
 
     protected function setUp(): void
     {
-        $this->check = new UserGroupsCheck();
+        $this->userGroupsCheck = new UserGroupsCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('users.user_groups', $this->check->getSlug());
+        $this->assertSame('users.user_groups', $this->userGroupsCheck->getSlug());
     }
 
     public function testGetCategoryReturnsUsers(): void
     {
-        $this->assertSame('users', $this->check->getCategory());
+        $this->assertSame('users', $this->userGroupsCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->userGroupsCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->userGroupsCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,65 +51,65 @@ class UserGroupsCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->userGroupsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithFewGroupsReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(8);
-        $this->check->setDatabase($database);
+        $this->userGroupsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userGroupsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('8 user groups', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('8 user groups', $healthCheckResult->description);
     }
 
     public function testRunWithTwentyGroupsReturnsGood(): void
     {
         $database = MockDatabaseFactory::createWithResult(20);
-        $this->check->setDatabase($database);
+        $this->userGroupsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userGroupsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('20 user groups', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('20 user groups', $healthCheckResult->description);
     }
 
     public function testRunWithManyGroupsReturnsWarning(): void
     {
         $database = MockDatabaseFactory::createWithResult(25);
-        $this->check->setDatabase($database);
+        $this->userGroupsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userGroupsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('25 user groups', $result->description);
-        $this->assertStringContainsString('consolidating', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('25 user groups', $healthCheckResult->description);
+        $this->assertStringContainsString('consolidating', $healthCheckResult->description);
     }
 
     public function testRunWithExactlyThresholdPlusOneReturnsWarning(): void
     {
         // Threshold is >20, so 21 should trigger warning
         $database = MockDatabaseFactory::createWithResult(21);
-        $this->check->setDatabase($database);
+        $this->userGroupsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userGroupsCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithDefaultJoomlaGroupsReturnsGood(): void
     {
         // Joomla ships with 9 default groups
         $database = MockDatabaseFactory::createWithResult(9);
-        $this->check->setDatabase($database);
+        $this->userGroupsCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->userGroupsCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('9 user groups', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('9 user groups', $healthCheckResult->description);
     }
 }
