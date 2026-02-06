@@ -1442,10 +1442,12 @@ Community plugins can:
 
 ## Available Plugins
 
-There are no community plugins listed yet — be the first to create one!
+| Plugin | Author | Description | Link |
+|--------|--------|-------------|------|
+| YOOtheme Pro Health Checker | Alex Revo | Diagnostic tool for YOOtheme Pro Builder sites. Verifies server requirements, Joomla configuration, and YOOtheme Pro setup — identifying potential issues with actionable recommendations. | [Website](https://alexrevo.pw/product/revo-debug-plugin.html) |
 
-::: tip Be the First!
-If you've built a Health Checker plugin, we'd love to list it here. See [Submitting Your Plugin](#submitting-your-plugin) below.
+::: tip Share Yours!
+Built a Health Checker plugin? We'd love to list it here. See [Submitting Your Plugin](#submitting-your-plugin) below.
 :::
 
 ## Submitting Your Plugin
