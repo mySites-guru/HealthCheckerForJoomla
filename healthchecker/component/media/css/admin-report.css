@@ -172,3 +172,68 @@
 .healthchecker-description p:last-child {
     margin-bottom: 0;
 }
+
+/* Dark mode overrides */
+[data-bs-theme="dark"] .btn-outline-primary,
+[data-bs-theme="dark"] .btn-outline-danger {
+    border-color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.8);
+}
+
+[data-bs-theme="dark"] .btn-outline-primary:hover {
+    background-color: rgba(13,110,253,0.3);
+    border-color: #6ea8fe;
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .btn-outline-danger:hover {
+    background-color: rgba(220,53,69,0.3);
+    border-color: #ea868f;
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .mysitesguru-banner {
+    background: #1a1a2e;
+    border-color: #333;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+[data-bs-theme="dark"] .mysitesguru-banner-content {
+    color: rgba(255,255,255,0.85);
+}
+
+[data-bs-theme="dark"] .mysitesguru-banner-link {
+    color: #6ea8fe;
+}
+
+[data-bs-theme="dark"] .mysitesguru-banner-link:hover {
+    color: #9ec5fe;
+}
+
+[data-bs-theme="dark"] .mysitesguru-banner-close {
+    color: rgba(255,255,255,0.5);
+}
+
+[data-bs-theme="dark"] .mysitesguru-banner-close:hover {
+    color: rgba(255,255,255,0.85);
+}
+
+[data-bs-theme="dark"] .healthchecker-description code {
+    background-color: rgba(255,255,255,0.1);
+}
+
+[data-bs-theme="dark"] .healthchecker-description pre {
+    background-color: rgba(255,255,255,0.1);
+}
+
+[data-bs-theme="dark"] .healthchecker-action-row:hover {
+    background-color: rgba(255,255,255,0.05) !important;
+}
+
+[data-bs-theme="dark"] .healthchecker-docs-link {
+    color: rgba(255,255,255,0.5);
+}
+
+[data-bs-theme="dark"] .healthchecker-docs-link:hover {
+    color: #6ea8fe;
+}

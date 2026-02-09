@@ -17,3 +17,22 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+
+/* Dark mode: improve button visibility */
+[data-bs-theme="dark"] .btn-outline-primary,
+[data-bs-theme="dark"] .btn-outline-secondary {
+    border-color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.8);
+}
+
+[data-bs-theme="dark"] .btn-outline-primary:hover {
+    background-color: rgba(13,110,253,0.3);
+    border-color: #6ea8fe;
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .btn-outline-secondary:hover {
+    background-color: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.6);
+    color: #fff;
+}
