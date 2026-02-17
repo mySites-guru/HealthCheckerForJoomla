@@ -764,6 +764,17 @@
                 </field>
 
                 <field
+                    name="check_security_index_file"
+                    type="radio"
+                    label="PLG_HEALTHCHECKER_CORE_CHECK_SECURITY_INDEX_FILE_TITLE"
+                    class="btn-group btn-group-yesno"
+                    default="1"
+                >
+                    <option value="1">JENABLED</option>
+                    <option value="0">JDISABLED</option>
+                </field>
+
+                <field
                     name="check_security_https_redirect"
                     type="radio"
                     label="PLG_HEALTHCHECKER_CORE_CHECK_SECURITY_HTTPS_REDIRECT_TITLE"
