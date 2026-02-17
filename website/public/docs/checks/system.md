@@ -9,7 +9,7 @@ description: >-
 
 System and hosting checks examine your PHP environment, server configuration, and hosting infrastructure. These form the foundation of a healthy Joomla site.
 
-**Total checks in this category: 33**
+**Total checks in this category: 34**
 
 ## PHP Configuration (8 checks)
 
@@ -191,7 +191,7 @@ Verifies MIME type detection.
 
 **Why it matters**: Helps prevent malicious file uploads by detecting true file types.
 
-## Server Environment (6 checks)
+## Server Environment (7 checks)
 
 ### Disk Space Available
 
@@ -202,6 +202,17 @@ Monitors available disk space.
 * **Critical**: Less than 10% free or under 500MB
 
 **Why it matters**: Insufficient disk space prevents backups, uploads, and log writing.
+
+### Core Directories
+
+Verifies all core Joomla root-level directories exist. These are the directories that Joomla's System Information page expects to find.
+
+* **Good**: All 14 core directories present
+* **Critical**: One or more core directories missing (lists which ones)
+
+**Why it matters**: After site migrations (e.g., Akeeba Backup restores), core directories like `/images` can be missing. This causes errors on Joomla's System Information page and can break media management, extension installation, and template rendering.
+
+**Directories checked**: `administrator/components`, `administrator/language`, `administrator/manifests`, `administrator/modules`, `administrator/templates`, `components`, `images`, `language`, `libraries`, `media`, `media/cache`, `modules`, `plugins`, `templates`
 
 ### Temp Directory Writable
 

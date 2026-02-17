@@ -5568,10 +5568,10 @@ This page provides a complete reference of all health checks included in Health 
 * [Performance](#performance) (10 checks)
 * [Security](#security) (21 checks)
 * [SEO](#seo) (12 checks)
-* [System & Hosting](#system-hosting) (33 checks)
+* [System & Hosting](#system-hosting) (34 checks)
 * [Users](#users) (12 checks)
 
-**Note:** The core plugin provides **129 checks** across these 8+ categories. Additional plugins may add more checks.
+**Note:** The core plugin provides **129 checks** across these 8 categories. Additional plugins may add more checks.
 
 ***
 
@@ -5674,6 +5674,7 @@ Checks for security vulnerabilities, configuration issues, and attack vectors.
 | **configuration.php Permissions** | File permissions 444 (read-only) | File writable (644/666) | File publicly writable (777) |
 | **Content Security Policy** | CSP headers configured | No CSP headers | - |
 | **CORS Configuration** | CORS properly restricted | CORS allows all origins (\*) | - |
+| **Index File** | No placeholder index files in site root | Placeholder files found (index.html, etc.) | - |
 | **Debug Mode** | Debug disabled | Debug enabled (exposes sensitive info) | - |
 | **Default Secret** | Unique secret configured | Using default/weak secret | - |
 | **Error Reporting** | Error reporting disabled for public | PHP errors displayed to visitors | - |
@@ -5720,6 +5721,7 @@ Checks for server configuration, PHP settings, and required extensions.
 | Check Name | 🟢 Good | 🟡 Warning | 🔴 Critical |
 |------------|---------|------------|-------------|
 | **Apache Modules** | Required modules loaded | Optional modules missing | Required modules missing |
+| **Core Directories** | All 14 core directories present | - | Core directories missing (lists which) |
 | **cURL Extension** | cURL installed and working | cURL missing (some features unavailable) | - |
 | **Disk Space** | >5GB free space | 1-5GB free | <1GB free space |
 | **DOM Extension** | DOM extension installed | - | DOM extension missing |
@@ -8155,6 +8157,17 @@ Checks for directory listing protection.
 find . -type d -exec touch {}/index.html \;
 ```
 
+### Placeholder Index Files
+
+Detects placeholder index files (index.html, index.htm, default.html, etc.) in the Joomla site root that could be served instead of index.php.
+
+* **Good**: No placeholder index files found
+* **Warning**: Placeholder index files found (lists which ones)
+
+**Why it matters**: Hosting providers often place default placeholder files like `index.html` in the web root. These can be served by direct request and potentially indexed by search engines, exposing hosting provider branding or blank pages instead of your Joomla content.
+
+**How to fix**: Delete the listed files from your site root directory.
+
 ### .htaccess Present
 
 Verifies .htaccess file exists and is configured.
@@ -8941,7 +8954,7 @@ description: >-
 
 System and hosting checks examine your PHP environment, server configuration, and hosting infrastructure. These form the foundation of a healthy Joomla site.
 
-**Total checks in this category: 33**
+**Total checks in this category: 34**
 
 ## PHP Configuration (8 checks)
 
@@ -9123,7 +9136,7 @@ Verifies MIME type detection.
 
 **Why it matters**: Helps prevent malicious file uploads by detecting true file types.
 
-## Server Environment (6 checks)
+## Server Environment (7 checks)
 
 ### Disk Space Available
 
@@ -9134,6 +9147,17 @@ Monitors available disk space.
 * **Critical**: Less than 10% free or under 500MB
 
 **Why it matters**: Insufficient disk space prevents backups, uploads, and log writing.
+
+### Core Directories
+
+Verifies all core Joomla root-level directories exist. These are the directories that Joomla's System Information page expects to find.
+
+* **Good**: All 14 core directories present
+* **Critical**: One or more core directories missing (lists which ones)
+
+**Why it matters**: After site migrations (e.g., Akeeba Backup restores), core directories like `/images` can be missing. This causes errors on Joomla's System Information page and can break media management, extension installation, and template rendering.
+
+**Directories checked**: `administrator/components`, `administrator/language`, `administrator/manifests`, `administrator/modules`, `administrator/templates`, `components`, `images`, `language`, `libraries`, `media`, `media/cache`, `modules`, `plugins`, `templates`
 
 ### Temp Directory Writable
 
@@ -9379,7 +9403,7 @@ description: >-
 
 # Understanding Health Checks
 
-Health Checker for Joomla provides comprehensive monitoring across 8+ categories, with 133 built-in checks designed to identify potential issues before they become problems.
+Health Checker for Joomla provides comprehensive monitoring across 8+ categories, with 129 built-in checks designed to identify potential issues before they become problems.
 
 ## What Are Health Checks?
 
@@ -9489,7 +9513,7 @@ Health checks can come from different providers:
 
 ### Core Provider
 
-The built-in provider that ships with Health Checker. Includes 129 checks across the 8+ categories.
+The built-in provider that ships with Health Checker. Includes 129 checks across the 8 categories.
 
 ### Third-Party Providers
 

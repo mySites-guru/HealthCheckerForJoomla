@@ -23,10 +23,10 @@ This page provides a complete reference of all health checks included in Health 
 * [Performance](#performance) (10 checks)
 * [Security](#security) (21 checks)
 * [SEO](#seo) (12 checks)
-* [System & Hosting](#system-hosting) (33 checks)
+* [System & Hosting](#system-hosting) (34 checks)
 * [Users](#users) (12 checks)
 
-**Note:** The core plugin provides **129 checks** across these 8+ categories. Additional plugins may add more checks.
+**Note:** The core plugin provides **129 checks** across these 8 categories. Additional plugins may add more checks.
 
 ***
 
@@ -129,6 +129,7 @@ Checks for security vulnerabilities, configuration issues, and attack vectors.
 | **configuration.php Permissions** | File permissions 444 (read-only) | File writable (644/666) | File publicly writable (777) |
 | **Content Security Policy** | CSP headers configured | No CSP headers | - |
 | **CORS Configuration** | CORS properly restricted | CORS allows all origins (\*) | - |
+| **Index File** | No placeholder index files in site root | Placeholder files found (index.html, etc.) | - |
 | **Debug Mode** | Debug disabled | Debug enabled (exposes sensitive info) | - |
 | **Default Secret** | Unique secret configured | Using default/weak secret | - |
 | **Error Reporting** | Error reporting disabled for public | PHP errors displayed to visitors | - |
@@ -175,6 +176,7 @@ Checks for server configuration, PHP settings, and required extensions.
 | Check Name | 🟢 Good | 🟡 Warning | 🔴 Critical |
 |------------|---------|------------|-------------|
 | **Apache Modules** | Required modules loaded | Optional modules missing | Required modules missing |
+| **Core Directories** | All 14 core directories present | - | Core directories missing (lists which) |
 | **cURL Extension** | cURL installed and working | cURL missing (some features unavailable) | - |
 | **Disk Space** | >5GB free space | 1-5GB free | <1GB free space |
 | **DOM Extension** | DOM extension installed | - | DOM extension missing |

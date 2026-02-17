@@ -165,6 +165,17 @@ Checks for directory listing protection.
 find . -type d -exec touch {}/index.html \;
 ```
 
+### Placeholder Index Files
+
+Detects placeholder index files (index.html, index.htm, default.html, etc.) in the Joomla site root that could be served instead of index.php.
+
+* **Good**: No placeholder index files found
+* **Warning**: Placeholder index files found (lists which ones)
+
+**Why it matters**: Hosting providers often place default placeholder files like `index.html` in the web root. These can be served by direct request and potentially indexed by search engines, exposing hosting provider branding or blank pages instead of your Joomla content.
+
+**How to fix**: Delete the listed files from your site root directory.
+
 ### .htaccess Present
 
 Verifies .htaccess file exists and is configured.
