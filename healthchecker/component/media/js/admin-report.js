@@ -35,6 +35,22 @@
             let checksTotal = 0;
             const cacheBuster = Date.now();
 
+            /**
+             * Safely parse a JSON response, providing a friendly error if the server
+             * returned HTML (e.g. a PHP error/warning) instead of valid JSON.
+             */
+            async function parseJsonResponse(response) {
+                const text = await response.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    if (text.trimStart().startsWith('<') || text.includes('<br') || text.includes('<b>')) {
+                        throw new Error(translations.serverError || 'We had an issue running the health checks - check the ajax response when error reporting is enabled for more details.');
+                    }
+                    throw new Error(translations.invalidResponse || 'Received an invalid response from the server.');
+                }
+            }
+
             function saveFilters() {
                 const filters = {
                     search: document.getElementById('filter_search').value,
@@ -127,7 +143,7 @@
                         },
                         credentials: 'same-origin'
                     });
-                    const metaData = await metaResponse.json();
+                    const metaData = await parseJsonResponse(metaResponse);
 
                     if (!metaData.success) {
                         throw new Error(metaData.message || 'Failed to load metadata');
@@ -167,7 +183,7 @@
                 } catch (error) {
                     loadingEl.classList.add('d-none');
                     errorEl.classList.remove('d-none');
-                    document.getElementById('health-check-error-message').textContent = error.message || 'Network error';
+                    document.getElementById('health-check-error-message').textContent = error.message || (translations.networkError || 'A network error occurred. Please try again.');
                 }
             }
 
@@ -187,7 +203,7 @@
                         body: formData,
                         credentials: 'same-origin'
                     });
-                    const data = await response.json();
+                    const data = await parseJsonResponse(response);
 
                     if (data.success && data.data && data.data.results) {
                         // Update all results from this category
@@ -199,6 +215,23 @@
                     }
                 } catch (error) {
                     console.error(`Failed to run category ${categorySlug}:`, error);
+
+                    // Mark all checks in this category as errored so they show in the UI
+                    const errorMessage = error.message || (translations.unknownError || 'Unknown error');
+                    healthCheckData.checks
+                        .filter(check => check.category === categorySlug)
+                        .forEach(check => {
+                            healthCheckData.results[check.slug] = {
+                                slug: check.slug,
+                                status: 'warning',
+                                title: check.title || check.slug,
+                                description: errorMessage,
+                                category: categorySlug,
+                                provider: check.provider || 'core'
+                            };
+                            updateCheckRow(check.slug, healthCheckData.results[check.slug]);
+                        });
+                    updateSummaryCounts();
                 }
             }
 
@@ -213,7 +246,7 @@
                         },
                         credentials: 'same-origin'
                     });
-                    const data = await response.json();
+                    const data = await parseJsonResponse(response);
 
                     if (data.success && data.data) {
                         healthCheckData.results[slug] = data.data;
