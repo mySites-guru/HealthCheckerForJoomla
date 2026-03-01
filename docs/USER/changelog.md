@@ -9,6 +9,10 @@ A complete history of features, fixes, and improvements across every release.
 
 ## Version 3.6
 
+### [3.6.3](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.6.3) <Badge type="info" text="1 Mar 2026" />
+
+- [Fix] Make report export strings translatable ([#77](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/77)) (Thanks [@alex-revo](https://github.com/alex-revo))
+
 ### [3.6.2](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.6.2) <Badge type="info" text="28 Feb 2026" />
 
 - [Fix] Fixed fatal error when plugins are installed without the component ([#73](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/73)) (Thanks [@Stevepic](https://github.com/Stevepic))
