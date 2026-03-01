@@ -13,7 +13,7 @@ A complete history of features, fixes, and improvements across every release.
 
 ### [3.7.1](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.7.1)&#x20;
 
-* \[Internal] Updated Spanish (es-ES) translations to v3.7.0 ([#81](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/81))
+* \[Internal] Updated Spanish (es-ES) translations to v3.7.0 ([#81](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/81)) (Thanks [@alamarte](https://github.com/alamarte))
 * \[Internal] Rebuilt documentation for v3.7.1 release
 
 ### [3.7.0](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.7.0)&#x20;
