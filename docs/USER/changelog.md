@@ -9,6 +9,12 @@ A complete history of features, fixes, and improvements across every release.
 
 ## Version 3.7
 
+### [3.7.2](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.7.2) <Badge type="info" text="2 Mar 2026" />
+
+- [Feature] Made Explore and Docs buttons translatable ([#82](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/82)) (Thanks [@alex-revo](https://github.com/alex-revo))
+- [Fix] Added missing translation for extensions.discover check
+- [Internal] Updated Russian (ru-RU) translations ([#83](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/83)) (Thanks [@alex-revo](https://github.com/alex-revo))
+
 ### [3.7.1](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.7.1) <Badge type="info" text="1 Mar 2026" />
 
 - [Internal] Updated Spanish (es-ES) translations to v3.7.0 ([#81](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/81)) (Thanks [@alamarte](https://github.com/alamarte))
