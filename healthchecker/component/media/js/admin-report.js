@@ -767,7 +767,9 @@
                 warning: form.dataset.textWarning || 'Warning',
                 good: form.dataset.textGood || 'Good',
                 checking: form.dataset.textChecking || 'Checking...',
-                viewDocs: form.dataset.textViewDocs || 'View Documentation'
+                viewDocs: form.dataset.textViewDocs || 'View Documentation',
+                explore: form.dataset.textExplore || 'Explore',
+                docs: form.dataset.textDocs || 'Docs'
             }
         });
     });
