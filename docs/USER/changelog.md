@@ -7,6 +7,17 @@ description: Complete history of features, fixes, and improvements across every 
 
 A complete history of features, fixes, and improvements across every release.
 
+## Version 3.8
+
+### [3.8.1](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.8.1) <Badge type="info" text="3 Mar 2026" />
+
+- [Internal] Rebuilt documentation
+- [Feature] Added Smart Search filter health check ([#87](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/87)) ([#90](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/90))
+- [Feature] Added custom fields search index health check ([#88](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/88)) ([#92](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/92))
+- [Feature] Added Russian language translation ([#93](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/93)) (Thanks [@alex-revo](https://github.com/alex-revo))
+- [Internal] Added translation gap detection to release script
+- [Internal] Added CODEOWNERS file
+
 ## Version 3.7
 
 ### [3.7.3](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.7.3) <Badge type="info" text="3 Mar 2026" />
