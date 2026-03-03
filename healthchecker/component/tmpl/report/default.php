@@ -52,7 +52,9 @@ $categoryUrl = Route::_('index.php?option=com_healthchecker&task=ajax.category&f
       data-text-critical="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_CRITICAL')); ?>"
       data-text-warning="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_WARNING')); ?>"
       data-text-good="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_GOOD')); ?>"
-      data-text-checking="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_CHECKING')); ?>">
+      data-text-checking="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_CHECKING')); ?>"
+      data-text-explore="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_REPORT_EXPLORE')); ?>"
+      data-text-docs="<?php echo htmlspecialchars(Text::_('COM_HEALTHCHECKER_REPORT_DOCS')); ?>">
 
     <?php if ($this->corePluginMissing): ?>
         <div class="alert alert-danger">
