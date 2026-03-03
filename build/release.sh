@@ -852,7 +852,7 @@ Context:
 Rules:
 1. Title must be concise, under 80 chars, include the language code and version.
 2. Body must start by @-mentioning the translator (use @${TRANSLATOR}).
-3. Body should be friendly and direct — one short paragraph explaining what's needed and why (new release, new keys).
+3. Body should be friendly and direct — one short paragraph explaining what is needed and why (new release, new keys).
 4. Do NOT use emoji. Do NOT use corporate or AI-sounding language.
 5. Do NOT repeat the key tables — just output the intro paragraph. The tables will be appended automatically.
 6. Output format — first line is the title, then a blank line, then the body paragraph. Nothing else.
