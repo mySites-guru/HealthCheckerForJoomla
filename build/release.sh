@@ -748,6 +748,157 @@ fi
 echo ""
 bash "$SCRIPT_DIR/website-deploy.sh"
 
+# CHECK TRANSLATIONS AND OPEN ISSUES FOR MISSING KEYS
+echo ""
+echo -e "${YELLOW}Checking for missing translation keys...${NC}"
+
+COMMIT_SHA=$(git rev-parse HEAD)
+REPO_BASE="https://github.com/mySites-guru/HealthCheckerForJoomla/blob/${COMMIT_SHA}"
+
+# Fetch existing open translation issues to avoid duplicates (keyed by language in title)
+OPEN_TRANSLATION_JSON=$(gh issue list --label translations --state open --json title,body 2>/dev/null || echo "[]")
+
+# Find all English .ini files
+EN_FILES=$(find "$SOURCE_DIR" -path "*/language/en-GB/*.ini" -type f | sort)
+
+for LANG_ENTRY in "ru-RU:alex-revo" "es-ES:alamarte"; do
+    LANG="${LANG_ENTRY%%:*}"
+    TRANSLATOR="${LANG_ENTRY##*:}"
+
+    # Extract already-requested keys and files from open issues matching this language
+    LANG_ISSUE_BODIES=$(echo "$OPEN_TRANSLATION_JSON" | \
+        jq -r ".[] | select(.title | contains(\"${LANG}\")) | .body" 2>/dev/null)
+    ALREADY_REQUESTED_KEYS=$(echo "$LANG_ISSUE_BODIES" | \
+        grep -oE '`[A-Z][A-Z0-9_]+`' | tr -d '`' | sort -u)
+    # Also extract .ini filenames already mentioned (for "missing file entirely" references)
+    ALREADY_MENTIONED_FILES=$(echo "$LANG_ISSUE_BODIES" | \
+        grep -oE '[a-z_]+(\.[a-z]+)?\.ini' | sort -u)
+    ISSUE_BODY=""
+    TOTAL_NEW_KEYS=0
+
+    while IFS= read -r EN_FILE; do
+        # Derive the translated file path
+        TRANS_FILE=$(echo "$EN_FILE" | sed "s|/en-GB/|/${LANG}/|g")
+
+        # Get relative path for display
+        REL_PATH=$(echo "$EN_FILE" | sed "s|${PROJECT_ROOT}/healthchecker/||")
+        BASENAME=$(basename "$EN_FILE")
+
+        # Skip if this file is already mentioned in an open issue
+        if echo "$ALREADY_MENTIONED_FILES" | grep -q "^${BASENAME}$" && [ ! -f "$TRANS_FILE" ]; then
+            continue
+        fi
+
+        # Extract English keys (lines starting with a key before =, skip comments/blank)
+        EN_KEYS=$(grep -oE '^[A-Z][A-Z0-9_]+=' "$EN_FILE" | sed 's/=$//' | sort)
+
+        if [ -f "$TRANS_FILE" ]; then
+            TRANS_KEYS=$(grep -oE '^[A-Z][A-Z0-9_]+=' "$TRANS_FILE" | sed 's/=$//' | sort)
+        else
+            TRANS_KEYS=""
+        fi
+
+        # Find missing keys
+        MISSING_KEYS=$(comm -23 <(echo "$EN_KEYS") <(echo "$TRANS_KEYS"))
+
+        # Filter out keys already requested in open issues
+        if [ -n "$ALREADY_REQUESTED_KEYS" ] && [ -n "$MISSING_KEYS" ]; then
+            MISSING_KEYS=$(comm -23 <(echo "$MISSING_KEYS") <(echo "$ALREADY_REQUESTED_KEYS"))
+        fi
+
+        if [ -z "$MISSING_KEYS" ]; then
+            continue
+        fi
+
+        KEY_COUNT=$(echo "$MISSING_KEYS" | wc -l | tr -d ' ')
+        TOTAL_NEW_KEYS=$((TOTAL_NEW_KEYS + KEY_COUNT))
+
+        # Build table for this file
+        # Get the en-GB reference file path relative to repo root
+        EN_REL=$(echo "$EN_FILE" | sed "s|${PROJECT_ROOT}/||")
+        ISSUE_BODY="${ISSUE_BODY}
+
+### \`${REL_PATH}\` — ${KEY_COUNT} keys
+
+English reference: [\`${BASENAME}\`](${REPO_BASE}/${EN_REL})
+
+| Key | en-GB line |
+|-----|-----------|
+"
+        while IFS= read -r KEY; do
+            LINE_NUM=$(grep -n "^${KEY}=" "$EN_FILE" | head -1 | cut -d: -f1)
+            ISSUE_BODY="${ISSUE_BODY}| \`${KEY}\` | [L${LINE_NUM}](${REPO_BASE}/${EN_REL}#L${LINE_NUM}) |
+"
+        done <<< "$MISSING_KEYS"
+    done <<< "$EN_FILES"
+
+    if [ "$TOTAL_NEW_KEYS" -eq 0 ]; then
+        echo -e "  ${BLUE}${LANG}: No new missing keys${NC}"
+        continue
+    fi
+
+    # Use Claude to generate a natural issue title and intro paragraph, then humanize
+    echo -e "  ${YELLOW}Generating issue text with Claude...${NC}"
+    ISSUE_TEXT=$(claude --print << ISSUE_PROMPT
+Write a GitHub issue title and body for a translation update request.
+
+Context:
+- Language: ${LANG}
+- Translator GitHub username: ${TRANSLATOR}
+- Version just released: v${NEW_VERSION}
+- Number of missing keys: ${TOTAL_NEW_KEYS}
+- The key tables below must be included verbatim in the body after your intro paragraph.
+
+Rules:
+1. Title must be concise, under 80 chars, include the language code and version.
+2. Body must start by @-mentioning the translator (use @${TRANSLATOR}).
+3. Body should be friendly and direct — one short paragraph explaining what's needed and why (new release, new keys).
+4. Do NOT use emoji. Do NOT use corporate or AI-sounding language.
+5. Do NOT repeat the key tables — just output the intro paragraph. The tables will be appended automatically.
+6. Output format — first line is the title, then a blank line, then the body paragraph. Nothing else.
+ISSUE_PROMPT
+)
+
+    ISSUE_TEXT=$(claude --print << HUMANIZE_PROMPT
+Review this GitHub issue title and body text. Remove any signs of AI-generated writing:
+- No inflated significance ("crucial", "pivotal", "vital", "key", "testament")
+- No promotional language ("vibrant", "comprehensive", "groundbreaking", "exciting")
+- No em dash overuse — use commas or periods instead
+- No rule-of-three lists
+- No negative parallelisms ("not just X, but Y")
+- No sycophantic tone ("Great!", "Absolutely!")
+- No filler phrases ("In order to", "It is important to note")
+- No copula avoidance — use "is/are/has" instead of "serves as/stands as"
+- No curly quotes — use straight quotes only
+- Keep it short, friendly, and direct. One paragraph max for the body.
+
+The text must keep the exact same format: first line is the title, blank line, then the body.
+Do NOT add anything extra. Output ONLY the cleaned text.
+
+Text to humanize:
+${ISSUE_TEXT}
+HUMANIZE_PROMPT
+)
+
+    ISSUE_TITLE=$(echo "$ISSUE_TEXT" | head -1)
+    ISSUE_INTRO=$(echo "$ISSUE_TEXT" | tail -n +3)
+    FULL_BODY="${ISSUE_INTRO}
+${ISSUE_BODY}"
+
+    gh issue create \
+        --title "$ISSUE_TITLE" \
+        --body "$FULL_BODY" \
+        --label "translations" 2>/dev/null
+
+    if [ $? -eq 0 ]; then
+        echo -e "  ${GREEN}✓ ${LANG}: Opened issue for ${TOTAL_NEW_KEYS} missing keys${NC}"
+    else
+        echo -e "  ${YELLOW}⚠ ${LANG}: Failed to create issue${NC}"
+    fi
+done
+
+echo -e "${GREEN}✓ Translation check complete${NC}"
+
 echo ""
 echo "===================================================================="
 echo -e "${GREEN}Release ${NEW_VERSION} complete!${NC}"
