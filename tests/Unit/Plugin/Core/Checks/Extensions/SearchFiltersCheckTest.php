@@ -19,31 +19,31 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(SearchFiltersCheck::class)]
 class SearchFiltersCheckTest extends TestCase
 {
-    private SearchFiltersCheck $check;
+    private SearchFiltersCheck $searchFiltersCheck;
 
     protected function setUp(): void
     {
-        $this->check = new SearchFiltersCheck();
+        $this->searchFiltersCheck = new SearchFiltersCheck();
     }
 
     public function testGetSlugReturnsCorrectValue(): void
     {
-        $this->assertSame('extensions.search_filters', $this->check->getSlug());
+        $this->assertSame('extensions.search_filters', $this->searchFiltersCheck->getSlug());
     }
 
     public function testGetCategoryReturnsExtensions(): void
     {
-        $this->assertSame('extensions', $this->check->getCategory());
+        $this->assertSame('extensions', $this->searchFiltersCheck->getCategory());
     }
 
     public function testGetProviderReturnsCore(): void
     {
-        $this->assertSame('core', $this->check->getProvider());
+        $this->assertSame('core', $this->searchFiltersCheck->getProvider());
     }
 
     public function testGetTitleReturnsString(): void
     {
-        $title = $this->check->getTitle();
+        $title = $this->searchFiltersCheck->getTitle();
 
         $this->assertIsString($title);
         $this->assertNotEmpty($title);
@@ -51,7 +51,7 @@ class SearchFiltersCheckTest extends TestCase
 
     public function testRunWithoutDatabaseReturnsWarning(): void
     {
-        $healthCheckResult = $this->check->run();
+        $healthCheckResult = $this->searchFiltersCheck->run();
 
         $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
         $this->assertStringContainsString('check_error', strtolower($healthCheckResult->description));
@@ -65,12 +65,12 @@ class SearchFiltersCheckTest extends TestCase
                 'return' => 0,
             ], // com_finder disabled
         ]);
-        $this->check->setDatabase($database);
+        $this->searchFiltersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchFiltersCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('SEARCH_FILTERS_GOOD_DISABLED', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('SEARCH_FILTERS_GOOD_DISABLED', $healthCheckResult->description);
     }
 
     public function testNoMenuItemsWithFiltersReturnsGood(): void
@@ -85,12 +85,12 @@ class SearchFiltersCheckTest extends TestCase
                 'return' => [],
             ], // no menu items
         ]);
-        $this->check->setDatabase($database);
+        $this->searchFiltersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchFiltersCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('SEARCH_FILTERS_GOOD_NO_FILTERS', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('SEARCH_FILTERS_GOOD_NO_FILTERS', $healthCheckResult->description);
     }
 
     public function testMenuItemsWithNoFilterIdReturnsGood(): void
@@ -111,12 +111,12 @@ class SearchFiltersCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->searchFiltersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchFiltersCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('SEARCH_FILTERS_GOOD_NO_FILTERS', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('SEARCH_FILTERS_GOOD_NO_FILTERS', $healthCheckResult->description);
     }
 
     public function testFiltersWithMapsReturnsGood(): void
@@ -147,12 +147,12 @@ class SearchFiltersCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->searchFiltersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchFiltersCheck->run();
 
-        $this->assertSame(HealthStatus::Good, $result->healthStatus);
-        $this->assertStringContainsString('SEARCH_FILTERS_GOOD', $result->description);
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('SEARCH_FILTERS_GOOD', $healthCheckResult->description);
     }
 
     public function testEmptyFilterReturnsWarning(): void
@@ -183,12 +183,12 @@ class SearchFiltersCheckTest extends TestCase
                 ],
             ],
         ]);
-        $this->check->setDatabase($database);
+        $this->searchFiltersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchFiltersCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('SEARCH_FILTERS_WARNING_EMPTY', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('SEARCH_FILTERS_WARNING_EMPTY', $healthCheckResult->description);
     }
 
     public function testMissingFilterReturnsWarning(): void
@@ -213,18 +213,18 @@ class SearchFiltersCheckTest extends TestCase
                 'return' => [],
             ], // no filters found
         ]);
-        $this->check->setDatabase($database);
+        $this->searchFiltersCheck->setDatabase($database);
 
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchFiltersCheck->run();
 
-        $this->assertSame(HealthStatus::Warning, $result->healthStatus);
-        $this->assertStringContainsString('SEARCH_FILTERS_WARNING_MISSING', $result->description);
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString('SEARCH_FILTERS_WARNING_MISSING', $healthCheckResult->description);
     }
 
     public function testCheckNeverReturnsCritical(): void
     {
-        $result = $this->check->run();
+        $healthCheckResult = $this->searchFiltersCheck->run();
 
-        $this->assertNotSame(HealthStatus::Critical, $result->healthStatus);
+        $this->assertNotSame(HealthStatus::Critical, $healthCheckResult->healthStatus);
     }
 }
