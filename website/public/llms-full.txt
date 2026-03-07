@@ -1263,7 +1263,9 @@ A complete history of features, fixes, and improvements across every release.
 
 ### [3.8.4](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.8.4)&#x20;
 
-* Maintenance release
+* \[Fixed] Add missing XML configuration for the Custom Fields Search Index check, so it can be toggled on/off in plugin settings ([#99](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/99)) (Thanks [@alex-revo](https://github.com/alex-revo))
+* \[Internal] Add Russian translations for Smart Search Filters and Custom Fields Search Index checks ([#99](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/99)) (Thanks [@alex-revo](https://github.com/alex-revo))
+* \[Internal] Rebuilt documentation
 
 ### [3.8.3](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.8.3)&#x20;
 
