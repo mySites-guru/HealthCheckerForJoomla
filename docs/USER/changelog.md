@@ -9,6 +9,10 @@ A complete history of features, fixes, and improvements across every release.
 
 ## Version 3.8
 
+### [3.8.4](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.8.4) <Badge type="info" text="7 Mar 2026" />
+
+- Maintenance release
+
 ### [3.8.3](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.8.3) <Badge type="info" text="6 Mar 2026" />
 
 - [Internal] Updated es-ES Spanish translations to v3.8.2 ([#96](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/96)) (Thanks [@alamarte](https://github.com/alamarte))
