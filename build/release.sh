@@ -665,23 +665,25 @@ class Pkg_HealthcheckerInstallerScript
     {
         $this->removeObsoleteFiles();
 
-        $this->enablePlugin('healthchecker', 'core');
-        $this->enablePlugin('healthchecker', 'example');
-        $this->enablePlugin('healthchecker', 'mysitesguru');
+        if ($type === 'install') {
+            $this->enablePlugin('healthchecker', 'core');
+            $this->enablePlugin('healthchecker', 'example');
+            $this->enablePlugin('healthchecker', 'mysitesguru');
 
-        if ($this->isExtensionInstalled('component', 'com_akeebabackup')) {
-            $this->enablePlugin('healthchecker', 'akeebabackup');
+            if ($this->isExtensionInstalled('component', 'com_akeebabackup')) {
+                $this->enablePlugin('healthchecker', 'akeebabackup');
+            }
+            if ($this->isExtensionInstalled('component', 'com_admintools')) {
+                $this->enablePlugin('healthchecker', 'akeebaadmintools');
+            }
+
+            $this->publishModule('mod_healthchecker', 'cpanel');
+
+            Factory::getApplication()->enqueueMessage(
+                'Health Checker installed successfully! Access it from Components > Health Checker.',
+                'success'
+            );
         }
-        if ($this->isExtensionInstalled('component', 'com_admintools')) {
-            $this->enablePlugin('healthchecker', 'akeebaadmintools');
-        }
-
-        $this->publishModule('mod_healthchecker', 'cpanel');
-
-        Factory::getApplication()->enqueueMessage(
-            'Health Checker installed successfully! Access it from Components > Health Checker.',
-            'success'
-        );
     }
 
     private function enablePlugin(string $group, string $element): void
