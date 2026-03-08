@@ -196,27 +196,31 @@ final class TwitterCardsCheck extends AbstractHealthCheck
     {
         $tags = [];
 
-        // Match Twitter meta tags: <meta name="twitter:*" content="...">
-        if (preg_match_all(
-            '/<meta\s+[^>]*name=["\']?(twitter:[^"\'>\s]+)["\']?\s+[^>]*content=["\']?([^"\'>\s][^"\']*)["\']?[^>]*>/i',
-            $html,
-            $matches,
-            PREG_SET_ORDER,
-        )) {
-            foreach ($matches as $match) {
-                $tags[$match[1]] = $match[2];
+        // Match Twitter meta tags with either name or property attribute:
+        // <meta name="twitter:*" content="..."> or <meta property="twitter:*" content="...">
+        // Some themes/extensions use "property" instead of "name" for Twitter tags.
+        foreach (['name', 'property'] as $attribute) {
+            if (preg_match_all(
+                '/<meta\s+[^>]*' . $attribute . '=["\']?(twitter:[^"\'>\s]+)["\']?\s+[^>]*content=["\']?([^"\'>\s][^"\']*)["\']?[^>]*>/i',
+                $html,
+                $matches,
+                PREG_SET_ORDER,
+            )) {
+                foreach ($matches as $match) {
+                    $tags[$match[1]] ??= $match[2];
+                }
             }
-        }
 
-        // Also check for reverse order: content before name
-        if (preg_match_all(
-            '/<meta\s+[^>]*content=["\']?([^"\'>\s][^"\']*)["\']?\s+[^>]*name=["\']?(twitter:[^"\'>\s]+)["\']?[^>]*>/i',
-            $html,
-            $matches,
-            PREG_SET_ORDER,
-        )) {
-            foreach ($matches as $match) {
-                $tags[$match[2]] = $match[1];
+            // Also check for reverse order: content before name/property
+            if (preg_match_all(
+                '/<meta\s+[^>]*content=["\']?([^"\'>\s][^"\']*)["\']?\s+[^>]*' . $attribute . '=["\']?(twitter:[^"\'>\s]+)["\']?[^>]*>/i',
+                $html,
+                $matches,
+                PREG_SET_ORDER,
+            )) {
+                foreach ($matches as $match) {
+                    $tags[$match[2]] ??= $match[1];
+                }
             }
         }
 

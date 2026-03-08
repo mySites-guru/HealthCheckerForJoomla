@@ -227,6 +227,53 @@ HTML;
         $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
+    public function testDetectsPropertyAttributeForTwitterTags(): void
+    {
+        // Some themes use property= instead of name= for Twitter meta tags
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="My Site Title">
+    <meta property="twitter:description" content="My site description">
+    <meta property="twitter:image" content="https://example.com/image.jpg">
+</head>
+<body></body>
+</html>
+HTML;
+
+        $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
+
+        $healthCheckResult = $this->twitterCardsCheck->run();
+
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+    }
+
+    public function testDetectsContentBeforePropertyOrderForTwitterTags(): void
+    {
+        // Reversed attribute order with property instead of name
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+    <meta content="summary_large_image" property="twitter:card">
+    <meta content="My Site Title" property="twitter:title">
+    <meta content="My site description" property="twitter:description">
+</head>
+<body></body>
+</html>
+HTML;
+
+        $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
+        $this->twitterCardsCheck->setHttpClient($httpClient);
+
+        $healthCheckResult = $this->twitterCardsCheck->run();
+
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+    }
+
     public function testSuggestsImageWhenMissing(): void
     {
         $html = <<<'HTML'
