@@ -76,7 +76,12 @@ class MediaManagerThumbnailsCheckTest extends TestCase
         $plugin = (object) [
             'enabled' => 0,
             'params' => json_encode([
-                'thumbnail_size' => 200,
+                'directories' => [
+                    'directories0' => [
+                        'directory' => 'images',
+                        'thumbs' => 1,
+                    ],
+                ],
             ]),
         ];
         $database = MockDatabaseFactory::createWithObject($plugin);
@@ -91,12 +96,21 @@ class MediaManagerThumbnailsCheckTest extends TestCase
         );
     }
 
-    public function testRunWithThumbnailsEnabledReturnsGood(): void
+    public function testRunWithAllThumbnailsEnabledReturnsGood(): void
     {
         $plugin = (object) [
             'enabled' => 1,
             'params' => json_encode([
-                'thumbnail_size' => 200,
+                'directories' => [
+                    'directories0' => [
+                        'directory' => 'images',
+                        'thumbs' => 1,
+                    ],
+                    'directories1' => [
+                        'directory' => 'files',
+                        'thumbs' => 1,
+                    ],
+                ],
             ]),
         ];
         $database = MockDatabaseFactory::createWithObject($plugin);
@@ -108,12 +122,42 @@ class MediaManagerThumbnailsCheckTest extends TestCase
         $this->assertStringContainsString('MEDIA_MANAGER_THUMBNAILS_GOOD', $healthCheckResult->description);
     }
 
-    public function testRunWithThumbnailsDisabledReturnsWarning(): void
+    public function testRunWithSingleDirectoryThumbnailsEnabledReturnsGood(): void
     {
         $plugin = (object) [
             'enabled' => 1,
             'params' => json_encode([
-                'thumbnail_size' => 0,
+                'directories' => [
+                    'directories0' => [
+                        'directory' => 'images',
+                        'thumbs' => 1,
+                    ],
+                ],
+            ]),
+        ];
+        $database = MockDatabaseFactory::createWithObject($plugin);
+        $this->mediaManagerThumbnailsCheck->setDatabase($database);
+
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
+
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+    }
+
+    public function testRunWithAllThumbnailsDisabledReturnsWarning(): void
+    {
+        $plugin = (object) [
+            'enabled' => 1,
+            'params' => json_encode([
+                'directories' => [
+                    'directories0' => [
+                        'directory' => 'images',
+                        'thumbs' => 0,
+                    ],
+                    'directories1' => [
+                        'directory' => 'files',
+                        'thumbs' => 0,
+                    ],
+                ],
             ]),
         ];
         $database = MockDatabaseFactory::createWithObject($plugin);
@@ -126,6 +170,67 @@ class MediaManagerThumbnailsCheckTest extends TestCase
             'media_manager_thumbnails_warning',
             strtolower($healthCheckResult->description),
         );
+    }
+
+    public function testRunWithPartialThumbnailsDisabledReturnsWarning(): void
+    {
+        $plugin = (object) [
+            'enabled' => 1,
+            'params' => json_encode([
+                'directories' => [
+                    'directories0' => [
+                        'directory' => 'images',
+                        'thumbs' => 1,
+                    ],
+                    'directories1' => [
+                        'directory' => 'files',
+                        'thumbs' => 0,
+                    ],
+                ],
+            ]),
+        ];
+        $database = MockDatabaseFactory::createWithObject($plugin);
+        $this->mediaManagerThumbnailsCheck->setDatabase($database);
+
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
+
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString(
+            'media_manager_thumbnails_warning',
+            strtolower($healthCheckResult->description),
+        );
+    }
+
+    public function testRunWithEmptyDirectoriesReturnsWarning(): void
+    {
+        $plugin = (object) [
+            'enabled' => 1,
+            'params' => json_encode([
+                'directories' => [],
+            ]),
+        ];
+        $database = MockDatabaseFactory::createWithObject($plugin);
+        $this->mediaManagerThumbnailsCheck->setDatabase($database);
+
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
+
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
+    }
+
+    public function testRunWithMissingDirectoriesKeyReturnsWarning(): void
+    {
+        $plugin = (object) [
+            'enabled' => 1,
+            'params' => json_encode([
+                'other_param' => 'value',
+            ]),
+        ];
+        $database = MockDatabaseFactory::createWithObject($plugin);
+        $this->mediaManagerThumbnailsCheck->setDatabase($database);
+
+        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
+
+        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testRunWithInvalidParamsReturnsWarning(): void
@@ -144,38 +249,6 @@ class MediaManagerThumbnailsCheckTest extends TestCase
             'media_manager_thumbnails_warning',
             strtolower($healthCheckResult->description),
         );
-    }
-
-    public function testRunWithNegativeThumbnailSizeReturnsWarning(): void
-    {
-        $plugin = (object) [
-            'enabled' => 1,
-            'params' => json_encode([
-                'thumbnail_size' => -100,
-            ]),
-        ];
-        $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->mediaManagerThumbnailsCheck->setDatabase($database);
-
-        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
-
-        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
-    }
-
-    public function testRunWithMissingThumbnailSizeParamReturnsWarning(): void
-    {
-        $plugin = (object) [
-            'enabled' => 1,
-            'params' => json_encode([
-                'other_param' => 'value',
-            ]),
-        ];
-        $database = MockDatabaseFactory::createWithObject($plugin);
-        $this->mediaManagerThumbnailsCheck->setDatabase($database);
-
-        $healthCheckResult = $this->mediaManagerThumbnailsCheck->run();
-
-        $this->assertSame(HealthStatus::Warning, $healthCheckResult->healthStatus);
     }
 
     public function testCheckNeverReturnsCritical(): void
