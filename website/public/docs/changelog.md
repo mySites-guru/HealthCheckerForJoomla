@@ -11,6 +11,10 @@ A complete history of features, fixes, and improvements across every release.
 
 ## Version 3.8
 
+### [3.8.5](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.8.5)&#x20;
+
+* Maintenance release
+
 ### [3.8.4](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.8.4)&#x20;
 
 * \[Fixed] Add missing XML configuration for the Custom Fields Search Index check, so it can be toggled on/off in plugin settings ([#99](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/99)) (Thanks [@alex-revo](https://github.com/alex-revo))
