@@ -5,6 +5,14 @@
 
 set -e
 
+# Allow claude_print to work when called from within a Claude Code session
+unset CLAUDECODE
+
+# Helper: run claude_print without picking up project config that interferes
+claude_print() {
+    claude_print --no-session-persistence --disable-slash-commands "$@"
+}
+
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
@@ -20,6 +28,219 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# --update-notes <tag> mode: regenerate release notes for an existing release
+if [ "$1" = "--update-notes" ]; then
+    UPDATE_TAG="$2"
+    if [ -z "$UPDATE_TAG" ]; then
+        echo -e "${RED}Usage: $0 --update-notes <tag>${NC}"
+        echo -e "${RED}Example: $0 --update-notes v3.9.0${NC}"
+        exit 1
+    fi
+
+    # Ensure tag exists
+    if ! git rev-parse "$UPDATE_TAG" >/dev/null 2>&1; then
+        echo -e "${RED}ERROR: Tag $UPDATE_TAG does not exist${NC}"
+        exit 1
+    fi
+
+    # Ensure GitHub release exists
+    if ! gh release view "$UPDATE_TAG" >/dev/null 2>&1; then
+        echo -e "${RED}ERROR: No GitHub release found for $UPDATE_TAG${NC}"
+        exit 1
+    fi
+
+    UPDATE_VERSION="${UPDATE_TAG#v}"
+    echo -e "${GREEN}Health Checker for Joomla - Update Release Notes${NC}"
+    echo "===================================================================="
+    echo -e "${BLUE}Updating release notes for ${UPDATE_TAG}${NC}"
+    echo ""
+
+    # Find the previous tag
+    PREV_TAG=$(git describe --tags --abbrev=0 "${UPDATE_TAG}^" 2>/dev/null || echo "")
+    if [ -z "$PREV_TAG" ]; then
+        echo -e "${RED}ERROR: Could not find a tag before $UPDATE_TAG${NC}"
+        exit 1
+    fi
+    echo -e "${BLUE}Previous release: ${PREV_TAG}${NC}"
+
+    # Gather commits between tags
+    GIT_LOG=$(git log --pretty=format:"%h %s" "${PREV_TAG}..${UPDATE_TAG}" | grep -v -E "^[a-f0-9]+ (Rebuild documentation|Update website|Update changelog|Bump version|Rebuild minified assets)")
+    echo -e "${BLUE}Commits between ${PREV_TAG} and ${UPDATE_TAG}:${NC}"
+    echo "$GIT_LOG"
+    echo ""
+
+    # Fetch closed issues and merged PRs between the two tags
+    PREV_TAG_DATE=$(git log -1 --format=%aI "$PREV_TAG" 2>/dev/null || echo "")
+    UPDATE_TAG_DATE=$(git log -1 --format=%aI "$UPDATE_TAG" 2>/dev/null || echo "")
+    CLOSED_ISSUES=""
+    if [ -n "$PREV_TAG_DATE" ]; then
+        echo -e "${BLUE}Fetching closed issues/PRs since ${PREV_TAG_DATE}...${NC}"
+        CLOSED_ISSUES=$(gh issue list --state closed --search "closed:${PREV_TAG_DATE}..${UPDATE_TAG_DATE}" --json number,title,labels,author --template '{{range .}}#{{.number}} {{.title}}{{range .labels}} [{{.name}}]{{end}} (by @{{.author.login}})
+{{end}}' 2>/dev/null || echo "")
+        MERGED_PRS=$(gh pr list --state merged --search "merged:${PREV_TAG_DATE}..${UPDATE_TAG_DATE}" --json number,title,labels,author --template '{{range .}}PR #{{.number}} {{.title}}{{range .labels}} [{{.name}}]{{end}} (by @{{.author.login}})
+{{end}}' 2>/dev/null || echo "")
+        if [ -n "$MERGED_PRS" ]; then
+            CLOSED_ISSUES="${CLOSED_ISSUES}
+${MERGED_PRS}"
+        fi
+    fi
+
+    if [ -n "$CLOSED_ISSUES" ]; then
+        echo -e "${BLUE}Closed issues/PRs:${NC}"
+        echo "$CLOSED_ISSUES"
+        echo ""
+    fi
+
+    # Generate release notes with Claude
+    echo -e "${YELLOW}Generating release notes with Claude...${NC}"
+
+    ISSUES_CONTEXT=""
+    if [ -n "$CLOSED_ISSUES" ]; then
+        ISSUES_CONTEXT="
+
+Closed issues and merged PRs since ${PREV_TAG}:
+${CLOSED_ISSUES}
+"
+    fi
+
+    CLAUDE_PROMPT="Generate release notes for Health Checker for Joomla version ${UPDATE_VERSION}.
+
+Git commits since ${PREV_TAG}:
+${GIT_LOG}
+${ISSUES_CONTEXT}
+Create concise, user-focused release notes. Only include:
+- New features (with brief description)
+- Bug fixes (important ones only)
+- Breaking changes or deprecations
+- Security/Performance improvements
+
+CRITICAL FORMATTING RULES:
+1. Output ONLY the release notes content. NO preamble.
+2. Start immediately with bullet points.
+3. DO NOT include commit hashes.
+4. DO NOT use emoji characters.
+5. Use prefixes: [Feature], [Fix], [Security], [Performance], [Internal]
+6. If a bullet point relates to a closed GitHub issue or merged PR, append the reference as a markdown link at the end of the line.
+   Format: ([#N](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/N))
+   Match commits to issues/PRs by comparing their descriptions.
+
+7. If an issue or PR was reported/opened by an EXTERNAL contributor (not @PhilETaylor), append (Thanks @username) after the issue link.
+   Do NOT credit @PhilETaylor as he is the project maintainer.
+
+Example:
+- [Fix] Fixed missing translation key for brute force protection check ([#2](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/2)) (Thanks @janedoe)
+- [Feature] Added backup status monitoring
+- [Internal] Updated build tooling"
+
+    PROMPT_FILE=$(mktemp)
+    echo "$CLAUDE_PROMPT" > "$PROMPT_FILE"
+    echo -e "${BLUE}--- Prompt ($(wc -c < "$PROMPT_FILE" | tr -d ' ') bytes) ---${NC}"
+    echo -e "${BLUE}--- First 5 lines of prompt ---${NC}"
+    head -5 "$PROMPT_FILE"
+    echo -e "${BLUE}--- end prompt preview ---${NC}"
+
+    CLAUDE_STDERR=$(mktemp)
+    CLAUDE_EXIT=0
+    CLAUDE_RAW=$(cat "$PROMPT_FILE" | claude_print 2>"$CLAUDE_STDERR") || CLAUDE_EXIT=$?
+
+    echo -e "${BLUE}Claude exit code: ${CLAUDE_EXIT}${NC}"
+
+    if [ -s "$CLAUDE_STDERR" ]; then
+        echo -e "${YELLOW}Claude stderr:${NC}"
+        cat "$CLAUDE_STDERR"
+    fi
+    rm -f "$CLAUDE_STDERR"
+
+    # If pipe failed, try positional argument
+    if [ -z "$CLAUDE_RAW" ]; then
+        echo -e "${YELLOW}Pipe returned empty, trying positional argument...${NC}"
+        CLAUDE_RAW=$(claude_print "$(cat "$PROMPT_FILE")" 2>/dev/null) || true
+    fi
+    rm -f "$PROMPT_FILE"
+
+    echo -e "${BLUE}--- Claude raw output ---${NC}"
+    echo "$CLAUDE_RAW"
+    echo -e "${BLUE}--- end Claude raw output ---${NC}"
+
+    if [ -z "$CLAUDE_RAW" ]; then
+        echo -e "${RED}Claude returned empty output. Cannot update release notes.${NC}"
+        exit 1
+    fi
+
+    RELEASE_NOTES=$(echo "$CLAUDE_RAW" | awk '
+        /^[[:space:]]*[*-]/ { sub(/^[[:space:]]+/, ""); print; in_list = 1; next }
+        /^$/ && in_list { print; next }
+        /^[[:space:]]+/ && in_list { print; next }
+    ')
+
+    if [ -z "$RELEASE_NOTES" ]; then
+        echo -e "${YELLOW}No bullet points found in Claude output. Using raw output.${NC}"
+        RELEASE_NOTES="$CLAUDE_RAW"
+    fi
+
+    echo -e "${BLUE}--- Final release notes ---${NC}"
+    echo "$RELEASE_NOTES"
+    echo -e "${BLUE}--- end release notes ---${NC}"
+    echo ""
+
+    # Build the full release body
+    REPO_URL=$(git config --get remote.origin.url | sed 's/git@github.com:/https:\/\/github.com\//' | sed 's/\.git$//')
+    RELEASE_BODY="${RELEASE_NOTES}
+
+---
+
+**Full Changelog**: ${REPO_URL}/compare/${PREV_TAG}...${UPDATE_TAG}
+
+## Installation
+
+Download the **Complete Package (Recommended)** which installs everything you need.
+
+**What gets installed:**
+- ✓ Component: com_healthchecker
+- ✓ Module: mod_healthchecker (dashboard widget)
+- ✓ Plugin: plg_healthchecker_core (All core checks)
+- ✓ Plugin: plg_healthchecker_example (SDK reference)
+- ✓ Plugin: plg_healthchecker_mysitesguru (API integration)
+- ✓ Plugin: plg_healthchecker_akeebabackup (auto-enabled if Akeeba Backup installed)
+- ✓ Plugin: plg_healthchecker_akeebaadmintools (auto-enabled if Admin Tools installed)
+
+## Requirements
+
+- Joomla 5.0 or later
+- PHP 8.1 or later"
+
+    # Update the GitHub release
+    echo -e "${YELLOW}Updating GitHub release ${UPDATE_TAG}...${NC}"
+    gh release edit "$UPDATE_TAG" --notes "$RELEASE_BODY"
+    echo -e "${GREEN}✓ GitHub release updated${NC}"
+
+    # Regenerate changelog from GitHub releases
+    echo ""
+    echo -e "${YELLOW}Regenerating changelog...${NC}"
+    bash "$SCRIPT_DIR/changelog.sh"
+    git add docs/USER/changelog.md
+    if ! git diff --cached --quiet; then
+        git commit -m "Update changelog for ${UPDATE_TAG}"
+        git push origin main
+        echo -e "${GREEN}✓ Changelog updated and pushed${NC}"
+    else
+        echo -e "${BLUE}No changelog changes to commit${NC}"
+    fi
+
+    # Build and deploy website
+    echo ""
+    bash "$SCRIPT_DIR/website-deploy.sh"
+
+    echo ""
+    echo "===================================================================="
+    echo -e "${GREEN}Release notes updated for ${UPDATE_TAG}!${NC}"
+    echo ""
+    echo "Release URL: https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/${UPDATE_TAG}"
+    echo "Website:     https://www.joomlahealthchecker.com"
+    echo ""
+    exit 0
+fi
 
 echo -e "${GREEN}Health Checker for Joomla - Complete Release Script${NC}"
 echo "===================================================================="
@@ -99,7 +320,7 @@ if [ -z "$LAST_TAG" ]; then
     CLOSED_ISSUES=""
 else
     echo -e "${BLUE}Last release: ${LAST_TAG}${NC}"
-    GIT_LOG=$(git log --pretty=format:"%h %s" "${LAST_TAG}..HEAD")
+    GIT_LOG=$(git log --pretty=format:"%h %s" "${LAST_TAG}..HEAD" | grep -v -E "^[a-f0-9]+ (Rebuild documentation|Update website|Update changelog|Bump version|Rebuild minified assets)")
 
     # Fetch closed issues and merged PRs since last tag
     LAST_TAG_DATE=$(git log -1 --format=%aI "$LAST_TAG" 2>/dev/null || echo "")
@@ -125,7 +346,8 @@ if [ -z "$GIT_LOG" ]; then
     VERSION_TYPE="patch"
 else
     echo -e "${YELLOW}Analyzing commits with Claude...${NC}"
-    VERSION_ANALYSIS=$(claude --print << EOF
+    PROMPT_FILE=$(mktemp)
+    cat > "$PROMPT_FILE" << EOF
 Analyze these git commits and determine the appropriate semantic version bump.
 
 Current version: ${CURRENT_VERSION}
@@ -141,7 +363,8 @@ Semantic versioning rules:
 CRITICAL: Output ONLY ONE WORD: either "major", "minor", or "patch"
 No explanation, no formatting, just the word.
 EOF
-)
+    VERSION_ANALYSIS=$(cat "$PROMPT_FILE" | claude_print 2>/dev/null) || true
+    rm -f "$PROMPT_FILE"
 
     VERSION_TYPE=$(echo "$VERSION_ANALYSIS" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
 
@@ -234,22 +457,42 @@ Example:
 - [Internal] Updated build tooling"
 fi
 
-RELEASE_NOTES=$(claude --print << EOF
-${CLAUDE_PROMPT}
-EOF
-)
+PROMPT_FILE=$(mktemp)
+echo "$CLAUDE_PROMPT" > "$PROMPT_FILE"
+CLAUDE_STDERR=$(mktemp)
+CLAUDE_RAW=$(cat "$PROMPT_FILE" | claude_print 2>"$CLAUDE_STDERR") || true
+rm -f "$PROMPT_FILE"
 
-RELEASE_NOTES=$(echo "$RELEASE_NOTES" | awk '
-    /^[*-]/ { print; in_list = 1; next }
-    /^$/ && in_list { print; next }
-    /^[[:space:]]+/ && in_list { print; next }
-')
+if [ -s "$CLAUDE_STDERR" ]; then
+    echo -e "${YELLOW}Claude stderr:${NC}"
+    cat "$CLAUDE_STDERR"
+fi
+rm -f "$CLAUDE_STDERR"
 
-if [ -z "$RELEASE_NOTES" ]; then
-    echo -e "${YELLOW}Claude generation failed. Using default message.${NC}"
+echo -e "${BLUE}--- Claude raw output ---${NC}"
+echo "$CLAUDE_RAW"
+echo -e "${BLUE}--- end Claude raw output ---${NC}"
+
+if [ -z "$CLAUDE_RAW" ]; then
+    echo -e "${YELLOW}Claude returned empty output. Using default message.${NC}"
     RELEASE_NOTES="Release version ${NEW_VERSION}"
 else
-    echo -e "${GREEN}Release notes generated!${NC}"
+    RELEASE_NOTES=$(echo "$CLAUDE_RAW" | awk '
+        /^[[:space:]]*[*-]/ { sub(/^[[:space:]]+/, ""); print; in_list = 1; next }
+        /^$/ && in_list { print; next }
+        /^[[:space:]]+/ && in_list { print; next }
+    ')
+
+    echo -e "${BLUE}--- After awk filter ---${NC}"
+    echo "$RELEASE_NOTES"
+    echo -e "${BLUE}--- end awk filter ---${NC}"
+
+    if [ -z "$RELEASE_NOTES" ]; then
+        echo -e "${YELLOW}No bullet points survived the awk filter. Using raw output.${NC}"
+        RELEASE_NOTES="$CLAUDE_RAW"
+    else
+        echo -e "${GREEN}Release notes generated!${NC}"
+    fi
 fi
 
 # Update version and creation date in all manifest files
@@ -839,7 +1082,8 @@ English reference: [\`${BASENAME}\`](${REPO_BASE}/${EN_REL})
 
     # Use Claude to generate a natural issue title and intro paragraph, then humanize
     echo -e "  ${YELLOW}Generating issue text with Claude...${NC}"
-    ISSUE_TEXT=$(claude --print << ISSUE_PROMPT
+    PROMPT_FILE=$(mktemp)
+    cat > "$PROMPT_FILE" << ISSUE_PROMPT
 Write a GitHub issue title and body for a translation update request.
 
 Context:
@@ -857,9 +1101,11 @@ Rules:
 5. Do NOT repeat the key tables — just output the intro paragraph. The tables will be appended automatically.
 6. Output format — first line is the title, then a blank line, then the body paragraph. Nothing else.
 ISSUE_PROMPT
-)
+    ISSUE_TEXT=$(cat "$PROMPT_FILE" | claude_print 2>/dev/null) || true
+    rm -f "$PROMPT_FILE"
 
-    ISSUE_TEXT=$(claude --print << HUMANIZE_PROMPT
+    PROMPT_FILE=$(mktemp)
+    cat > "$PROMPT_FILE" << HUMANIZE_PROMPT
 Review this GitHub issue title and body text. Remove any signs of AI-generated writing:
 - No inflated significance ("crucial", "pivotal", "vital", "key", "testament")
 - No promotional language ("vibrant", "comprehensive", "groundbreaking", "exciting")
@@ -878,7 +1124,8 @@ Do NOT add anything extra. Output ONLY the cleaned text.
 Text to humanize:
 ${ISSUE_TEXT}
 HUMANIZE_PROMPT
-)
+    ISSUE_TEXT=$(cat "$PROMPT_FILE" | claude_print 2>/dev/null) || true
+    rm -f "$PROMPT_FILE"
 
     ISSUE_TITLE=$(echo "$ISSUE_TEXT" | head -1)
     ISSUE_INTRO=$(echo "$ISSUE_TEXT" | tail -n +3)

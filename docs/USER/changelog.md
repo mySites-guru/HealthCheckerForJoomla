@@ -11,7 +11,7 @@ A complete history of features, fixes, and improvements across every release.
 
 ### [3.9.0](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.9.0) <Badge type="info" text="8 Mar 2026" />
 
-- Maintenance release
+- [Feature] Sitemap check now detects dynamically generated sitemaps via HTTP fallback when no physical file exists ([#102](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/102)) ([#105](https://github.com/mySites-guru/HealthCheckerForJoomla/pull/105)) (Thanks [@nzrunner](https://github.com/nzrunner))
 
 ## Version 3.8
 
