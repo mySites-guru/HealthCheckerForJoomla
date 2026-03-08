@@ -12,8 +12,8 @@ declare(strict_types=1);
  * Media Manager Thumbnails Health Check
  *
  * This check verifies whether the Filesystem - Local plugin is configured to
- * generate thumbnails for the Media Manager, improving performance when browsing
- * large media libraries.
+ * generate thumbnails for each directory in the Media Manager, improving
+ * performance when browsing large media libraries.
  *
  * WHY THIS CHECK IS IMPORTANT:
  * By default, the Joomla Media Manager loads full-size images when browsing,
@@ -23,11 +23,12 @@ declare(strict_types=1);
  *
  * RESULT MEANINGS:
  *
- * GOOD: Thumbnail generation is enabled. The Media Manager will display optimized
- * thumbnails instead of full-size images, providing faster browsing performance.
+ * GOOD: Thumbnail generation is enabled for all configured directories. The Media
+ * Manager will display optimized thumbnails instead of full-size images.
  *
- * WARNING: Thumbnail generation is disabled or the plugin is not properly configured.
- * Enable thumbnail generation in the Filesystem - Local plugin settings to improve
+ * WARNING: Thumbnail generation is disabled for one or more directories, the plugin
+ * is not properly configured, or no directories are configured at all. Enable
+ * thumbnail generation in the Filesystem - Local plugin settings to improve
  * Media Manager performance, especially for sites with many or large images.
  *
  * CRITICAL: This check does not return CRITICAL status.
@@ -109,18 +110,42 @@ final class MediaManagerThumbnailsCheck extends AbstractHealthCheck
             return $this->warning(Text::_('COM_HEALTHCHECKER_CHECK_PERFORMANCE_MEDIA_MANAGER_THUMBNAILS_WARNING_3'));
         }
 
-        // Check if thumbnail generation is enabled
-        // The parameter is 'thumbnail_size' - if set to a value > 0, thumbnails are enabled
-        $thumbnailSize = (int) ($params['thumbnail_size'] ?? 0);
+        // The plugin stores directories as a subform array under 'directories'.
+        // Each entry has 'directory' (folder name) and 'thumbs' (0 or 1).
+        $directories = $params['directories'] ?? [];
 
-        if ($thumbnailSize <= 0) {
+        if (! is_array($directories) || $directories === []) {
             return $this->warning(
                 Text::_('COM_HEALTHCHECKER_CHECK_PERFORMANCE_MEDIA_MANAGER_THUMBNAILS_WARNING_4'),
             );
         }
 
+        $disabledDirs = [];
+
+        foreach ($directories as $directory) {
+            if (! is_array($directory)) {
+                continue;
+            }
+
+            $dirName = (string) ($directory['directory'] ?? '');
+            $thumbsEnabled = (int) ($directory['thumbs'] ?? 0);
+
+            if ($dirName !== '' && $thumbsEnabled === 0) {
+                $disabledDirs[] = $dirName;
+            }
+        }
+
+        if ($disabledDirs !== []) {
+            return $this->warning(
+                Text::sprintf(
+                    'COM_HEALTHCHECKER_CHECK_PERFORMANCE_MEDIA_MANAGER_THUMBNAILS_WARNING_5',
+                    implode(', ', $disabledDirs),
+                ),
+            );
+        }
+
         return $this->good(
-            Text::sprintf('COM_HEALTHCHECKER_CHECK_PERFORMANCE_MEDIA_MANAGER_THUMBNAILS_GOOD', $thumbnailSize),
+            Text::sprintf('COM_HEALTHCHECKER_CHECK_PERFORMANCE_MEDIA_MANAGER_THUMBNAILS_GOOD', \count($directories)),
         );
     }
 }
