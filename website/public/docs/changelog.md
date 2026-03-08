@@ -9,6 +9,12 @@ description: >-
 
 A complete history of features, fixes, and improvements across every release.
 
+## Version 3.9
+
+### [3.9.0](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.9.0)&#x20;
+
+* Maintenance release
+
 ## Version 3.8
 
 ### [3.8.5](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.8.5)&#x20;
