@@ -24,11 +24,12 @@ declare(strict_types=1);
  *
  * RESULT MEANINGS:
  *
- * GOOD: A valid XML sitemap exists at /sitemap.xml (either as a physical file
+ * GOOD: A valid XML sitemap exists at /sitemap.xml or a common alternative
+ * path like /xml-sitemap or /xml-sitemap.xml (either as a physical file
  * or served dynamically) containing proper urlset or sitemapindex structure.
  *
- * WARNING: No sitemap.xml found on disk or via HTTP, the content is empty,
- * or it doesn't contain valid XML sitemap structure.
+ * WARNING: No sitemap found on disk or via HTTP at any known path, the content
+ * is empty, or it doesn't contain valid XML sitemap structure.
  *
  * CRITICAL: This check does not return critical status.
  */
@@ -46,6 +47,16 @@ use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
 final class SitemapCheck extends AbstractHealthCheck
 {
     private const HTTP_TIMEOUT_SECONDS = 10;
+
+    /**
+     * Common sitemap URL paths to check via HTTP.
+     *
+     * Extensions like PWT Sitemap use Joomla menu aliases (e.g. /xml-sitemap)
+     * instead of a physical sitemap.xml file.
+     *
+     * @var list<string>
+     */
+    private const SITEMAP_PATHS = ['sitemap.xml', 'xml-sitemap', 'xml-sitemap.xml'];
 
     /**
      * Get the unique slug identifier for this check.
@@ -76,9 +87,10 @@ final class SitemapCheck extends AbstractHealthCheck
      * Perform the XML sitemap health check.
      *
      * First checks for a physical sitemap.xml file on disk. If not found,
-     * falls back to fetching /sitemap.xml via HTTP to detect dynamically
-     * generated sitemaps (e.g. PWT Sitemap). Follows redirects automatically
-     * to handle sitemap index redirects.
+     * falls back to fetching common sitemap paths via HTTP (/sitemap.xml,
+     * /xml-sitemap, /xml-sitemap.xml) to detect dynamically generated sitemaps
+     * (e.g. PWT Sitemap). Follows redirects automatically to handle sitemap
+     * index redirects.
      *
      * @return HealthCheckResult The check result with status and description
      */
@@ -103,30 +115,43 @@ final class SitemapCheck extends AbstractHealthCheck
     }
 
     /**
-     * Fetch /sitemap.xml via HTTP to detect dynamically generated sitemaps.
+     * Try common sitemap URL paths via HTTP to detect dynamically generated sitemaps.
      *
-     * Joomla's HTTP client follows redirects automatically, so extensions
-     * that 301 redirect from /sitemap.xml to sub-sitemaps are handled.
+     * Checks /sitemap.xml first, then alternative paths like /xml-sitemap used by
+     * extensions such as PWT Sitemap. Joomla's HTTP client follows redirects
+     * automatically, so 301 redirects to sub-sitemaps are handled.
      */
     private function checkViaHttp(): HealthCheckResult
     {
-        try {
-            $sitemapUrl = Uri::root() . 'sitemap.xml';
-            $http = $this->getHttpClient();
-            $response = $http->get($sitemapUrl, [], self::HTTP_TIMEOUT_SECONDS);
+        $http = $this->getHttpClient();
+        $root = Uri::root();
 
-            if ($response->code !== 200) {
-                return $this->warning(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_WARNING'));
+        foreach (self::SITEMAP_PATHS as $path) {
+            try {
+                $response = $http->get($root . $path, [], self::HTTP_TIMEOUT_SECONDS);
+
+                if ($response->code !== 200) {
+                    continue;
+                }
+
+                $content = $response->body;
+                $validationError = $this->validateSitemapContent($content);
+
+                if ($validationError instanceof HealthCheckResult) {
+                    continue;
+                }
+
+                $langKey = $path === 'sitemap.xml'
+                    ? 'COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_GOOD_2'
+                    : 'COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_GOOD_3';
+
+                return $this->good(Text::sprintf($langKey, '/' . $path));
+            } catch (\Throwable) {
+                continue;
             }
-
-            $content = $response->body;
-
-            return $this->validateSitemapContent($content)
-                ?? $this->good(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_GOOD_2'));
-        } catch (\Throwable) {
-            // Network failure — fall back to the standard "not found" warning.
-            return $this->warning(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_WARNING'));
         }
+
+        return $this->warning(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_WARNING'));
     }
 
     /**

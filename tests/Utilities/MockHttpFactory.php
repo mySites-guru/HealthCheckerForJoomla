@@ -121,6 +121,47 @@ class MockHttpFactory
     }
 
     /**
+     * Create a mock HTTP client that returns different responses based on the URL
+     *
+     * @param array<string, array{code: int, body?: string}> $urlResponses Map of URL substring to response
+     * @param int $defaultCode Default status code for unmatched URLs
+     */
+    public static function createWithUrlResponses(array $urlResponses, int $defaultCode = 404): Http
+    {
+        return new class ($urlResponses, $defaultCode) extends Http {
+            /**
+             * @param array<string, array{code: int, body?: string}> $urlResponses
+             */
+            public function __construct(
+                private readonly array $urlResponses,
+                private readonly int $defaultCode,
+            ) {}
+
+            public function get(string $url, array $headers = [], int|float $timeout = 10): Response
+            {
+                foreach ($this->urlResponses as $urlSubstring => $response) {
+                    if (str_contains($url, $urlSubstring)) {
+                        return new Response($response['code'], $response['body'] ?? '', []);
+                    }
+                }
+
+                return new Response($this->defaultCode, '', []);
+            }
+
+            public function head(string $url, array $headers = [], int|float $timeout = 10): Response
+            {
+                foreach ($this->urlResponses as $urlSubstring => $response) {
+                    if (str_contains($url, $urlSubstring)) {
+                        return new Response($response['code'], '', []);
+                    }
+                }
+
+                return new Response($this->defaultCode, '', []);
+            }
+        };
+    }
+
+    /**
      * Create a mock HTTP client with JSON API response
      *
      * @param int          $code HTTP status code
