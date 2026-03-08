@@ -7,6 +7,12 @@ description: Complete history of features, fixes, and improvements across every 
 
 A complete history of features, fixes, and improvements across every release.
 
+## Version 3.9
+
+### [3.9.0](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.9.0) <Badge type="info" text="8 Mar 2026" />
+
+- Maintenance release
+
 ## Version 3.8
 
 ### [3.8.5](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.8.5) <Badge type="info" text="8 Mar 2026" />
