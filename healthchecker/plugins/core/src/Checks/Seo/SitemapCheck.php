@@ -11,7 +11,8 @@ declare(strict_types=1);
 /**
  * XML Sitemap Health Check
  *
- * This check verifies that an XML sitemap exists in the site root and contains
+ * This check verifies that an XML sitemap exists either as a physical file
+ * or served dynamically (e.g. by extensions like PWT Sitemap) and contains
  * valid sitemap structure to help search engines discover all your content.
  *
  * WHY THIS CHECK IS IMPORTANT:
@@ -23,12 +24,11 @@ declare(strict_types=1);
  *
  * RESULT MEANINGS:
  *
- * GOOD: A valid XML sitemap exists at /sitemap.xml containing proper urlset
- * or sitemapindex structure for search engine consumption.
+ * GOOD: A valid XML sitemap exists at /sitemap.xml (either as a physical file
+ * or served dynamically) containing proper urlset or sitemapindex structure.
  *
- * WARNING: Either no sitemap.xml exists, the file is empty, or it doesn't
- * contain valid XML sitemap structure (missing urlset or sitemapindex elements).
- * Install an XML sitemap extension or generate one manually.
+ * WARNING: No sitemap.xml found on disk or via HTTP, the content is empty,
+ * or it doesn't contain valid XML sitemap structure.
  *
  * CRITICAL: This check does not return critical status.
  */
@@ -36,6 +36,7 @@ declare(strict_types=1);
 namespace MySitesGuru\HealthChecker\Plugin\Core\Checks\Seo;
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Uri\Uri;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\AbstractHealthCheck;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthCheckResult;
 use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
@@ -44,6 +45,8 @@ use MySitesGuru\HealthChecker\Component\Administrator\Check\HealthStatus;
 
 final class SitemapCheck extends AbstractHealthCheck
 {
+    private const HTTP_TIMEOUT_SECONDS = 10;
+
     /**
      * Get the unique slug identifier for this check.
      *
@@ -72,39 +75,69 @@ final class SitemapCheck extends AbstractHealthCheck
     /**
      * Perform the XML sitemap health check.
      *
-     * Verifies that a valid XML sitemap exists at the standard location
-     * (/sitemap.xml) and contains proper sitemap structure. Validates XML
-     * syntax and checks for required urlset or sitemapindex elements that
-     * search engines need to parse the sitemap correctly.
+     * First checks for a physical sitemap.xml file on disk. If not found,
+     * falls back to fetching /sitemap.xml via HTTP to detect dynamically
+     * generated sitemaps (e.g. PWT Sitemap). Follows redirects automatically
+     * to handle sitemap index redirects.
      *
      * @return HealthCheckResult The check result with status and description
      */
     protected function performCheck(): HealthCheckResult
     {
-        // sitemap.xml must be in site root as per sitemap protocol specification.
-        // Search engines look for it at http://example.com/sitemap.xml
+        // Phase 1: Check for a physical sitemap.xml file on disk.
         $sitemapPath = JPATH_ROOT . '/sitemap.xml';
 
-        if (! file_exists($sitemapPath)) {
+        if (file_exists($sitemapPath)) {
+            $content = @file_get_contents($sitemapPath);
+
+            if ($content === false) {
+                return $this->warning(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_WARNING_2'));
+            }
+
+            return $this->validateSitemapContent($content)
+                ?? $this->good(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_GOOD'));
+        }
+
+        // Phase 2: No physical file — try fetching via HTTP for dynamic sitemaps.
+        return $this->checkViaHttp();
+    }
+
+    /**
+     * Fetch /sitemap.xml via HTTP to detect dynamically generated sitemaps.
+     *
+     * Joomla's HTTP client follows redirects automatically, so extensions
+     * that 301 redirect from /sitemap.xml to sub-sitemaps are handled.
+     */
+    private function checkViaHttp(): HealthCheckResult
+    {
+        try {
+            $sitemapUrl = Uri::root() . 'sitemap.xml';
+            $http = $this->getHttpClient();
+            $response = $http->get($sitemapUrl, [], self::HTTP_TIMEOUT_SECONDS);
+
+            if ($response->code !== 200) {
+                return $this->warning(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_WARNING'));
+            }
+
+            $content = $response->body;
+
+            return $this->validateSitemapContent($content)
+                ?? $this->good(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_GOOD_2'));
+        } catch (\Throwable) {
+            // Network failure — fall back to the standard "not found" warning.
             return $this->warning(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_WARNING'));
         }
+    }
 
-        // Attempt to read sitemap contents. Using @ to suppress warnings
-        // for permission issues, handled by false check below.
-        $content = @file_get_contents($sitemapPath);
-
-        if ($content === false) {
-            return $this->warning(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_WARNING_2'));
-        }
-
-        // Empty sitemaps are useless for search engines and may indicate
-        // a failed generation or corrupted file.
+    /**
+     * Validate sitemap XML content and return a warning result if invalid, or null if valid.
+     */
+    private function validateSitemapContent(string $content): ?HealthCheckResult
+    {
         if (trim($content) === '') {
             return $this->warning(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_WARNING_3'));
         }
 
-        // Validate that the file contains well-formed XML.
-        // Using internal error handling to catch XML parsing errors gracefully.
         libxml_use_internal_errors(true);
         $xml = simplexml_load_string($content);
         libxml_clear_errors();
@@ -113,10 +146,6 @@ final class SitemapCheck extends AbstractHealthCheck
             return $this->warning(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_WARNING_4'));
         }
 
-        // Check for required sitemap protocol elements.
-        // A valid sitemap must have either <urlset> (single sitemap) or
-        // <sitemapindex> (sitemap index pointing to multiple sitemaps).
-        // Without these, search engines won't recognize it as a valid sitemap.
         $hasUrlset = stripos($content, '<urlset') !== false;
         $hasSitemapIndex = stripos($content, '<sitemapindex') !== false;
 
@@ -124,8 +153,6 @@ final class SitemapCheck extends AbstractHealthCheck
             return $this->warning(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_WARNING_5'));
         }
 
-        // Sitemap exists, is valid XML, and contains required sitemap elements.
-        // Further validation of URLs and structure would require full parsing.
-        return $this->good(Text::_('COM_HEALTHCHECKER_CHECK_SEO_SITEMAP_GOOD'));
+        return null;
     }
 }
