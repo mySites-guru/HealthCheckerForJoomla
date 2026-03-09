@@ -205,6 +205,85 @@ HTML;
         $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
     }
 
+    public function testRunReturnsGoodWhenTagsUseNameAttribute(): void
+    {
+        // Some sites/extensions use name= instead of property= for OG tags
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="og:url" content="https://example.com/">
+    <meta name="og:site_name" content="Example Site">
+    <meta name="og:type" content="website">
+    <meta name="og:locale" content="en_GB">
+    <meta name="og:title" content="My Site Title">
+    <meta name="og:description" content="My site description that is over 120 characters long">
+    <meta name="og:image" content="https://example.com/images/header.png">
+    <meta name="fb:app_id" content="9876543210">
+</head>
+<body></body>
+</html>
+HTML;
+
+        $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
+        $this->facebookOpenGraphCheck->setHttpClient($httpClient);
+
+        $healthCheckResult = $this->facebookOpenGraphCheck->run();
+
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+        $this->assertStringContainsString(
+            'COM_HEALTHCHECKER_CHECK_SEO_FACEBOOK_OPEN_GRAPH_GOOD_APPID',
+            $healthCheckResult->description,
+        );
+    }
+
+    public function testRunReturnsGoodWhenTagsMixNameAndPropertyAttributes(): void
+    {
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+    <meta property="og:title" content="My Site Title">
+    <meta name="og:description" content="My site description">
+    <meta property="og:image" content="https://example.com/image.jpg">
+    <meta name="og:url" content="https://example.com/">
+</head>
+<body></body>
+</html>
+HTML;
+
+        $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
+        $this->facebookOpenGraphCheck->setHttpClient($httpClient);
+
+        $healthCheckResult = $this->facebookOpenGraphCheck->run();
+
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+    }
+
+    public function testPropertyAttributeTakesPrecedenceOverName(): void
+    {
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+    <meta property="og:title" content="Property Title">
+    <meta name="og:title" content="Name Title">
+    <meta property="og:description" content="Property Description">
+    <meta property="og:image" content="https://example.com/image.jpg">
+    <meta property="og:url" content="https://example.com/">
+</head>
+<body></body>
+</html>
+HTML;
+
+        $httpClient = MockHttpFactory::createWithGetResponse(200, $html);
+        $this->facebookOpenGraphCheck->setHttpClient($httpClient);
+
+        $healthCheckResult = $this->facebookOpenGraphCheck->run();
+
+        $this->assertSame(HealthStatus::Good, $healthCheckResult->healthStatus);
+    }
+
     public function testResultMetadata(): void
     {
         $html = '<html><head></head><body></body></html>';

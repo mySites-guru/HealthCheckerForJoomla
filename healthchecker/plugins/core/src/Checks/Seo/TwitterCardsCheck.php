@@ -238,27 +238,30 @@ final class TwitterCardsCheck extends AbstractHealthCheck
     {
         $tags = [];
 
-        // Match Open Graph meta tags: <meta property="og:*" content="...">
-        if (preg_match_all(
-            '/<meta\s+[^>]*property=["\']?(og:[^"\'>\s]+)["\']?\s+[^>]*content=["\']?([^"\'>\s][^"\']*)["\']?[^>]*>/i',
-            $html,
-            $matches,
-            PREG_SET_ORDER,
-        )) {
-            foreach ($matches as $match) {
-                $tags[$match[1]] = $match[2];
+        // Match Open Graph meta tags with either property or name attribute.
+        // The OG spec requires "property", but many sites/extensions use "name" instead.
+        foreach (['property', 'name'] as $attribute) {
+            if (preg_match_all(
+                '/<meta\s+[^>]*' . $attribute . '=["\']?(og:[^"\'>\s]+)["\']?\s+[^>]*content=["\']?([^"\'>\s][^"\']*)["\']?[^>]*>/i',
+                $html,
+                $matches,
+                PREG_SET_ORDER,
+            )) {
+                foreach ($matches as $match) {
+                    $tags[$match[1]] ??= $match[2];
+                }
             }
-        }
 
-        // Also check for reverse order: content before property
-        if (preg_match_all(
-            '/<meta\s+[^>]*content=["\']?([^"\'>\s][^"\']*)["\']?\s+[^>]*property=["\']?(og:[^"\'>\s]+)["\']?[^>]*>/i',
-            $html,
-            $matches,
-            PREG_SET_ORDER,
-        )) {
-            foreach ($matches as $match) {
-                $tags[$match[2]] = $match[1];
+            // Also check for reverse order: content before property/name
+            if (preg_match_all(
+                '/<meta\s+[^>]*content=["\']?([^"\'>\s][^"\']*)["\']?\s+[^>]*' . $attribute . '=["\']?(og:[^"\'>\s]+)["\']?[^>]*>/i',
+                $html,
+                $matches,
+                PREG_SET_ORDER,
+            )) {
+                foreach ($matches as $match) {
+                    $tags[$match[2]] ??= $match[1];
+                }
             }
         }
 
