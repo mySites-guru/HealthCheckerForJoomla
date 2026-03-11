@@ -170,15 +170,19 @@ To completely remove Health Checker:
 
 1. Navigate to **System → Manage → Extensions**
 2. Search for "Health Checker"
-3. Select all Health Checker extensions
-4. Click **Uninstall**
+3. Find the **Health Checker for Joomla** package (Type: "Package")
+4. Select it and click **Uninstall**
 
-This removes:
+Uninstalling the package removes everything in one step:
 
 * Component
-* All plugins
+* All plugins (core, example, Akeeba Backup, Akeeba Admin Tools, mySites.guru)
 * Dashboard module
 * All files and folders
+
+::: warning Always uninstall the package, not individual extensions
+Do not uninstall plugins or the component separately. Uninstalling the package handles all sub-extensions automatically.
+:::
 
 **Note**: Health Checker doesn't create database tables, so there's no data to clean up.
 
