@@ -1261,6 +1261,14 @@ A complete history of features, fixes, and improvements across every release.
 
 ## Version 3.9
 
+### [3.9.5](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.9.5)&#x20;
+
+* \[Fix] Fixed package uninstall leaving plugins behind when removing the extension package ([#114](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/114))
+* \[Fix] Corrected plugin ID attributes in package manifest to ensure child plugins are properly uninstalled
+* \[Internal] Updated uninstall documentation to recommend using package removal instead of individual uninstall
+* \[Internal] Updated documentation to reflect mySites.guru branding, replacing Panopticon references
+* \[Internal] Added documentation page explaining package vs individual installation options
+
 ### [3.9.4](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.9.4)&#x20;
 
 * \[Fix] Fixed translation errors and improved wording in the Spanish (es-ES) language file ([#112](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/112)) (Thanks [@alamarte](https://github.com/alamarte))
