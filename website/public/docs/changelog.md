@@ -11,6 +11,11 @@ A complete history of features, fixes, and improvements across every release.
 
 ## Version 3.9
 
+### [3.9.8](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.9.8)&#x20;
+
+* \[Internal] Extract zip package build into separate `buildzips.sh` script
+* \[Fix] Let Joomla's own cascade handle child extension removal instead of manually managing it
+
 ### [3.9.5](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.9.5)&#x20;
 
 * \[Fix] Fixed package uninstall leaving plugins behind when removing the extension package ([#114](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/114))
