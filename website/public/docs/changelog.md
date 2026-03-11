@@ -11,6 +11,11 @@ A complete history of features, fixes, and improvements across every release.
 
 ## Version 3.9
 
+### [3.9.10](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.9.10)&#x20;
+
+* \[Internal] Updated Spanish (es-ES) translations: fixed terminology consistency and added 4 new translation keys ([#120](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/120)) (Thanks [@alamarte](https://github.com/alamarte))
+* \[Internal] Added missing Russian translations for open\_basedir warnings ([#119](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/119)) (Thanks [@alex-revo](https://github.com/alex-revo))
+
 ### [3.9.9](https://github.com/mySites-guru/HealthCheckerForJoomla/releases/tag/v3.9.9)&#x20;
 
 * \[Fix] Fixed filesystem operations failing when `open_basedir` is enabled, preventing errors on restricted hosting environments ([#115](https://github.com/mySites-guru/HealthCheckerForJoomla/issues/115)) (Thanks [@alex-revo](https://github.com/alex-revo))
