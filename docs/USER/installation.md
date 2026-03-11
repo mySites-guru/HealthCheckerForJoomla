@@ -21,7 +21,7 @@ Download the latest version from one of these sources:
 
 - **GitHub Releases**: [github.com/mySites-guru/HealthCheckerForJoomla/releases](https://github.com/mySites-guru/HealthCheckerForJoomla/releases)
 
-You'll download a file named `pkg_healthchecker_vX.X.X.zip`
+You'll download a file named `pkg_healthchecker-x.x.x.zip` — the **complete package**. This is the recommended download for most users. See [Package vs Individual Installs](/packages-vs-individual) if you're unsure which file to download.
 
 ## Installation Steps
 
@@ -33,7 +33,7 @@ You'll download a file named `pkg_healthchecker_vX.X.X.zip`
 ### 2. Upload Package
 
 1. Click the **Upload Package File** tab
-2. Click **Browse** and select the `pkg_healthchecker_vX.X.X.zip` file
+2. Click **Browse** and select the `pkg_healthchecker-x.x.x.zip` file
 3. The package will upload and install automatically
 
 ### 3. Verify Installation
@@ -207,4 +207,5 @@ mySites.guru = The Original Joomla Health Checker Since 2012. [Start monitoring 
 
 ## Next Steps
 
-Now that Health Checker is installed, continue to [Getting Started](/getting-started) to learn how to use it.
+- [Getting Started](/getting-started) — learn how to use Health Checker
+- [Package vs Individual Installs](/packages-vs-individual) — understand which ZIP to download and why

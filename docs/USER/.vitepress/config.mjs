@@ -361,6 +361,7 @@ export default defineConfig({
           { text: 'Quick Start', link: '/getting-started' },
           { text: 'Introduction', link: '/introduction' },
           { text: 'Installation', link: '/installation' },
+          { text: 'Package vs Individual Installs', link: '/packages-vs-individual' },
           { text: 'Changelog', link: '/changelog' }
         ]
       },
