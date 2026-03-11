@@ -673,18 +673,27 @@ class Pkg_HealthcheckerInstallerScript
         $installer = \Joomla\CMS\Installer\Installer::getInstance();
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 
+        // Remove all plugins first
         foreach (self::PLUGINS as $element) {
-            $query = $db->getQuery(true)
-                ->select($db->quoteName('extension_id'))
-                ->from($db->quoteName('#__extensions'))
-                ->where($db->quoteName('type') . ' = ' . $db->quote('plugin'))
-                ->where($db->quoteName('folder') . ' = ' . $db->quote('healthchecker'))
-                ->where($db->quoteName('element') . ' = ' . $db->quote($element));
-            $id = (int) $db->setQuery($query)->loadResult();
+            $id = $this->getExtensionId($db, 'plugin', $element, 'healthchecker');
 
             if ($id) {
                 $installer->uninstall('plugin', $id);
             }
+        }
+
+        // Remove the module
+        $moduleId = $this->getExtensionId($db, 'module', 'mod_healthchecker');
+
+        if ($moduleId) {
+            $installer->uninstall('module', $moduleId);
+        }
+
+        // Remove the component
+        $componentId = $this->getExtensionId($db, 'component', 'com_healthchecker');
+
+        if ($componentId) {
+            $installer->uninstall('component', $componentId);
         }
 
         // Remove the plugin group directory if empty
@@ -692,6 +701,21 @@ class Pkg_HealthcheckerInstallerScript
         if (is_dir($groupDir) && count(glob($groupDir . '/*')) === 0) {
             @rmdir($groupDir);
         }
+    }
+
+    private function getExtensionId(DatabaseInterface $db, string $type, string $element, string $folder = ''): int
+    {
+        $query = $db->getQuery(true)
+            ->select($db->quoteName('extension_id'))
+            ->from($db->quoteName('#__extensions'))
+            ->where($db->quoteName('type') . ' = ' . $db->quote($type))
+            ->where($db->quoteName('element') . ' = ' . $db->quote($element));
+
+        if ($folder !== '') {
+            $query->where($db->quoteName('folder') . ' = ' . $db->quote($folder));
+        }
+
+        return (int) $db->setQuery($query)->loadResult();
     }
 
     public function postflight(string $type, InstallerAdapter $parent): void
