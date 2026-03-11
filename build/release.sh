@@ -670,7 +670,6 @@ class Pkg_HealthcheckerInstallerScript
 
     public function uninstall(InstallerAdapter $parent): void
     {
-        $installer = \Joomla\CMS\Installer\Installer::getInstance();
         $db = Factory::getContainer()->get(DatabaseInterface::class);
 
         // Remove all plugins first
@@ -678,6 +677,8 @@ class Pkg_HealthcheckerInstallerScript
             $id = $this->getExtensionId($db, 'plugin', $element, 'healthchecker');
 
             if ($id) {
+                $installer = new \Joomla\CMS\Installer\Installer();
+                $installer->setPackageUninstall(true);
                 $installer->uninstall('plugin', $id);
             }
         }
@@ -686,6 +687,8 @@ class Pkg_HealthcheckerInstallerScript
         $moduleId = $this->getExtensionId($db, 'module', 'mod_healthchecker');
 
         if ($moduleId) {
+            $installer = new \Joomla\CMS\Installer\Installer();
+            $installer->setPackageUninstall(true);
             $installer->uninstall('module', $moduleId);
         }
 
@@ -693,6 +696,8 @@ class Pkg_HealthcheckerInstallerScript
         $componentId = $this->getExtensionId($db, 'component', 'com_healthchecker');
 
         if ($componentId) {
+            $installer = new \Joomla\CMS\Installer\Installer();
+            $installer->setPackageUninstall(true);
             $installer->uninstall('component', $componentId);
         }
 
