@@ -66,10 +66,10 @@ Without both of these, Health Checker won't function.
 | First time installing | Complete package (`pkg_healthchecker`) |
 | Updating an existing install | Complete package (`pkg_healthchecker`) |
 | You don't use Akeeba extensions and don't want those plugins present | Individual ZIPs (component + core + module) |
-| You manage updates via Panopticon and want full control over which plugins are enabled | Individual ZIPs — see note below |
+| You manage updates via [mySites.guru](https://mysites.guru) and want full control over which plugins are enabled | Individual ZIPs — see note below |
 | You're a developer building a custom check plugin | Your plugin ZIP only (assumes component is already installed) |
 
-::: tip Managing plugin state with Panopticon or automation tools
+::: tip Managing plugin state with mySites.guru or other automation tools
 When installed via the complete package, all bundled plugins are enabled on first install. If you disable optional plugins (like the example or mySites.guru plugins) and later update via the package, the plugins stay in their current enabled/disabled state — the package respects your choices on update.
 
 If you still prefer to control exactly which plugins exist on your site, install the individual ZIPs for just the parts you want.
