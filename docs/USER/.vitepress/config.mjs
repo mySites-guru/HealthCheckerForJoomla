@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   title: 'Health Checker for Joomla',
-  description: 'Free Joomla 5+ extension with 130+ automated health checks for security, performance, SEO, and database. Instant reports from your admin panel.',
+  description: 'Monitor your Joomla 5 site with 130+ automated health checks. Scan security, performance, SEO, sitemaps, and database issues in seconds. Free and open source.',
   base: '/docs/',
   outDir: '../../website/public/docs',
   cleanUrls: true,
@@ -249,7 +249,7 @@ export default defineConfig({
   // Generate per-page OG/Twitter meta tags from frontmatter
   transformPageData(pageData) {
     const title = pageData.title || 'Health Checker for Joomla'
-    const description = pageData.frontmatter?.description || pageData.description || 'Free Joomla 5+ extension with 130+ automated health checks for security, performance, SEO, and database.'
+    const description = pageData.frontmatter?.description || pageData.description || 'Monitor your Joomla 5 site with 130+ automated health checks. Scan security, performance, SEO, sitemaps, and database issues in seconds.'
 
     // Build canonical URL
     let relativePath = pageData.relativePath || ''
@@ -258,6 +258,7 @@ export default defineConfig({
 
     pageData.frontmatter.head ??= []
     pageData.frontmatter.head.push(
+      ['link', { rel: 'canonical', href: url }],
       ['meta', { property: 'og:title', content: `${title} | Health Checker for Joomla` }],
       ['meta', { property: 'og:description', content: description }],
       ['meta', { property: 'og:url', content: url }],
@@ -327,16 +328,19 @@ export default defineConfig({
     transformItems: (items) => {
       // Filter out README
       items = items.filter(item => !item.url.includes('README'))
-      // Add /docs prefix to all URLs (workaround for base path bug)
+      // Add /docs prefix to all URLs and set lastmod for crawl priority
+      const today = new Date().toISOString().split('T')[0]
       items = items.map(item => ({
         ...item,
-        url: item.url.startsWith('/') ? `/docs${item.url}` : `/docs/${item.url}`
+        url: item.url.startsWith('/') ? `/docs${item.url}` : `/docs/${item.url}`,
+        lastmod: item.lastmod || today
       }))
       // Add root page
       items.unshift({
         url: '/',
         changefreq: 'weekly',
-        priority: 1.0
+        priority: 1.0,
+        lastmod: today
       })
       return items
     }

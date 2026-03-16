@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /docs/sitemap.xml
 
-Sitemap: https://www.joomlahealthchecker.com/docs/sitemap.xml
+Sitemap: https://www.joomlahealthchecker.com/sitemap.xml

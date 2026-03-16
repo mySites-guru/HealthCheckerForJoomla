@@ -84,6 +84,11 @@ export default {
       newResponse.headers.set('Content-Type', 'text/html; charset=utf-8');
     }
 
+    // Prevent XML files (sitemaps) from being indexed as content pages
+    if (url.pathname.endsWith('.xml')) {
+      newResponse.headers.set('X-Robots-Tag', 'noindex');
+    }
+
     // Add security headers
     for (const [key, value] of Object.entries(securityHeaders)) {
       // Allow /docs/ to be framed by same origin (for search widget)

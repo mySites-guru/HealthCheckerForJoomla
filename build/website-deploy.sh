@@ -381,9 +381,7 @@ else
     echo -e "${YELLOW}Step 6: Notifying search engines via IndexNow...${NC}"
     echo "Waiting 5 seconds for deployment to propagate..."
     sleep 5
-    ./indexnow-notify.sh
-
-    if [ $? -eq 0 ]; then
+    if ./indexnow-notify.sh; then
         echo -e "${GREEN}✓ Search engines notified${NC}"
     else
         echo -e "${YELLOW}⚠ IndexNow notification failed (non-fatal)${NC}"
