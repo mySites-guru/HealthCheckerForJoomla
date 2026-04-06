@@ -57,6 +57,7 @@ $showRefreshButton = !empty($healthStats['enableCache']) || $params->get('enable
     <!-- Results State -->
     <div id="<?php echo $moduleId; ?>-results" class="d-none">
         <div class="row g-3">
+            <?php if ($healthStats['showCritical']): ?>
             <div class="col">
                 <a href="<?php echo $reportUrl; ?>" class="text-decoration-none d-block rounded-3 h-100 bg-danger text-white healthchecker-card" style="view-transition-name: healthchecker-critical;">
                     <div class="text-center p-3">
@@ -68,6 +69,8 @@ $showRefreshButton = !empty($healthStats['enableCache']) || $params->get('enable
                     </div>
                 </a>
             </div>
+            <?php endif; ?>
+            <?php if ($healthStats['showWarning']): ?>
             <div class="col">
                 <a href="<?php echo $reportUrl; ?>" class="text-decoration-none d-block rounded-3 h-100 bg-warning healthchecker-card" style="view-transition-name: healthchecker-warning;">
                     <div class="text-center p-3">
@@ -79,6 +82,8 @@ $showRefreshButton = !empty($healthStats['enableCache']) || $params->get('enable
                     </div>
                 </a>
             </div>
+            <?php endif; ?>
+            <?php if ($healthStats['showGood']): ?>
             <div class="col">
                 <a href="<?php echo $reportUrl; ?>" class="text-decoration-none d-block rounded-3 h-100 bg-success text-white healthchecker-card" style="view-transition-name: healthchecker-good;">
                     <div class="text-center p-3">
@@ -90,6 +95,7 @@ $showRefreshButton = !empty($healthStats['enableCache']) || $params->get('enable
                     </div>
                 </a>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 

@@ -85,10 +85,13 @@ PKG_DIR="$BUILD_DIR/tmp/pkg_healthchecker"
 mkdir -p "$PKG_DIR/packages"
 cp "$BUILD_DIR"/*.zip "$PKG_DIR/packages/"
 
+# Copy package-level language files
+cp -r "$SOURCE_DIR/package/language" "$PKG_DIR/"
+
 cat > "$PKG_DIR/pkg_healthchecker.xml" << EOF
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="package" method="upgrade">
-    <name>Health Checker for Joomla</name>
+    <name>PKG_HEALTHCHECKER</name>
     <packagename>healthchecker</packagename>
     <author>mySites.guru / Phil E. Taylor</author>
     <creationDate>$(date +%Y-%m)</creationDate>
@@ -97,10 +100,20 @@ cat > "$PKG_DIR/pkg_healthchecker.xml" << EOF
     <authorEmail>phil@phil-taylor.com</authorEmail>
     <authorUrl>https://phil-taylor.com</authorUrl>
     <version>${VERSION}</version>
-    <description>Comprehensive health check extension for Joomla with over 130 checks across 8+ categories.</description>
+    <description><![CDATA[PKG_HEALTHCHECKER_XML_DESCRIPTION]]></description>
     <packager>mySites.guru</packager>
     <packagerurl>https://mysites.guru</packagerurl>
     <blockChildUninstall>true</blockChildUninstall>
+
+    <languages folder="language">
+        <language tag="en-GB">en-GB/pkg_healthchecker.ini</language>
+        <language tag="en-GB">en-GB/pkg_healthchecker.sys.ini</language>
+        <language tag="es-ES">es-ES/pkg_healthchecker.ini</language>
+        <language tag="es-ES">es-ES/pkg_healthchecker.sys.ini</language>
+        <language tag="ru-RU">ru-RU/pkg_healthchecker.ini</language>
+        <language tag="ru-RU">ru-RU/pkg_healthchecker.sys.ini</language>
+    </languages>
+
     <files folder="packages">
         <file type="component" id="com_healthchecker">com_healthchecker-${VERSION}.zip</file>
         <file type="module" id="mod_healthchecker" client="administrator">mod_healthchecker-${VERSION}.zip</file>
