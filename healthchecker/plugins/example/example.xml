@@ -14,12 +14,65 @@
         <folder plugin="example">services</folder>
         <folder>src</folder>
         <folder>language</folder>
+        <filename>DEVELOPER_GUIDE.md</filename>
     </files>
 
     <languages folder="language">
         <language tag="en-GB">en-GB/plg_healthchecker_example.ini</language>
+        <language tag="en-GB">en-GB/plg_healthchecker_example.sys.ini</language>
         <language tag="es-ES">es-ES/plg_healthchecker_example.ini</language>
+        <language tag="es-ES">es-ES/plg_healthchecker_example.sys.ini</language>
     </languages>
+
+    <!-- Developer Guide tab visible in Extensions > Plugins > Edit -->
+    <config>
+        <fields name="params">
+            <fieldset
+                name="developer_guide"
+                label="PLG_HEALTHCHECKER_EXAMPLE_TAB_GUIDE_LABEL"
+            >
+                <field
+                    name="guide_intro"
+                    type="note"
+                    label=""
+                    description="PLG_HEALTHCHECKER_EXAMPLE_GUIDE_INTRO"
+                />
+
+                <field
+                    name="guide_events"
+                    type="note"
+                    label="PLG_HEALTHCHECKER_EXAMPLE_GUIDE_EVENTS_LABEL"
+                    description="PLG_HEALTHCHECKER_EXAMPLE_GUIDE_EVENTS_DESC"
+                    class="alert alert-info"
+                />
+
+                <field
+                    name="guide_steps"
+                    type="note"
+                    label="PLG_HEALTHCHECKER_EXAMPLE_GUIDE_STEPS_LABEL"
+                    description="PLG_HEALTHCHECKER_EXAMPLE_GUIDE_STEPS_DESC"
+                    class="alert alert-info"
+                />
+
+                <field
+                    name="guide_categories"
+                    type="note"
+                    label="PLG_HEALTHCHECKER_EXAMPLE_GUIDE_CATEGORIES_LABEL"
+                    description="PLG_HEALTHCHECKER_EXAMPLE_GUIDE_CATEGORIES_DESC"
+                    class="alert alert-info"
+                />
+
+                <field
+                    name="guide_docs"
+                    type="note"
+                    label="PLG_HEALTHCHECKER_EXAMPLE_GUIDE_DOCS_LABEL"
+                    description="PLG_HEALTHCHECKER_EXAMPLE_GUIDE_DOCS_DESC"
+                    class="alert alert-success"
+                />
+
+            </fieldset>
+        </fields>
+    </config>
 
     <updateservers>
         <server

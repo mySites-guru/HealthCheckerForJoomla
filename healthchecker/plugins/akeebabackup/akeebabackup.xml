@@ -39,6 +39,7 @@
                     name="check_akeeba_backup_installed"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_INSTALLED_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_CHECK_AKEEBA_BACKUP_INSTALLED_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -50,6 +51,7 @@
                     name="export_akeeba_backup_installed"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -62,6 +64,7 @@
                     name="check_akeeba_backup_last_backup"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_LAST_BACKUP_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_CHECK_AKEEBA_BACKUP_LAST_BACKUP_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -73,6 +76,7 @@
                     name="export_akeeba_backup_last_backup"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -85,6 +89,7 @@
                     name="check_akeeba_backup_success_rate"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_SUCCESS_RATE_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_CHECK_AKEEBA_BACKUP_SUCCESS_RATE_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -96,6 +101,7 @@
                     name="export_akeeba_backup_success_rate"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -108,6 +114,7 @@
                     name="check_akeeba_backup_stuck_backups"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_STUCK_BACKUPS_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_CHECK_AKEEBA_BACKUP_STUCK_BACKUPS_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -119,6 +126,7 @@
                     name="export_akeeba_backup_stuck_backups"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -131,6 +139,7 @@
                     name="check_akeeba_backup_files_exist"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_FILES_EXIST_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_CHECK_AKEEBA_BACKUP_FILES_EXIST_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -142,6 +151,7 @@
                     name="export_akeeba_backup_files_exist"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -154,6 +164,7 @@
                     name="check_akeeba_backup_backup_size"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_BACKUP_SIZE_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_CHECK_AKEEBA_BACKUP_BACKUP_SIZE_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -165,6 +176,7 @@
                     name="export_akeeba_backup_backup_size"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -177,6 +189,7 @@
                     name="check_akeeba_backup_profile_exists"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_PROFILE_EXISTS_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_CHECK_AKEEBA_BACKUP_PROFILE_EXISTS_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -188,6 +201,7 @@
                     name="export_akeeba_backup_profile_exists"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -200,6 +214,7 @@
                     name="check_akeeba_backup_profile_configured"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_PROFILE_CONFIGURED_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_CHECK_AKEEBA_BACKUP_PROFILE_CONFIGURED_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -211,6 +226,7 @@
                     name="export_akeeba_backup_profile_configured"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -223,6 +239,7 @@
                     name="check_akeeba_backup_failed_backups"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_FAILED_BACKUPS_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_CHECK_AKEEBA_BACKUP_FAILED_BACKUPS_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -234,6 +251,7 @@
                     name="export_akeeba_backup_failed_backups"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -246,6 +264,7 @@
                     name="check_akeeba_backup_frequency"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_BACKUP_FREQUENCY_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_CHECK_AKEEBA_BACKUP_FREQUENCY_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -257,6 +276,7 @@
                     name="export_akeeba_backup_frequency"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBABACKUP_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >

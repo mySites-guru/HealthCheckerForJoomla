@@ -39,6 +39,7 @@
                     name="check_akeeba_admintools_installed"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_INSTALLED_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_INSTALLED_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -50,6 +51,7 @@
                     name="export_akeeba_admintools_installed"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -62,6 +64,7 @@
                     name="check_akeeba_admintools_waf_enabled"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_WAF_ENABLED_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_WAF_ENABLED_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -73,6 +76,7 @@
                     name="export_akeeba_admintools_waf_enabled"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -85,6 +89,7 @@
                     name="check_akeeba_admintools_security_events"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_SECURITY_EVENTS_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_SECURITY_EVENTS_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -96,6 +101,7 @@
                     name="export_akeeba_admintools_security_events"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -108,6 +114,7 @@
                     name="check_akeeba_admintools_blocked_attacks"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_BLOCKED_ATTACKS_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_BLOCKED_ATTACKS_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -119,6 +126,7 @@
                     name="export_akeeba_admintools_blocked_attacks"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -131,6 +139,7 @@
                     name="check_akeeba_admintools_active_bans"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_ACTIVE_BANS_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_ACTIVE_BANS_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -142,6 +151,7 @@
                     name="export_akeeba_admintools_active_bans"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -154,6 +164,7 @@
                     name="check_akeeba_admintools_scan_age"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_SCAN_AGE_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_SCAN_AGE_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -165,6 +176,7 @@
                     name="export_akeeba_admintools_scan_age"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -177,6 +189,7 @@
                     name="check_akeeba_admintools_file_alerts"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_FILE_ALERTS_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_FILE_ALERTS_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -188,6 +201,7 @@
                     name="export_akeeba_admintools_file_alerts"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -200,6 +214,7 @@
                     name="check_akeeba_admintools_temp_superusers"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_TEMP_SUPERUSERS_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_TEMP_SUPERUSERS_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -211,6 +226,7 @@
                     name="export_akeeba_admintools_temp_superusers"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -223,6 +239,7 @@
                     name="check_akeeba_admintools_ip_whitelist"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_IP_WHITELIST_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_IP_WHITELIST_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -234,6 +251,7 @@
                     name="export_akeeba_admintools_ip_whitelist"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -246,6 +264,7 @@
                     name="check_akeeba_admintools_waf_rules"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_WAF_RULES_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_WAF_RULES_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -257,6 +276,7 @@
                     name="export_akeeba_admintools_waf_rules"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -269,6 +289,7 @@
                     name="check_akeeba_admintools_login_failures"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_LOGIN_FAILURES_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_LOGIN_FAILURES_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -280,6 +301,7 @@
                     name="export_akeeba_admintools_login_failures"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -292,6 +314,7 @@
                     name="check_akeeba_admintools_geoblocking"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_GEOBLOCKING_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_GEOBLOCKING_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -303,6 +326,7 @@
                     name="export_akeeba_admintools_geoblocking"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -315,6 +339,7 @@
                     name="check_akeeba_admintools_sqli_blocks"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_SQLI_BLOCKS_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_SQLI_BLOCKS_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -326,6 +351,7 @@
                     name="export_akeeba_admintools_sqli_blocks"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -338,6 +364,7 @@
                     name="check_akeeba_admintools_xss_blocks"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_XSS_BLOCKS_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_XSS_BLOCKS_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -349,6 +376,7 @@
                     name="export_akeeba_admintools_xss_blocks"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >
@@ -361,6 +389,7 @@
                     name="check_akeeba_admintools_admin_access"
                     type="radio"
                     label="PLG_HEALTHCHECKER_AKEEBA_ADMINTOOLS_ADMIN_ACCESS_TITLE"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_CHECK_AKEEBA_ADMINTOOLS_ADMIN_ACCESS_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -372,6 +401,7 @@
                     name="export_akeeba_admintools_admin_access"
                     type="list"
                     label="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_AKEEBAADMINTOOLS_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >

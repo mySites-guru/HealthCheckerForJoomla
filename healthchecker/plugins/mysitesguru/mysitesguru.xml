@@ -39,6 +39,7 @@
                     name="check_mysitesguru_connection"
                     type="radio"
                     label="COM_HEALTHCHECKER_CHECK_MYSITESGURU_CONNECTION_TITLE"
+                    description="PLG_HEALTHCHECKER_MYSITESGURU_CHECK_MYSITESGURU_CONNECTION_DESC"
                     class="btn-group btn-group-yesno"
                     default="1"
                 >
@@ -49,6 +50,7 @@
                     name="export_mysitesguru_connection"
                     type="list"
                     label="PLG_HEALTHCHECKER_MYSITESGURU_EXPORT_VISIBILITY"
+                    description="PLG_HEALTHCHECKER_MYSITESGURU_EXPORT_VISIBILITY_DESC"
                     default="always"
                     class="form-select-sm"
                 >

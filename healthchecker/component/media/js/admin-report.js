@@ -295,7 +295,7 @@
                 const isThirdParty = result.provider !== 'core';
                 let providerBadge = '';
                 if (isThirdParty && provider) {
-                    providerBadge = `<span class="badge bg-secondary hasTooltip" title="${escapeHtml(provider.name + (provider.version ? ' v' + provider.version : ''))}">${escapeHtml(provider.name)}</span>`;
+                    providerBadge = `<span class="badge bg-secondary">${escapeHtml(provider.name)}</span>`;
                 }
 
                 // Build action buttons (action + docs) for the right side
@@ -495,7 +495,7 @@
                             const isThirdParty = result.provider !== 'core';
                             let providerBadge = '';
                             if (isThirdParty && provider) {
-                                providerBadge = `<span class="badge bg-secondary hasTooltip" title="${escapeHtml(provider.name + (provider.version ? ' v' + provider.version : ''))}">${escapeHtml(provider.name)}</span>`;
+                                providerBadge = `<span class="badge bg-secondary">${escapeHtml(provider.name)}</span>`;
                             }
 
                             // Build action buttons (action + docs) for the right side
