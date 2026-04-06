@@ -204,7 +204,7 @@ final class MySitesGuruPlugin extends CMSPlugin implements SubscriberInterface
         }
 
         $logoUrl = Uri::root() . 'media/plg_healthchecker_mysitesguru/logo.png';
-        $bannerText = htmlspecialchars(Text::_('PLG_HEALTHCHECKER_MYSITESGURU_BANNER_TEXT'), ENT_QUOTES, 'UTF-8');
+        $bannerText = Text::_('PLG_HEALTHCHECKER_MYSITESGURU_BANNER_TEXT');
         $bannerLink = htmlspecialchars(Text::_('PLG_HEALTHCHECKER_MYSITESGURU_BANNER_LINK'), ENT_QUOTES, 'UTF-8');
         $dismissLabel = htmlspecialchars(Text::_('PLG_HEALTHCHECKER_MYSITESGURU_BANNER_DISMISS'), ENT_QUOTES, 'UTF-8');
 
@@ -276,7 +276,7 @@ JS;
     public function onBeforeReportExportDisplay(BeforeReportExportDisplayEvent $beforeReportExportDisplayEvent): void
     {
         $logoUrl = Uri::root() . 'media/plg_healthchecker_mysitesguru/logo.png';
-        $bannerText = htmlspecialchars(Text::_('PLG_HEALTHCHECKER_MYSITESGURU_BANNER_TEXT'), ENT_QUOTES, 'UTF-8');
+        $bannerText = Text::_('PLG_HEALTHCHECKER_MYSITESGURU_BANNER_TEXT');
         $bannerLink = htmlspecialchars(Text::_('PLG_HEALTHCHECKER_MYSITESGURU_BANNER_LINK'), ENT_QUOTES, 'UTF-8');
 
         $html = <<<HTML
