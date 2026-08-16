@@ -695,6 +695,122 @@ class OrphanedTablesCheckTest extends TestCase
         }
     }
 
+    public function testRunParsesTablesFromLibraryManifestSqlFile(): void
+    {
+        // A library keeps its manifest in administrator/manifests/libraries
+        // while its payload lives in libraries/[name]
+        $manifestPath = JPATH_ADMINISTRATOR . '/manifests/libraries';
+        $libraryPath = JPATH_SITE . '/libraries/testlibrary';
+        $sqlPath = $libraryPath . '/sql';
+
+        @mkdir($manifestPath, 0777, true);
+        @mkdir($sqlPath, 0777, true);
+
+        $manifest = <<<'XML_WRAP'
+        <?xml version="1.0" encoding="utf-8"?>
+        <extension type="library" method="upgrade">
+            <name>testlibrary</name>
+            <install>
+                <sql>
+                    <file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
+                </sql>
+            </install>
+        </extension>
+        XML_WRAP;
+
+        $sqlContent = <<<'SQL_WRAP'
+        CREATE TABLE IF NOT EXISTS `#__testlibrary_consumers` (
+            id INT PRIMARY KEY,
+            element VARCHAR(255)
+        );
+        SQL_WRAP;
+
+        file_put_contents($manifestPath . '/testlibrary.xml', $manifest);
+        file_put_contents($sqlPath . '/install.mysql.utf8.sql', $sqlContent);
+
+        try {
+            $database = MockDatabaseFactory::createWithSequentialQueries([
+                [
+                    'method' => 'loadColumn',
+                    'return' => [
+                        'test_content',
+                        'test_extensions',
+                        'test_testlibrary_consumers', // Declared by the library manifest
+                    ],
+                ],
+                [
+                    'method' => 'loadObjectList',
+                    'return' => [],
+                ],
+            ]);
+            $this->orphanedTablesCheck->setDatabase($database);
+
+            $result = $this->orphanedTablesCheck->run();
+
+            // A library-owned table is not orphaned just because no component declares it
+            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        } finally {
+            @unlink($manifestPath . '/testlibrary.xml');
+            @unlink($sqlPath . '/install.mysql.utf8.sql');
+            @rmdir($sqlPath);
+            @rmdir($libraryPath);
+        }
+    }
+
+    public function testRunParsesLibraryTablesFromConventionalPathWithoutManifestSql(): void
+    {
+        // Mirrors the component fallback: a library that ships install SQL at a
+        // conventional path without declaring it in <install><sql>
+        $manifestPath = JPATH_ADMINISTRATOR . '/manifests/libraries';
+        $libraryPath = JPATH_SITE . '/libraries/fallbacklibrary';
+        $sqlPath = $libraryPath . '/sql';
+
+        @mkdir($manifestPath, 0777, true);
+        @mkdir($sqlPath, 0777, true);
+
+        $manifest = <<<'XML_WRAP'
+        <?xml version="1.0" encoding="utf-8"?>
+        <extension type="library" method="upgrade">
+            <name>fallbacklibrary</name>
+        </extension>
+        XML_WRAP;
+
+        $sqlContent = <<<'SQL_WRAP'
+        CREATE TABLE `#__fallbacklibrary_data` (
+            id INT PRIMARY KEY
+        );
+        SQL_WRAP;
+
+        file_put_contents($manifestPath . '/fallbacklibrary.xml', $manifest);
+        file_put_contents($sqlPath . '/install.mysql.utf8.sql', $sqlContent);
+
+        try {
+            $database = MockDatabaseFactory::createWithSequentialQueries([
+                [
+                    'method' => 'loadColumn',
+                    'return' => [
+                        'test_content',
+                        'test_fallbacklibrary_data',
+                    ],
+                ],
+                [
+                    'method' => 'loadObjectList',
+                    'return' => [],
+                ],
+            ]);
+            $this->orphanedTablesCheck->setDatabase($database);
+
+            $result = $this->orphanedTablesCheck->run();
+
+            $this->assertSame(HealthStatus::Good, $result->healthStatus);
+        } finally {
+            @unlink($manifestPath . '/fallbacklibrary.xml');
+            @unlink($sqlPath . '/install.mysql.utf8.sql');
+            @rmdir($sqlPath);
+            @rmdir($libraryPath);
+        }
+    }
+
     public function testRunParsesSqlWithDifferentTableFormats(): void
     {
         // Create a component with various CREATE TABLE formats

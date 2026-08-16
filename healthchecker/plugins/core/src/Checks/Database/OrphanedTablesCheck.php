@@ -278,7 +278,8 @@ final class OrphanedTablesCheck extends AbstractHealthCheck
      * Get extension tables by parsing SQL install files.
      *
      * Scans administrator/components/com_[star]/sql/install.mysql[star].sql files
-     * to extract actual table names that extensions create.
+     * to extract actual table names that extensions create, then does the same
+     * for installed libraries.
      *
      * @param string $prefix Table prefix from Joomla configuration
      *
@@ -286,7 +287,7 @@ final class OrphanedTablesCheck extends AbstractHealthCheck
      */
     private function getExtensionTablesFromSql(string $prefix): array
     {
-        $tables = [];
+        $tables = $this->getLibraryTablesFromSql($prefix);
         $componentPath = JPATH_ADMINISTRATOR . '/components';
 
         if (! is_dir($componentPath)) {
@@ -339,56 +340,135 @@ final class OrphanedTablesCheck extends AbstractHealthCheck
      */
     private function getSqlPathsFromManifest(string $componentDir): array
     {
-        $paths = [];
-
         $xmlFiles = glob($componentDir . '/*.xml');
 
         if ($xmlFiles === false || $xmlFiles === []) {
-            return $paths;
+            return [];
         }
 
         foreach ($xmlFiles as $xmlFile) {
-            $xml = @simplexml_load_file($xmlFile);
-
-            if ($xml === false) {
-                continue;
-            }
-
-            // Only process extension manifest files
-            if ($xml->getName() !== 'extension') {
-                continue;
-            }
-
-            // Extract <install><sql><file> paths — bail if any level is missing
-            $sqlNode = $xml->install->sql ?? null;
-
-            if (! $sqlNode instanceof \SimpleXMLElement) {
-                continue;
-            }
-
-            if (! property_exists($sqlNode, 'file')) {
-                continue;
-            }
-
-            if ($sqlNode->file === null) {
-                continue;
-            }
-
-            foreach ($sqlNode->file as $file) {
-                $sqlRelativePath = (string) $file;
-
-                if ($sqlRelativePath === '') {
-                    continue;
-                }
-
-                $paths[] = $componentDir . '/' . $sqlRelativePath;
-            }
+            $paths = $this->getSqlPathsFromManifestFile($xmlFile, $componentDir);
 
             // Only process the first valid manifest
-            break;
+            if ($paths !== null) {
+                return $paths;
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Get SQL install file paths declared by a single extension manifest.
+     *
+     * Split out from getSqlPathsFromManifest() because a library keeps its
+     * manifest in administrator/manifests/libraries while its payload lives in
+     * libraries/[name], so the file to parse and the directory to resolve
+     * against are not the same place. For components they are.
+     *
+     * @param string $xmlFile Full path to the manifest XML file
+     * @param string $baseDir Directory the declared SQL paths are relative to
+     *
+     * @return array<string>|null Absolute paths to SQL install files, or null when
+     *                            this file is not an extension manifest declaring SQL
+     */
+    private function getSqlPathsFromManifestFile(string $xmlFile, string $baseDir): ?array
+    {
+        $xml = @simplexml_load_file($xmlFile);
+
+        if ($xml === false) {
+            return null;
+        }
+
+        // Only process extension manifest files
+        if ($xml->getName() !== 'extension') {
+            return null;
+        }
+
+        // Extract <install><sql><file> paths — bail if any level is missing
+        $sqlNode = $xml->install->sql ?? null;
+
+        if (! $sqlNode instanceof \SimpleXMLElement) {
+            return null;
+        }
+
+        if (! property_exists($sqlNode, 'file')) {
+            return null;
+        }
+
+        if ($sqlNode->file === null) {
+            return null;
+        }
+
+        $paths = [];
+
+        foreach ($sqlNode->file as $file) {
+            $sqlRelativePath = (string) $file;
+
+            if ($sqlRelativePath === '') {
+                continue;
+            }
+
+            $paths[] = $baseDir . '/' . $sqlRelativePath;
         }
 
         return $paths;
+    }
+
+    /**
+     * Get library tables by parsing the SQL install files libraries declare.
+     *
+     * Libraries create tables like any other extension — typically a registry
+     * shared by the several extensions that depend on them — but nothing above
+     * this looks at them: the component scan only globs com_[star], and
+     * getExtensionTablesByPrefix() skips every row whose type is not
+     * "component". Their tables were therefore reported as orphaned on every
+     * run, with no way for the site owner to make the warning correct.
+     *
+     * A library's manifest lives in administrator/manifests/libraries/[name].xml
+     * while its files live in libraries/[name], so the manifest is parsed from
+     * one path and its declared SQL resolved against the other.
+     *
+     * @param string $prefix Table prefix from Joomla configuration
+     *
+     * @return array<string> Array of prefixed table names from SQL files
+     */
+    private function getLibraryTablesFromSql(string $prefix): array
+    {
+        $tables = [];
+        $manifestPath = JPATH_ADMINISTRATOR . '/manifests/libraries';
+
+        if (! is_dir($manifestPath)) {
+            return $tables;
+        }
+
+        $manifests = glob($manifestPath . '/*.xml');
+
+        if ($manifests === false) {
+            return $tables;
+        }
+
+        foreach ($manifests as $manifest) {
+            $libraryDir = JPATH_SITE . '/libraries/' . basename($manifest, '.xml');
+
+            $sqlPaths = $this->getSqlPathsFromManifestFile($manifest, $libraryDir) ?? [];
+
+            // Fall back to common hardcoded locations, as the component scan does
+            $sqlPaths = array_unique(array_merge($sqlPaths, [
+                $libraryDir . '/sql/install.mysql.sql',
+                $libraryDir . '/sql/install.mysql.utf8.sql',
+                $libraryDir . '/sql/mysql/install.sql',
+                $libraryDir . '/sql/install.sql',
+            ]));
+
+            foreach ($sqlPaths as $sqlPath) {
+                if (is_file($sqlPath) && is_readable($sqlPath)) {
+                    $tables = array_merge($tables, $this->parseTablesFromSql($sqlPath, $prefix));
+                }
+            }
+        }
+
+        return array_unique($tables);
     }
 
     /**
